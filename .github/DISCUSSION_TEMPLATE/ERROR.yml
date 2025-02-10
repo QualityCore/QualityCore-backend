@@ -26,7 +26,7 @@ body:
     attributes:
       label: 에러내역(자세히)
       description: "에러내역을 적어주세요.."
-      value: |
+      value: null
     validations:
       required: true
 
@@ -35,6 +35,6 @@ body:
     attributes:
       label: 해결방안(자세히)
       description: "해결방안을 적어주세요.."
-      value: |
+      value: null
     validations:
       required: true
