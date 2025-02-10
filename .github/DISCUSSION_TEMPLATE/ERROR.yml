@@ -1,0 +1,36 @@
+title: "ERROR"
+body:
+  - type: checkboxes
+    attributes:
+      label: 작성자
+      options:
+        - label: "승현(PM)"
+        - label: "정현(형상)"
+        - label: "남규(DB)"
+        - label: "관훈(DB)"
+
+  - type: dropdown
+    id: download
+    attributes:
+      label: 에러내용
+      options:
+        - "404 에러"
+        - "500 에러"
+        - "백엔드 기타 에러"
+        - "프론트엔드 기타 에러"
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvements
+    attributes:
+      label: 에러내역(자세히)
+      description: "구체적으로 적어주세요.."
+      value: |
+        -
+        -
+        -
+        -
+      render: bash
+    validations:
+      required: true
