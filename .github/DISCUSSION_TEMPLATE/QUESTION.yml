@@ -28,4 +28,4 @@ body:
       description: "질문 내용을 간결하게 적어주세요.."
       value: null
     validations:
-      - required: true
+      required: true
