@@ -1,0 +1,22 @@
+title: "📅 MEETING NOTES 📅"
+body:
+  - type: checkboxes
+    attributes:
+      label: 🙆‍♂️ **참여자** 👥
+      options:
+        - label: "승현(PM)"
+        - label: "정현(형상)"
+        - label: "남규(DB)"
+        - label: "관훈(DB)"
+
+  - type: textarea
+    id: improvements
+    attributes:
+      label: 🌈 **회의 내역** 📋
+      description: "회의 내용을 구체적으로 적어주세요.. ✍️"
+      value: |
+        📌 주요 논의 사항 : 
+        💡 아이디어/결정 사항 : 
+      render: bash
+    validations:
+      required: true
