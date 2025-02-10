@@ -1,0 +1,24 @@
+title: "MEETING"
+body:
+  - type: checkboxes
+    attributes:
+      label: 🙆‍♂️참여자
+      options:
+        - label: "승현(PM)"
+        - label: "정현(형상)"
+        - label: "남규(DB)"
+        - label: "관훈(DB)"
+        
+  - type: textarea
+    id: improvements
+    attributes:
+      label: 🌈회의내역(자세히)
+      description: "구체적으로 적어주세요.."
+      value: |
+        -
+        -
+        -
+        -
+      render: bash
+    validations:
+      required: true
