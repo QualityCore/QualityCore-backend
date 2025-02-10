@@ -1,0 +1,36 @@
+title: "[ANNOUNCEMENT]"
+body:
+  - type: checkboxes
+    attributes:
+      label: 작성자
+      options:
+        - label: "승현(PM)"
+        - label: "정현(형상)"
+        - label: "남규(DB)"
+        - label: "관훈(DB)"
+
+  - type: dropdown
+    attributes:
+      label: 카테고리
+      multiple: false
+      options:
+        - 전체 공지
+        - 에러 관련
+        - 기타
+      default: 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvements
+    attributes:
+      label: 공지사항
+      description: "다들 잘 이행하시길 바랍니다."
+      value: |
+        -
+        -
+        -
+        -
+      render: bash
+    validations:
+      required: true
