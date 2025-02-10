@@ -2,7 +2,7 @@ title: "ERROR"
 body:
   - type: checkboxes
     attributes:
-      label: 🙆‍♂️작성자
+      label: 🙆‍♂️ **작성자** 👨‍💻
       options:
         - label: "승현(PM)"
         - label: "정현(형상)"
@@ -12,7 +12,7 @@ body:
   - type: dropdown
     id: download
     attributes:
-      label: ❤질문 종류
+      label: ❤ **질문 종류** ❓
       options:
         - "백엔드 질문"
         - "프론트엔드 질문"
@@ -24,10 +24,8 @@ body:
   - type: textarea
     id: error_details
     attributes:
-      label: 📣질문 내역
-      description: "질문내용을 적어주세요.."
+      label: 📣 **질문 내역** ✍️
+      description: "질문 내용을 간결하게 적어주세요.."
       value: null
     validations:
-          -
-          -
-      required: true
+      - required: true
