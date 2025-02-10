@@ -1,4 +1,4 @@
-title: "MEETING"
+title: "DAILY"
 body:
   - type: checkboxes
     attributes:
@@ -15,8 +15,8 @@ body:
       label: 🚬오늘할일(자세히)
       description: "할게 없으면 X라고 적어주세요!!"
       value: |
-        1. 백엔드 : 
-        2. 프론트엔드 : 
+        1. BECKEND : 
+        2. FRONTEND : 
         3. CSS : 
         4. ERROR 수정 : 
       render: bash
