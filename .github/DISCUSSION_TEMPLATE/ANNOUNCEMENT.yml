@@ -24,7 +24,7 @@ body:
   - type: textarea
     id: improvements
     attributes:
-      label: 공지사항
+      label: 👉👉공지사항👈👈
       description: "다들 잘 이행하시길 바랍니다."
       value: |
         -
