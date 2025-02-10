@@ -1,0 +1,24 @@
+title: "MEETING"
+body:
+  - type: checkboxes
+    attributes:
+      label: 🙆‍♂️참여자
+      options:
+        - label: "승현(PM)"
+        - label: "정현(형상)"
+        - label: "남규(DB)"
+        - label: "관훈(DB)"
+        
+  - type: textarea
+    id: improvements
+    attributes:
+      label: 🚬오늘할일(자세히)
+      description: "할게 없으면 X라고 적어주세요!!"
+      value: |
+        1. 백엔드 : 
+        2. 프론트엔드 : 
+        3. CSS : 
+        4. ERROR 수정 : 
+      render: bash
+    validations:
+      required: true
