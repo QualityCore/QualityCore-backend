@@ -45,17 +45,22 @@ public class MasterDataService {
         return workplaceRepository.save(updateWorkplace);
     }
 
-    // 작업장 등록 삭제하기
+    // 작업장 등록 삭제
     @Transactional
-    public void deleteWorkplace(String workplaceCode) {
-        Workplace workplace = workplaceRepository.findByWorkplaceCode((workplaceCode)
-                .orElseThrow(() -> new IllegalArgumentException("해당 작업장이 존재하지 않습니다. Code: " + workplaceCode));
+    public void deleteWorkplace(int id) {
+        Workplace workplace = workplaceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 작업장이 존재하지 않습니다. ID: " + id));
 
+        // 🔹 workplaceCode 가 NULL 인지 확인 후 삭제 실행
+        if (workplace.getWorkplaceCode() != null) {
+            workplaceScheduleRepository.deleteByWorkplaceCode(workplace.getWorkplaceCode());
+        }
 
-        // 자식 테이블 데이터 먼저 삭제(workplace_code 참조하는 데이터 제거)
-        workplaceScheduleRepository.deleteByWorkplaceCode(workplaceCode);
-        // 부모 데이터 삭제
+        // 🔹 1. 자식 테이블 데이터 먼저 삭제
+        workplaceScheduleRepository.deleteByWorkplaceCode(workplace.getWorkplaceCode());
+
+        // 🔹 2. 부모 데이터 삭제
         workplaceRepository.delete(workplace);
-
     }
+
 }

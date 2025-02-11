@@ -2,6 +2,8 @@ package com.org.qualitycore.masterdata.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -15,8 +17,7 @@ import java.time.LocalDateTime;
 public class WorkplaceSchedule {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE ,generator = "schedule_seq")
-    @SequenceGenerator(name = "schedule_seq", sequenceName = "SCHEDULE_ID", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SCHEDULE_ID")
     private Long scheduleID; // 스케줄 고유 id
 
@@ -34,9 +35,11 @@ public class WorkplaceSchedule {
     @Column(name="END_TIME" , nullable = false)
     private LocalDateTime endTime; //작업종료시간
 
+    @CreationTimestamp // insert 시 자동으로 sysdate 값 저장
     @Column(name = "CREATED_AT", nullable = false)
     private  LocalDateTime createdAt; // 생성날짜
 
-    @Column(name = "UPDATED_AT",nullable = false)
+    @UpdateTimestamp
+    @Column(name = "UPDATED_AT")
     private LocalDateTime updatedAt; // 수정날짜
 }
