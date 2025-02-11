@@ -41,7 +41,20 @@ public class MasterDataController {
     }
 
 
-}
+    // 작업장 수정
+    @PutMapping("/workplaces")
+    public ResponseEntity<MasterDataMessage> updateWorkplace(@RequestBody WorkplaceDTO workplaceDTO){
+        Workplace savedWorkplace = masterDataService.updateWorkplace(workplaceDTO);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new MasterDataMessage(HttpStatus.CREATED.value(),
+                        "등록에 성공했어!! 축하해! ID :" + savedWorkplace.getWorkplaceId()));
+    }
+    }
+
+
+
+
+
 
 
 

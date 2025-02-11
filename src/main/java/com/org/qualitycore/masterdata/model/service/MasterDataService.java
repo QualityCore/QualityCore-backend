@@ -26,4 +26,12 @@ public class MasterDataService {
         Workplace workplace = modelMapper.map(workplaceDTO,Workplace.class); // DTO->엔티티변환
         return masterDataRepository.save(workplace);
     }
+
+    public Workplace updateWorkplace(WorkplaceDTO workplaceDTO) {
+        Workplace workplace = masterDataRepository.findById(workplaceDTO.getWorkplaceId()).orElseThrow(IllegalArgumentException::new);
+
+        Workplace workplaceUpdate = workplace.toBuilder().workplaceName(workplaceDTO.getWorkplaceName()).build();
+
+        return masterDataRepository.save(workplaceUpdate);
+    }
 }
