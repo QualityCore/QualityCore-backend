@@ -1,4 +1,4 @@
-title: "❔❔QUESTION❔❔"
+title: "[❓ 질문 ❓][년월][월][날짜][제목]"
 body:
   - type: checkboxes
     attributes:
