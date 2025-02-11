@@ -36,7 +36,9 @@ public class WorkController {
 
         res.put("work", work);
 
-        return ResponseEntity.ok().headers(headers).body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
+        return ResponseEntity.ok().
+                headers(headers).
+                body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
     }
 
     @GetMapping("/detail/{workOrderId}")
@@ -50,10 +52,26 @@ public class WorkController {
 
         Map<String, Object> res = new HashMap<>();
 
-        System.out.println("res = " + res);
-
         res.put("work", work);
 
-        return ResponseEntity.ok().headers(headers).body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
+        return ResponseEntity.ok().
+                headers(headers).
+                body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> workOrderCreate(@RequestBody WorkDTO work) {
+
+        workService.workOrderCreate(work);
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", 201);
+
+        response.put("message", "작업지시서 생성 성공");
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED).
+                body(response);
     }
 }
