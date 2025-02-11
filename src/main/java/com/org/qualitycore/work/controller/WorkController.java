@@ -74,4 +74,21 @@ public class WorkController {
                 status(HttpStatus.CREATED).
                 body(response);
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<?> workOrderUpdate(@RequestBody WorkDTO work) {
+
+        workService.workOrderUpdate(work);
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", 200);
+
+        response.put("message", "작업지시서 수정 성공");
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED).
+                body(response);
+
+    }
 }
