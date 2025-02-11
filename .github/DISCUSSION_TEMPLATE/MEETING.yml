@@ -1,4 +1,4 @@
-title: "[💼 회의 💼][년월][월][날짜][제목]"
+title: "💼 [회의] YYYY-MM-DD | 제목"
 body:
   - type: checkboxes
     attributes:
