@@ -1,4 +1,4 @@
-title: "📅 DAILY PLAN 📅"
+title: "[📅 오늘할일 📅][년월][월][날짜][제목]"
 body:
   - type: checkboxes
     attributes:
