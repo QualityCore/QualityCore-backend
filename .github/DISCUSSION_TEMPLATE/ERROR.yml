@@ -1,4 +1,4 @@
-title: "[⚠️ 에러 ⚠️][년월][월][날짜][제목]"
+title: "🚨 [에러] YYYY-MM-DD | 제목"
 body:
   - type: checkboxes
     attributes:
