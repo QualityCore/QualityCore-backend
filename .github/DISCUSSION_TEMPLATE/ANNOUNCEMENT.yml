@@ -1,4 +1,4 @@
-title: "[📢 공지사항 📢][년월][월][날짜][제목]"
+title: "📢 [공지사항] YYYY-MM-DD | 제목"
 body:
   - type: checkboxes
     attributes:
