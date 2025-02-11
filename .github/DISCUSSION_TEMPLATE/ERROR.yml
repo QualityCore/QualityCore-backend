@@ -1,4 +1,4 @@
-title: "⚠️ ERROR REPORT ⚠️"
+title: "[⚠️ 에러 ⚠️][년월][월][날짜][제목]"
 body:
   - type: checkboxes
     attributes:
