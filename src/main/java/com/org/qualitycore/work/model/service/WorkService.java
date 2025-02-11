@@ -37,4 +37,21 @@ public class WorkService {
 
         workRepository.save(modelMapper.map(work, Work.class));
     }
+
+    public void workOrderUpdate(WorkDTO work) {
+
+        Work workUpdate = workRepository.findById(work.getWorkOrderId()).orElseThrow(IllegalArgumentException::new);
+
+        Work workUpdates = workUpdate.toBuilder().
+                           workTeam(work.getWorkTeam()).
+                           workQuantity(work.getWorkQuantity()).
+                           workStartDate(work.getWorkStartDate()).
+                           workEndDate(work.getWorkEndDate()).
+                           workOrderStatus(work.getWorkOrderStatus()).
+                           workEtc(work.getWorkEtc()).
+                           build();
+        // 수정할거 작업조, 작업수량, 작업시작일, 작업종료일, 작업상태, 특이사항
+
+        workRepository.save(workUpdates);
+    }
 }
