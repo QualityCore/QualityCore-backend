@@ -17,8 +17,9 @@ import java.time.LocalDateTime;
 public class Workplace {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "workplace_seq")
+    @SequenceGenerator(name="workplace_swq", sequenceName ="WORKPLACE_ID", allocationSize =1)
     @Column(name ="WORKPLACE_ID")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int workplaceId; // 작업장 고유 ID
 
     @Column(name = "WORKPLACE_NAME ")
