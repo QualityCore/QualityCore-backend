@@ -18,6 +18,11 @@ public class Work {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(
+            name = "work_order_id_seq",
+            sequenceName = "work_order_id_seq",
+            allocationSize = 1
+    )
     @Column(name = "WORK_ORDER_ID")
     private int workOrderId; // 작업지시서 번호
 
