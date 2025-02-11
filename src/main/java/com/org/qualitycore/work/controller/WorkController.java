@@ -23,7 +23,8 @@ public class WorkController {
 
     private final WorkService workService;
 
-    @GetMapping("/list") // 작업지시서 전체 조회
+    // 작업지시서 전체 조회
+    @GetMapping("/list")
     public ResponseEntity<WorkMessage> findAllWorkOrders() {
 
         HttpHeaders headers = new HttpHeaders();
@@ -41,6 +42,7 @@ public class WorkController {
                 body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
     }
 
+    // 작업지시서 상세 조회
     @GetMapping("/detail/{workOrderId}")
     public ResponseEntity<WorkMessage> findByWorkOrderCode(@PathVariable("workOrderId") int workId) {
 
@@ -59,6 +61,7 @@ public class WorkController {
                 body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
     }
 
+    // 작업지시서 생성
     @PostMapping("/create")
     public ResponseEntity<?> workOrderCreate(@RequestBody WorkDTO work) {
 
@@ -75,6 +78,7 @@ public class WorkController {
                 body(response);
     }
 
+    // 작업지시서 수정
     @PutMapping("/update")
     public ResponseEntity<?> workOrderUpdate(@RequestBody WorkDTO work) {
 
@@ -90,5 +94,22 @@ public class WorkController {
                 status(HttpStatus.CREATED).
                 body(response);
 
+    }
+
+    // 작업지시서 삭제
+    @DeleteMapping("/detail/delete/{workOrderId}")
+    public ResponseEntity<?> workOrderDelete(@PathVariable("workOrderId") int workId) {
+
+        workService.workOrderDelete(workId);
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("status", 200);
+
+        response.put("message", "작업지시서 삭제 성공");
+
+        return ResponseEntity.
+                status(HttpStatus.CREATED).
+                body(response);
     }
 }
