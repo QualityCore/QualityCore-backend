@@ -39,4 +39,21 @@ public class WorkController {
         return ResponseEntity.ok().headers(headers).body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
     }
 
+    @GetMapping("/detail/{workOrderId}")
+    public ResponseEntity<WorkMessage> findByWorkOrderCode(@PathVariable("workOrderId") int workId) {
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        WorkDTO work = workService.findByWorkOrderCode(workId);
+
+        Map<String, Object> res = new HashMap<>();
+
+        System.out.println("res = " + res);
+
+        res.put("work", work);
+
+        return ResponseEntity.ok().headers(headers).body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
+    }
 }
