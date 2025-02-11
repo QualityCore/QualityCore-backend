@@ -54,4 +54,11 @@ public class WorkService {
 
         workRepository.save(workUpdates);
     }
+
+    public void workOrderDelete(int workId) {
+
+        workRepository.deleteById(workId);
+
+        modelMapper.map(workId, Work.class);
+    }
 }
