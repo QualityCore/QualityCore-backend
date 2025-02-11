@@ -48,6 +48,15 @@ public class MasterDataController {
         return  ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),"수정이 완료되었어요 짝짝!!" + updateWorkplace.getWorkplaceId()));
     }
 
+    // 작업장 삭제
+    @DeleteMapping("/workplaces/{id}")
+    public ResponseEntity<MasterDataMessage> deleteWorkplace (@PathVariable int id){
+        masterDataService.deleteWorkplace(id);
+        return ResponseEntity.ok(new MasterDataMessage
+                (HttpStatus.OK.value(),"삭제 성공이라구 ID"+id));
+    }
+
+
     }
 
 
