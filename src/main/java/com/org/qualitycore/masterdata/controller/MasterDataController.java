@@ -23,7 +23,7 @@ public class MasterDataController {
 
 
     // 작업장 전체 조회
-    @GetMapping("/workplaces")
+    @GetMapping("/workplaces/find")
     public List<WorkplaceDTO> getAllWorkplaces() {
         List<Workplace> workplaces = masterDataService.getAllWorkplaces();
         return workplaces.stream()
@@ -32,7 +32,7 @@ public class MasterDataController {
     }
 
     // 작업장 등록
-    @PostMapping("/workplaces")
+    @PostMapping("/workplaces/regist")
     public ResponseEntity<MasterDataMessage> createWorkplace(@RequestBody WorkplaceDTO workplaceDTO) {
         Workplace savedWorkplace = masterDataService.creactWorkplace(workplaceDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -41,7 +41,19 @@ public class MasterDataController {
     }
 
 
-}
+    // 작업장 수정
+    @PutMapping("/workplaces/{id}")
+    public ResponseEntity<MasterDataMessage> updateWorkplace(@PathVariable int id, @RequestBody WorkplaceDTO workplaceDTO){
+        Workplace updateWorkplace = masterDataService.updateWorkplace(id ,workplaceDTO);
+        return  ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),"수정이 완료되었어요 짝짝!!" + updateWorkplace.getWorkplaceId()));
+    }
+
+    }
+
+
+
+
+
 
 
 

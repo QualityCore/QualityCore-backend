@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 public class WorkplaceDTO {
-    private int workplaceId; // 작업장 고유 ID (DB 에서 자동생성)
+
     private String workplaceName; // 작업장 이름
     private String workplaceType; // 작업장 타입
     private String workplaceCode; // 작업장 코드
