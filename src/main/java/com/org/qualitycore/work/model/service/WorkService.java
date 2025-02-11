@@ -32,4 +32,9 @@ public class WorkService {
 
         return modelMapper.map(work, WorkDTO.class);
     }
+
+    public void workOrderCreate(WorkDTO work) {
+
+        workRepository.save(modelMapper.map(work, Work.class));
+    }
 }
