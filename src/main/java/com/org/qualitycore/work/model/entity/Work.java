@@ -1,9 +1,8 @@
 package com.org.qualitycore.work.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.Date;
 
 @NoArgsConstructor
@@ -13,6 +12,7 @@ import java.util.Date;
 @Builder(toBuilder = true)
 @Table(name = "TBL_WORK")
 @Entity
+@Schema(description = "작업지시서 관련 Entity")
 public class Work {
 
 
