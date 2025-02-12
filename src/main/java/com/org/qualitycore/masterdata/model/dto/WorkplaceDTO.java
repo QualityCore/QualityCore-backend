@@ -4,23 +4,46 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
+@Schema(description = "작업장 정보 DTO")
 public class WorkplaceDTO {
 
-    private Long workplaceId; // 작업장 고유 ID
-    private String workplaceName; // 작업장 이름
-    private String workplaceType; // 작업장 타입
-    private String workplaceCode; // 작업장 코드
-    private String workplaceStatus; // 작업장 상태
-    private String workplaceLocation; // 작업장 위치
-    private String managerName; // 작업 책임자
-    private int workplaceCapacity; // 작업량 용량 / 생산 가능량
-    private LocalDateTime createdAt; // 생성날짜 (응답전용)
-    private LocalDateTime updatedAt; // 수정날짜 (응답전용)
+    @Schema(description = "작업장 고유 ID", example = "1")
+    private Long workplaceId;
 
+    @Schema(description = "작업장 이름", example = "제1작업장")
+    private String workplaceName;
 
+    @Schema(description = "작업장 타입", example = "분쇄")
+    private String workplaceType;
+
+    @Schema(description = "작업장 코드", example = "W001")
+    private String workplaceCode;
+
+    @Schema(description = "작업장 상태", example = "가동 중")
+    private String workplaceStatus;
+
+    @Schema(description = "작업장 위치", example = "서울 공장 1층")
+    private String workplaceLocation;
+
+    @Schema(description = "작업 책임자", example = "김철수")
+    private String managerName;
+
+    @Schema(description = "작업량 용량 / 생산 가능량", example = "1000")
+    private int workplaceCapacity;
+
+    @Schema(description = "생성 날짜 (응답 전용)", example = "2024-02-12T10:15:30")
+    private LocalDateTime createdAt;
+
+    @Schema(description = "수정 날짜 (응답 전용)", example = "2024-02-12T11:00:00")
+    private LocalDateTime updatedAt;
 }

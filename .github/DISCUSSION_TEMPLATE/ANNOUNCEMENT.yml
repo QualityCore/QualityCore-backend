@@ -1,4 +1,4 @@
-title: "[📢 ANNOUNCEMENT 📢]"
+title: "📢 [공지사항] YYYY-MM-DD | 제목"
 body:
   - type: checkboxes
     attributes:
