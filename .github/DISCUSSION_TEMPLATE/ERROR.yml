@@ -1,4 +1,4 @@
-title: "⚠️ ERROR REPORT ⚠️"
+title: "🚨 [에러] YYYY-MM-DD | 제목"
 body:
   - type: checkboxes
     attributes:
