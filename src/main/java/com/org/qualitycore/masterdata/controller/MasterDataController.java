@@ -69,16 +69,26 @@ public class MasterDataController {
             @ApiResponse(responseCode = "404" , description = "해당 ID의 작업장을 찾을수없어요")})
     @PutMapping("/workplaces/{id}")
     public ResponseEntity<MasterDataMessage> updateWorkplace(
-            @PathVariable  int id, @RequestBody WorkplaceDTO workplaceDTO){
+            @PathVariable @Parameter(description = "수정할 작업장의 ID",required = true)  int id,
+            @RequestBody @Parameter(description = "수정할 작업장 정보",required = true) WorkplaceDTO workplaceDTO){
         Workplace updateWorkplace = masterDataService.updateWorkplace(id ,workplaceDTO);
-        return  ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),"수정이 완료되었어요 짝짝!!" + updateWorkplace.getWorkplaceId()));
+        return  ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),
+                "수정이 완료되었어요 짝짝!!" + updateWorkplace.getWorkplaceId()));
     }
 
+
     // 작업장 등록 삭제
+    @Operation(summary = "작업장정보 삭제",description = "작업장정보를 삭제 합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200" ,description = "작업장 삭제 성공",
+                        content = @Content(schema = @Schema(implementation = MasterDataMessage.class))),
+            @ApiResponse(responseCode = "404",description = "해당 ID의 작업장을 찾을 수 없음")})
     @DeleteMapping("/workplaces/{id}")
-    public ResponseEntity<MasterDataMessage> deleteWorkplace(@PathVariable int id) {
+    public ResponseEntity<MasterDataMessage> deleteWorkplace(
+            @PathVariable @Parameter(description ="삭제할 장업장의 ID" , required = true) int id) {
         masterDataService.deleteWorkplace(id);
-        return ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(), "삭제 성공! ID: " + id));
+        return ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),
+                "삭제 성공! ID: " + id));
     }
 
 
