@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @ToString
 public class WorkplaceDTO {
 
+    private Long workplaceId; // 작업장 고유 ID
     private String workplaceName; // 작업장 이름
     private String workplaceType; // 작업장 타입
     private String workplaceCode; // 작업장 코드
