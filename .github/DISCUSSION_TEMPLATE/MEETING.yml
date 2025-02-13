@@ -9,6 +9,10 @@ body:
         - label: "남규(DB)"
         - label: "관훈(DB)"
 
+
+ - type : markdown
+    attributes : 
+      value : |
  ############### 📝 오늘 할 일 (What I plan to do today) ###############
         🔹 각 사람별 오늘의 할일을 체크박스로 만든후 완료되면 췍
   - type: checkboxes
