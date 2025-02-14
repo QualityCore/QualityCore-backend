@@ -1,9 +1,9 @@
-package com.org.qualitycore.masterdata.controller;
+package com.org.qualitycore.standardinformation.controller;
 
-import com.org.qualitycore.masterdata.model.dto.WorkplaceDTO;
-import com.org.qualitycore.masterdata.model.entity.MasterDataMessage;
-import com.org.qualitycore.masterdata.model.entity.Workplace;
-import com.org.qualitycore.masterdata.model.service.MasterDataService;
+import com.org.qualitycore.standardinformation.model.dto.WorkplaceDTO;
+import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
+import com.org.qualitycore.standardinformation.model.entity.Workplace;
+import com.org.qualitycore.standardinformation.model.service.StandardInformationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -22,12 +22,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/masterdata")
+@RequestMapping("/standardinformation")
+@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Tag(name="Master Data" , description = "기준정보관리 API")
-public class MasterDataController {
+public class StandardInformationController {
 
-    private final MasterDataService masterDataService;
+    private final StandardInformationService standardInformationService;
     private final ModelMapper modelMapper;
 
 
@@ -38,9 +39,20 @@ public class MasterDataController {
                     content= @Content(array = @ArraySchema(schema = @Schema(implementation = WorkplaceDTO.class))))})
     @GetMapping("/workplaces/find")
     public List<WorkplaceDTO> getAllWorkplaces() {
-        List<Workplace> workplaces = masterDataService.getAllWorkplaces();
+        List<Workplace> workplaces = standardInformationService.getAllWorkplaces();
         return workplaces.stream()
-                .map(workplace -> modelMapper.map(workplace, WorkplaceDTO.class))
+                .map(workplace -> WorkplaceDTO.builder()
+                        .workplaceId(workplace.getWorkplaceId())
+                        .lineId(workplace.getLineId())
+                        .workplaceName(workplace.getWorkplaceName())
+                        .workplaceType(workplace.getWorkplaceType())
+                        .workplaceCode(workplace.getWorkplaceCode())
+                        .workplaceStatus(workplace.getWorkplaceStatus())
+                        .managerName(workplace.getManagerName())
+                        .workplaceCapacity(workplace.getWorkplaceCapacity())
+                        .createdAt(workplace.getCreatedAt())
+                        .updatedAt(workplace.getUpdatedAt())
+                        .build())
                 .collect(Collectors.toList());
     }
 
@@ -49,14 +61,14 @@ public class MasterDataController {
     @Operation(summary = "작업장정보 등록", description = "새로운 작업장을 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "작업장 등록 성공",
-                    content = @Content(schema = @Schema(implementation = MasterDataMessage.class))),
+                    content = @Content(schema = @Schema(implementation = StandardInformationMessage.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")})
     @PostMapping("/workplaces/regist")
-    public ResponseEntity<MasterDataMessage> createWorkplace(
+    public ResponseEntity<StandardInformationMessage> createWorkplace(
             @RequestBody @Parameter(description = "등록할 작업장 정보",required = true) WorkplaceDTO workplaceDTO) {
-        Workplace savedWorkplace = masterDataService.creactWorkplace(workplaceDTO);
+        Workplace savedWorkplace = standardInformationService.createWorkplace(workplaceDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MasterDataMessage(HttpStatus.CREATED.value(),
+                .body(new StandardInformationMessage(HttpStatus.CREATED.value(),
                         "등록에 성공했어!! 축하해! ID :" + savedWorkplace.getWorkplaceId()));
     }
 
@@ -65,14 +77,14 @@ public class MasterDataController {
     @Operation(summary = "작업장정보 수정" , description = "장업장 정보를 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200" ,description = "작업장 수정 성공!",
-                    content = @Content(schema = @Schema(implementation = MasterDataMessage.class))),
+                    content = @Content(schema = @Schema(implementation = StandardInformationMessage.class))),
             @ApiResponse(responseCode = "404" , description = "해당 ID의 작업장을 찾을수없어요")})
     @PutMapping("/workplaces/{id}")
-    public ResponseEntity<MasterDataMessage> updateWorkplace(
+    public ResponseEntity<StandardInformationMessage> updateWorkplace(
             @PathVariable @Parameter(description = "수정할 작업장의 ID",required = true)  int id,
             @RequestBody @Parameter(description = "수정할 작업장 정보",required = true) WorkplaceDTO workplaceDTO){
-        Workplace updateWorkplace = masterDataService.updateWorkplace(id ,workplaceDTO);
-        return  ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),
+        Workplace updateWorkplace = standardInformationService.updateWorkplace(id ,workplaceDTO);
+        return  ResponseEntity.ok(new StandardInformationMessage(HttpStatus.OK.value(),
                 "수정이 완료되었어요 짝짝!!" + updateWorkplace.getWorkplaceId()));
     }
 
@@ -81,13 +93,13 @@ public class MasterDataController {
     @Operation(summary = "작업장정보 삭제",description = "작업장정보를 삭제 합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200" ,description = "작업장 삭제 성공",
-                        content = @Content(schema = @Schema(implementation = MasterDataMessage.class))),
+                        content = @Content(schema = @Schema(implementation = StandardInformationMessage.class))),
             @ApiResponse(responseCode = "404",description = "해당 ID의 작업장을 찾을 수 없음")})
     @DeleteMapping("/workplaces/{id}")
-    public ResponseEntity<MasterDataMessage> deleteWorkplace(
+    public ResponseEntity<StandardInformationMessage> deleteWorkplace(
             @PathVariable @Parameter(description ="삭제할 장업장의 ID" , required = true) int id) {
-        masterDataService.deleteWorkplace(id);
-        return ResponseEntity.ok(new MasterDataMessage(HttpStatus.OK.value(),
+        standardInformationService.deleteWorkplace(id);
+        return ResponseEntity.ok(new StandardInformationMessage(HttpStatus.OK.value(),
                 "삭제 성공! ID: " + id));
     }
 

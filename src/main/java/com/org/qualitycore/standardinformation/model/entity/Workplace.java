@@ -1,4 +1,4 @@
-package com.org.qualitycore.masterdata.model.entity;
+package com.org.qualitycore.standardinformation.model.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -7,8 +7,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name ="WORKPLACE")
@@ -24,8 +22,12 @@ public class Workplace {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name ="WORKPLACE_ID")
-    @Schema(description = "작업장 고유 ID", example = "1")
-    private Long workplaceId; // 작업장 고유 ID
+    @Schema(description = "작업장 고유 ID", example = "WO001")
+    private String workplaceId; // 작업장 고유 ID
+
+    @Column(name ="LINE_ID", nullable = false)
+    @Schema(description = "LINE_ID",example = "LINE001")
+    private String lineId;
 
     @Column(name ="WORKPLACE_NAME",nullable = false)
     @Schema(description = "작업장 이름", example = "제1작업장")
@@ -35,13 +37,10 @@ public class Workplace {
     @Schema(description = "작업장 타입", example = "분쇄")
     private String workplaceType; // 작업장 타입
 
-    @Column(name ="WORKPLACE_CODE" ,unique = true,nullable = false)
+    @Column(name ="WORKPLACE_CODE" , nullable = false)
     @Schema(description = "작업장 코드 (유니크)", example = "W001")
     private String workplaceCode; // 작업장 코드
 
-    @OneToMany(mappedBy ="workplace" , cascade=CascadeType.ALL , orphanRemoval = true)
-    @Schema(description = "작업장에 속한 스케줄 목록")
-    private List<WorkplaceSchedule> schedules = new ArrayList<>(); // 스케줄 연관 관게 추가
 
     @Column(name ="WORKPLACE_STATUS",nullable = false)
     @Schema(description = "작업장 상태", example = "가동 중")
@@ -57,7 +56,7 @@ public class Workplace {
 
     @Column(name ="WORKPLACE_CAPACITY",nullable = false)
     @Schema(description = "작업량 용량 / 생산 가능량", example = "1000")
-    private int workplaceCapacity; // 작업량 용량 / 생산 가능량
+    private Integer workplaceCapacity; // 작업량 용량 / 생산 가능량
 
     @CreationTimestamp // insert 시 자동으로 sysdate 값 저장
     @Column(name ="CREATED_AT" , nullable = false)
