@@ -20,8 +20,7 @@ import java.time.LocalDateTime;
 public class Workplace {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name ="WORKPLACE_ID")
+    @Column(name ="WORKPLACE_ID" , nullable = false , updatable = false)
     @Schema(description = "작업장 고유 ID", example = "WO001")
     private String workplaceId; // 작업장 고유 ID
 
