@@ -48,6 +48,7 @@ public class StandardInformationController {
                         .workplaceType(workplace.getWorkplaceType())
                         .workplaceCode(workplace.getWorkplaceCode())
                         .workplaceStatus(workplace.getWorkplaceStatus())
+                        .workplaceLocation(workplace.getWorkplaceLocation())
                         .managerName(workplace.getManagerName())
                         .workplaceCapacity(workplace.getWorkplaceCapacity())
                         .createdAt(workplace.getCreatedAt())
