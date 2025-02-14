@@ -7,7 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @ToString
-@Builder(toBuilder = true)
 @Table(name = "WORK_ORDER")
 @Entity
 @Schema(description = "작업지시서 관련 Entity")

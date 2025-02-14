@@ -17,22 +17,12 @@ import java.util.List;
 public interface WorkRepository extends JpaRepository<WorkOrders, String> {
 
     @Query("SELECT new com.org.qualitycore.work.model.dto.WorkFindAllDTO(" +
-            "w.lotNo, " +
-            "w.workProgress, " +
-            "w.workEtc, " +
-            "e.workTeam, " +
-            "p.lineNo, " +
-            "p.planQty, " +
-            "TO_CHAR(p.startDate, 'YYYY-MM-DD') AS startDate, " +
-            "TO_CHAR(p.endDate, 'YYYY-MM-DD') AS endDate, " +
-            "r.productName, " +
-            "r.sizeSpec, " +
-            "s.processStatus) " +
+            "w.lotNo, w.workProgress, w.workEtc, e.workTeam, p.lineNo, " +
+            "p.planQty, p.startDate, p.endDate, r.productName, r.sizeSpec, s.processStatus) " +
             "FROM WorkOrders w " +
             "LEFT JOIN w.employee e " +
             "LEFT JOIN w.planProduct r " +
             "LEFT JOIN w.planLine p " +
             "LEFT JOIN w.progressStatus s")
     List<WorkFindAllDTO> findAllWorkOrders();
-
 }

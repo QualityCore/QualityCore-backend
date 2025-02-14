@@ -41,4 +41,7 @@ public class PlanLine {
     @Column(name = "END_DATE")
     private Date endDate; // 생산종료일
 
+    @OneToMany(mappedBy = "planLine", fetch = FetchType.LAZY)
+    private List<WorkOrders> workOrders;
+
 }

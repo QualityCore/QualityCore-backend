@@ -24,13 +24,14 @@ public class WorkFindAllDTO {
 
     private int planQty;
 
-    private String startDate;
+    private Date startDate;
 
-    private String endDate;
+    private Date endDate;
 
     private String productName;
 
     private String sizeSpec;
 
     private String processStatus;
+
 }

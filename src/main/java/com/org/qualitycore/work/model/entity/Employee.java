@@ -38,4 +38,7 @@ public class Employee {
 
     @Column(name = "WORK_TEAM")
     private String workTeam; // 작업조
+
+    @OneToMany(mappedBy = "employee", fetch = FetchType.LAZY)
+    private List<WorkOrders> workOrders;
 }
