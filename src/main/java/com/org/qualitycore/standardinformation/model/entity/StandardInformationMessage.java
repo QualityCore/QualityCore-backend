@@ -1,4 +1,4 @@
-package com.org.qualitycore.masterdata.model.entity;
+package com.org.qualitycore.standardinformation.model.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 @ToString
 @Schema(description = "API 응답 메시지 객체")
-public class MasterDataMessage {
+public class StandardInformationMessage {
 
     @Schema(description = "HTTP 상태 코드", example = "200")
     private int httpStatusCode;

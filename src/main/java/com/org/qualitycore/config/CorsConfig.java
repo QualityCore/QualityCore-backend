@@ -16,9 +16,10 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**")
+                registry.addMapping("/**") // 모든 경로에 대해 CORS 허용
                         .allowedOrigins("http://localhost:3000") // React 서버 주소
-                        .allowedMethods("GET", "POST", "PUT", "DELETE")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // OPTIONS 추가
+                        .allowedHeaders("*") // 모든 헤더 허용
                         .allowCredentials(true);
             }
         };

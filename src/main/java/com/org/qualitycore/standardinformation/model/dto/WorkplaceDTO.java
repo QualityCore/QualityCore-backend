@@ -1,24 +1,25 @@
-package com.org.qualitycore.masterdata.model.dto;
+package com.org.qualitycore.standardinformation.model.dto;
 
 import lombok.*;
 
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-
-import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @ToString
+@Builder
 @Schema(description = "작업장 정보 DTO")
 public class WorkplaceDTO {
 
-    @Schema(description = "작업장 고유 ID", example = "1")
-    private Long workplaceId;
+    @Schema(description = "작업장 고유 ID", example = "WO001")
+    private String workplaceId;
+
+    @Schema(description = "LINE ID" , example = "LINE001")
+    private String lineId;
 
     @Schema(description = "작업장 이름", example = "제1작업장")
     private String workplaceName;
@@ -39,7 +40,7 @@ public class WorkplaceDTO {
     private String managerName;
 
     @Schema(description = "작업량 용량 / 생산 가능량", example = "1000")
-    private int workplaceCapacity;
+    private Integer workplaceCapacity;
 
     @Schema(description = "생성 날짜 (응답 전용)", example = "2024-02-12T10:15:30")
     private LocalDateTime createdAt;
