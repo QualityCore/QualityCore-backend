@@ -27,7 +27,7 @@ public class PlanController {
 
     @GetMapping("/api/v1/plan-overview")
     public List<ProductionPlanDTO> findProductionPlans(
-            @RequestParam @DateTimeFormat(pattern = "yyyyMM") LocalDate planYm,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM") LocalDate planYm,
             @RequestParam(required = false) String status
 
     ){

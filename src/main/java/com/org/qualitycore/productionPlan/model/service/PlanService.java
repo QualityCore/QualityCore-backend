@@ -27,6 +27,10 @@ public class PlanService {
         QPlanMst planMst = QPlanMst.planMst;
         QProductionPlan productionPlan = QProductionPlan.productionPlan;
 
+        // YearMonth → LocalDate 범위
+        LocalDate startDate = planYm.atDay(1);                 // 해당 월 1일
+        LocalDate endDate = planYm.atEndOfMonth();             // 해당 월 마지막 날
+
         return queryFactory
                 .select(Projections.fields(ProductionPlanDTO.class,
                         planMst.planYm.as("planYm"),
