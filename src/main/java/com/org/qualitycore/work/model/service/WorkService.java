@@ -2,10 +2,13 @@ package com.org.qualitycore.work.model.service;
 
 import com.org.qualitycore.work.model.dto.WorkFindAllDTO;
 import com.org.qualitycore.work.model.repository.WorkRepository;
+import com.org.qualitycore.work.model.entity.Employee;
+import com.org.qualitycore.work.model.repository.WorkRepository;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,8 +17,9 @@ import java.util.List;
 @Schema(description = "작업지시서 관련 Service")
 public class WorkService {
 
-    private final WorkRepository workRepository;
-    private final ModelMapper modelMapper;
+        private final WorkRepository workRepository;
+        private final ModelMapper mapper;
+
 
     // 작업지시서 메인화면 전체조회
     public List<WorkFindAllDTO> findAllWorkOrders() {
@@ -24,7 +28,7 @@ public class WorkService {
         return workRepository.findAllWorkOrders();
     }
 
-
+//
 //    // 작업지시서 상세조회
 //    public WorkDTO findByWorkOrderCode(int workId) {
 //

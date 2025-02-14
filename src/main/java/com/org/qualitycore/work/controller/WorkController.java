@@ -29,7 +29,7 @@ public class WorkController {
 
     private final WorkService workService;
 
-    // 작업지시서 전체 조회
+     // 작업지시서 전체 조회
     @GetMapping("/list")
     @Operation(summary = "작업지시서 전체 조회", description = "작업지시서 메인화면에서 모든 작업지시서를 조회하는 기능입니다.")
     @ApiResponses({

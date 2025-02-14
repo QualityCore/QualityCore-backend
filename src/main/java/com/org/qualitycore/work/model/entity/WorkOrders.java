@@ -3,10 +3,6 @@ package com.org.qualitycore.work.model.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Date;
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -41,6 +37,7 @@ public class WorkOrders {
     private String workProgress; // 진행률
 
     @Column(name = "WORK_ETC")
-    private String workEtc; // 특이사항
+    private String workEtc;
 
 }
+
