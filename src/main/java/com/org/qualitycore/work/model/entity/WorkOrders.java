@@ -37,6 +37,5 @@ public class WorkOrders {
 
     @Column(name = "WORK_ETC")
     private String workEtc;
-
 }
 

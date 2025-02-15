@@ -1,9 +1,11 @@
 package com.org.qualitycore.work.model.service;
 
 import com.org.qualitycore.work.model.dto.WorkFindAllDTO;
+import com.org.qualitycore.work.model.dto.WorkLotDTO;
+import com.org.qualitycore.work.model.entity.*;
 import com.org.qualitycore.work.model.repository.WorkRepository;
-import com.org.qualitycore.work.model.entity.Employee;
-import com.org.qualitycore.work.model.repository.WorkRepository;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -19,24 +21,77 @@ public class WorkService {
 
         private final WorkRepository workRepository;
         private final ModelMapper mapper;
+        private final JPAQueryFactory queryFactory;
 
 
-    // 작업지시서 메인화면 전체조회
+
     public List<WorkFindAllDTO> findAllWorkOrders() {
 
+        QWorkOrders workOrders = QWorkOrders.workOrders;
+        QEmployee employee = QEmployee.employee;
+        QPlanProduct planProduct = QPlanProduct.planProduct;
+        QPlanLine planLine = QPlanLine.planLine;
+        QProgressStatus progressStatus = QProgressStatus.progressStatus;
 
-        return workRepository.findAllWorkOrders();
+        return queryFactory
+                .select(Projections.fields(WorkFindAllDTO.class,
+                        workOrders.lotNo.as("lotNo"),
+                        workOrders.workProgress.as("workProgress"),
+                        workOrders.workEtc.as("workEtc"),
+                        employee.workTeam.as("workTeam"),
+                        planLine.lineNo.as("lineNo"),
+                        planLine.planQty.as("planQty"),
+                        planLine.startDate.as("startDate"),
+                        planLine.endDate.as("endDate"),
+                        planProduct.productName.as("productName"),
+                        planProduct.sizeSpec.as("sizeSpec"),
+                        progressStatus.processStatus.as("processStatus")
+                ))
+                .from(workOrders)
+                .leftJoin(workOrders.employee, employee)
+                .leftJoin(workOrders.planProduct, planProduct)
+                .leftJoin(workOrders.planLine, planLine)
+                .leftJoin(workOrders.progressStatus, progressStatus)
+                .fetch();
     }
 
-//
-//    // 작업지시서 상세조회
-//    public WorkDTO findByWorkOrderCode(int workId) {
-//
-//        WorkOrder work = workRepository.findById(workId).
-//                orElseThrow(IllegalArgumentException::new);
-//
-//        return modelMapper.map(work, WorkDTO.class);
-//    }
+
+    // 작업지시서 상세조회
+    public WorkLotDTO findByWorkOrderCode(String lotNo) {
+
+        QWorkOrders workOrders = QWorkOrders.workOrders;
+        QEmployee employee = QEmployee.employee;
+        QPlanProduct planProduct = QPlanProduct.planProduct;
+        QPlanLine planLine = QPlanLine.planLine;
+        QProgressStatus progressStatus = QProgressStatus.progressStatus;
+
+        return queryFactory
+                .select(Projections.fields(WorkLotDTO.class,
+                        workOrders.lotNo.as("lotNo"),
+                        workOrders.workProgress.as("workProgress"),
+                        workOrders.workEtc.as("workEtc"),
+                        employee.workTeam.as("workTeam"),
+                        planLine.lineNo.as("lineNo"),
+                        planLine.planQty.as("planQty"),
+                        planLine.startDate.as("startDate"),
+                        planLine.endDate.as("endDate"),
+                        planProduct.productName.as("productName"),
+                        planProduct.sizeSpec.as("sizeSpec"),
+                        progressStatus.processStatus.as("processStatus")
+                ))
+                .from(workOrders)
+                .leftJoin(workOrders.employee, employee)
+                .leftJoin(workOrders.planProduct, planProduct)
+                .leftJoin(workOrders.planLine, planLine)
+                .leftJoin(workOrders.progressStatus, progressStatus)
+                .where(workOrders.lotNo.eq(lotNo))
+                .fetchOne();
+    }
+
+
+
+
+}
 //
 //    // 작업지시서 생성
 //    @Transactional
@@ -62,4 +117,4 @@ public class WorkService {
 //        modelMapper.map(workId, WorkOrder.class);
 //    }
 
-}
+

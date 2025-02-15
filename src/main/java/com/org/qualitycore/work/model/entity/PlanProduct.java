@@ -49,7 +49,4 @@ public class PlanProduct {
 
     @Column(name = "SIZE_SPEC")
     private String sizeSpec;
-
-    @OneToMany(mappedBy = "planProduct", fetch = FetchType.LAZY)
-    private List<WorkOrders> workOrders;
 }
