@@ -1,9 +1,11 @@
 package com.org.qualitycore.work.controller;
 
 import com.org.qualitycore.work.model.dto.WorkFindAllDTO;
+import com.org.qualitycore.work.model.dto.WorkLotDTO;
 import com.org.qualitycore.work.model.entity.WorkMessage;
 import com.org.qualitycore.work.model.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +31,7 @@ public class WorkController {
 
     private final WorkService workService;
 
-    // 작업지시서 전체 조회
+     // 작업지시서 전체 조회
     @GetMapping("/list")
     @Operation(summary = "작업지시서 전체 조회", description = "작업지시서 메인화면에서 모든 작업지시서를 조회하는 기능입니다.")
     @ApiResponses({
@@ -70,47 +72,47 @@ public class WorkController {
                 .body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
     }
 
-//    // 작업지시서 상세 조회
-//    @Operation(summary = "작업지시서 상세 조회",
-//            description = "작업지시서 번호를 통해 작업지시서 상세 조회를 합니다.",
-//            parameters = {@Parameter(name = "workOrderId", description = "상세조회를 위한 작업지시서 고유 PK")})
-//    @ApiResponses({
-//            @ApiResponse(responseCode = "200", description = "회원정보 상세조회 성공"),
-//            @ApiResponse(responseCode = "404", description = "작업지시서를 찾을 수 없습니다.")})
-//    @GetMapping("/detail/{workOrderId}")
-//    public ResponseEntity<WorkMessage> findByWorkOrderCode(@PathVariable("workOrderId") int workId) {
-//
-//        HttpHeaders headers = new HttpHeaders();
-//
-//        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
-//
-//        WorkDTO work = null;
-//
-//        try {
-//            work = workService.findByWorkOrderCode(workId);
-//
-//        } catch (IllegalArgumentException e) {
-//            // 작업지시서를 찾을 수 없을 경우 404 응답
-//            Map<String, Object> res = new HashMap<>();
-//
-//            res.put("status", 404);
-//
-//            res.put("message", "작업지시서를 찾을 수 없습니다.");
-//
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .headers(headers)
-//                    .body(new WorkMessage(404, "작업지시서를 찾을 수 없습니다.", res));
-//        }
-//
-//        // 작업지시서가 있을 경우 상세 조회
-//        Map<String, Object> res = new HashMap<>();
-//
-//        res.put("work", work);
-//
-//        return ResponseEntity.ok()
-//                .headers(headers)
-//                .body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
-//    }
+    // 작업지시서 상세 조회
+    @Operation(summary = "작업지시서 상세 조회",
+            description = "작업지시서 번호를 통해 작업지시서 상세 조회를 합니다.",
+            parameters = {@Parameter(name = "workOrderId", description = "상세조회를 위한 작업지시서 고유 PK")})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원정보 상세조회 성공"),
+            @ApiResponse(responseCode = "404", description = "작업지시서를 찾을 수 없습니다.")})
+    @GetMapping("/detail/{lotNo}")
+    public ResponseEntity<WorkMessage> findByWorkOrderCode(@PathVariable("lotNo") String lotNo) {
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        WorkLotDTO work = null;
+
+        try {
+            work = workService.findByWorkOrderCode(lotNo);
+
+        } catch (IllegalArgumentException e) {
+            // 작업지시서를 찾을 수 없을 경우 404 응답
+            Map<String, Object> res = new HashMap<>();
+
+            res.put("status", 404);
+
+            res.put("message", "작업지시서를 찾을 수 없습니다.");
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .headers(headers)
+                    .body(new WorkMessage(404, "작업지시서를 찾을 수 없습니다.", res));
+        }
+
+        // 작업지시서가 있을 경우 상세 조회
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("work", work);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
+    }
 //
 //    // 작업지시서 생성
 //    @PostMapping("/create")

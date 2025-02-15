@@ -33,7 +33,4 @@ public class ProductionPlan {
 
     @Column(name = "PRODUCT_ID")
     private String productId;  // 제품 ID
-
-
-
 }

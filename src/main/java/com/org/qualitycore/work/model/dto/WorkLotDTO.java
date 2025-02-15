@@ -2,6 +2,7 @@ package com.org.qualitycore.work.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
 import java.util.Date;
 
 @NoArgsConstructor
@@ -9,8 +10,8 @@ import java.util.Date;
 @Getter
 @Setter
 @ToString
-@Schema(description = "작업지시서 전체 DTO")
-public class WorkFindAllDTO {
+@Schema(description = "작업지시서 상세조회 DTO")
+public class WorkLotDTO {
 
     @Schema(description = "작업지시서 번호")
     private String lotNo;
@@ -44,5 +45,4 @@ public class WorkFindAllDTO {
 
     @Schema(description = "현재 공정")
     private String processStatus;
-
 }

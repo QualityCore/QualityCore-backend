@@ -1,15 +1,13 @@
 package com.org.qualitycore.work.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @ToString
 @Entity
@@ -40,4 +38,5 @@ public class Employee {
 
     @Column(name = "WORK_TEAM")
     private String workTeam; // 작업조
+
 }
