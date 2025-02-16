@@ -53,6 +53,7 @@ public class StandardInformationController {
                         .workplaceLocation(workplace.getWorkplaceLocation())
                         .managerName(workplace.getManagerName())
                         .workplaceCapacity(workplace.getWorkplaceCapacity())
+                        .workplaceCapacityUnit(workplace.getWorkplaceCapacityUnit())
                         .build())
                 .collect(Collectors.toList());
     }
