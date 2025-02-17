@@ -1,7 +1,9 @@
 package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.standardinformation.model.dto.WorkplaceDTO;
+import com.org.qualitycore.standardinformation.model.entity.LineInformation;
 import com.org.qualitycore.standardinformation.model.entity.Workplace;
+import com.org.qualitycore.standardinformation.model.repository.LineInformationRepository;
 import com.org.qualitycore.standardinformation.model.repository.WorkplaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -16,6 +18,7 @@ import java.util.List;
 public class StandardInformationService {
 
     private final WorkplaceRepository workplaceRepository;
+    private final LineInformationRepository lineInformationRepository;
     private final ModelMapper modelMapper;
 
     // 작업장 전체 조회
@@ -25,21 +28,35 @@ public class StandardInformationService {
 
     //작업장 등록
     public Workplace createWorkplace(WorkplaceDTO workplaceDTO) {
+        // ✅ `lineId`를 기반으로 `lineInformation`을 찾거나 자동 생성
+        LineInformation lineInformation = lineInformationRepository.findByLineId(workplaceDTO.getLineId())
+                .orElseThrow(() -> new IllegalArgumentException
+                        ("존재하지 않는 LINE_ID입니다: " + workplaceDTO.getLineId()));
+
+
         Workplace workplace = Workplace.builder()
-                .workplaceId(workplaceDTO.getWorkplaceId())
+                .workplaceId(generateNextWorkplaceId())  // ✅ 자동 생성
                 .workplaceName(workplaceDTO.getWorkplaceName())
                 .workplaceCode(workplaceDTO.getWorkplaceCode())
                 .workplaceLocation(workplaceDTO.getWorkplaceLocation())
                 .workplaceType(workplaceDTO.getWorkplaceType())
-                .lineId(workplaceDTO.getLineId())
                 .workplaceStatus(workplaceDTO.getWorkplaceStatus())
                 .managerName(workplaceDTO.getManagerName())
                 .workplaceCapacity(workplaceDTO.getWorkplaceCapacity())
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .workplaceCapacityUnit(workplaceDTO.getWorkplaceCapacityUnit())
+                .lineInformation(lineInformation)  // ✅ `lineInformation` 직접 설정
                 .build();
+
         return workplaceRepository.save(workplace);
     }
+
+    // ✅ 가장 큰 `workplaceId` 조회 후 다음 ID 생성 (WO001, WO002 형식 유지)
+    public String generateNextWorkplaceId() {
+        Integer maxId = workplaceRepository.findMaxWorkplaceId();
+        int nextId = (maxId != null) ? maxId + 1 : 1;
+        return String.format("WO%03d", nextId);  // "WO001", "WO002", "WO003" 형식
+    }
+
 
     // 작업장 등록 수정하기
     public Workplace updateWorkplace(String id, WorkplaceDTO workplaceDTO) {
@@ -54,6 +71,7 @@ public class StandardInformationService {
                 .workplaceLocation(workplaceDTO.getWorkplaceLocation() !=null ? workplaceDTO.getWorkplaceLocation() : workplace.getWorkplaceLocation())
                 .managerName(workplaceDTO.getManagerName() !=null ? workplaceDTO.getManagerName() : workplace.getManagerName())
                 .workplaceCapacity(workplaceDTO.getWorkplaceCapacity() !=null ? workplaceDTO.getWorkplaceCapacity() : workplace.getWorkplaceCapacity() )
+                .workplaceCapacityUnit(workplaceDTO.getWorkplaceCapacityUnit() != null ? workplaceDTO.getWorkplaceCapacityUnit() : workplace.getWorkplaceCapacityUnit())
                 .build();
         return workplaceRepository.save(updateWorkplace);
     }

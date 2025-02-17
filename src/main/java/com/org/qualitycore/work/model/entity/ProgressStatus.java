@@ -28,4 +28,5 @@ public class ProgressStatus {
 
     @Column(name = "PROCESS_STATUS")
     private String processStatus; // 현재공정
+
 }

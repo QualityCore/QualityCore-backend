@@ -41,4 +41,5 @@ public class PlanLine {
     @Column(name = "END_DATE")
     private Date endDate; // 생산종료일
 
+
 }
