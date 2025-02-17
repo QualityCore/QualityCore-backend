@@ -1,13 +1,11 @@
 package com.org.qualitycore.productionPlan.model.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "PLAN_MST")
@@ -27,4 +25,7 @@ public class PlanMst {
 
     @Column(name="STATUS", nullable = false)
     private String status;
+
+    @OneToMany(mappedBy = "planMst", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlanProduct> planProducts;
 }

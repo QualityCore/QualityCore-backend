@@ -1,5 +1,6 @@
 package com.org.qualitycore.work.model.entity;
 
+import com.org.qualitycore.productionPlan.model.entity.PlanProductBase;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,7 +31,7 @@ public class PlanProduct {
     private String productName;
 
     @Column(name = "PLAN_QTY")
-    private int planQty;
+    private Integer planQty;
 
     @Column(name = "BASE_TEMP")
     private int baseTemp;

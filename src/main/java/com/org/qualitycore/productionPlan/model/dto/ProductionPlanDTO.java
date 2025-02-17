@@ -16,5 +16,6 @@ public class ProductionPlanDTO {
     private String sizeSpec;    // 규격
     private Integer planQty;    // 계획수량
     private String status;      // 상태
+    private String beerType;     // 맥주종류
 
 }

@@ -15,6 +15,8 @@ import jakarta.persistence.Id;
 @ToString
 public class ProductionPlan {
 
+
+    // 이곳은 생산계획조회 DTO 입니다.
     @Id
     @Column(name = "PLAN_PRODUCT_ID")
     private String planProductId;     // 생산계획제품 ID
