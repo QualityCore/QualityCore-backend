@@ -18,7 +18,7 @@ public class WorkplaceDTO {
     @Schema(description = "작업장 고유 ID", example = "WO001")
     private String workplaceId;
 
-    @Schema(description = "LINE ID" , example = "LINE001")
+    @Schema(description = "LINE ID", example = "LINE001")
     private String lineId;
 
     @Schema(description = "작업장 이름", example = "제1작업장")
@@ -42,9 +42,7 @@ public class WorkplaceDTO {
     @Schema(description = "작업량 용량 / 생산 가능량", example = "1000")
     private Integer workplaceCapacity;
 
-    @Schema(description = "생성 날짜 (응답 전용)", example = "2024-02-12T10:15:30")
-    private LocalDateTime createdAt;
+    @Schema(description = "작업장 용량 단위", example = "L")
+    private String workplaceCapacityUnit; // 새로운 컬럼 추가
 
-    @Schema(description = "수정 날짜 (응답 전용)", example = "2024-02-12T11:00:00")
-    private LocalDateTime updatedAt;
 }
