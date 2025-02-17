@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name ="WORKPLACE")
@@ -24,9 +25,16 @@ public class Workplace {
     @Schema(description = "작업장 고유 ID", example = "WO001")
     private String workplaceId; // 작업장 고유 ID
 
-    @Column(name ="LINE_ID", nullable = false)
-    @Schema(description = "LINE_ID",example = "LINE001")
-    private String lineId;
+
+
+    @Column(name = "LINE_ID" , nullable = false , updatable = false , insertable = false )
+    @Schema(description = "LINE_ID" , example = "LINE001")
+    private String lineId; // 라인 아이디
+
+    @ManyToOne  // 외래 키 설정
+    @JoinColumn(name = "LINE_ID", referencedColumnName = "LINE_ID", nullable = false)
+    @Schema(description = "LINE 정보", example = "LINE001")
+    private LineInformation lineInformation;
 
     @Column(name ="WORKPLACE_NAME",nullable = false)
     @Schema(description = "작업장 이름", example = "제1작업장")
@@ -57,6 +65,10 @@ public class Workplace {
     @Schema(description = "작업량 용량 / 생산 가능량", example = "1000")
     private Integer workplaceCapacity; // 작업량 용량 / 생산 가능량
 
+    @Column(name="WORKPLACE_CAPACITYUNIT",nullable = false)
+    @Schema(description = "작업장 용량 단위", example = "L")
+    private String workplaceCapacityUnit; // 작업장용량 단위
+
     @CreationTimestamp // insert 시 자동으로 sysdate 값 저장
     @Column(name ="CREATED_AT" , nullable = false)
     @Schema(description = "작업장 생성 날짜", example = "2024-02-12T10:15:30")
@@ -66,6 +78,9 @@ public class Workplace {
     @Column(name ="UPDATED_AT")
     @Schema(description = "작업장 수정 날짜", example = "2024-02-12T11:00:00")
     private LocalDateTime updatedAt;  // 수정 날짜
+
+
+
 }
 
 
