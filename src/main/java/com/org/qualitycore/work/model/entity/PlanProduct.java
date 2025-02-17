@@ -31,7 +31,7 @@ public class PlanProduct {
     private String productName;
 
     @Column(name = "PLAN_QTY")
-    private Integer planQty;
+    private int planQty;
 
     @Column(name = "BASE_TEMP")
     private int baseTemp;
