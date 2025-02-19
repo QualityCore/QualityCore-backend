@@ -2,33 +2,25 @@ package com.org.qualitycore.standardinformation.controller;
 
 import com.org.qualitycore.standardinformation.model.dto.WorkplaceDTO;
 import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
-import com.org.qualitycore.standardinformation.model.entity.Workplace;
 import com.org.qualitycore.standardinformation.model.service.StandardInformationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/standardinformation")
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
-@Tag(name="Master Data" , description = "기준정보관리 API")
-public class StandardInformationController {
+@Tag(name="Workplace" , description = "작업장정보 API")
+public class WorkplacesController {
 
     private final StandardInformationService standardInformationService;
 
