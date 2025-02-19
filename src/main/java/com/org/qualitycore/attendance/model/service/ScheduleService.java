@@ -44,9 +44,8 @@ public class ScheduleService {
                         schedule.scheduleId.as("scheduleId"),
                         schedule.checkIn.as("checkIn"),
                         schedule.checkOut.as("checkOut"),
-                        schedule.totalTime.as("totalTime"),
-                        schedule.workingTime.as("workingTime"),
-                        schedule.workStatus.as("workStatus")
+                        schedule.workStatus.as("workStatus"),
+                        schedule.scheduleEtc.as("scheduleEtc")
                 ))
                 .from(employee)
                 .join(schedule).on(employee.empId.eq(schedule.employee.empId))
@@ -68,9 +67,8 @@ public class ScheduleService {
                         schedule.scheduleId.as("scheduleId"),
                         schedule.checkIn.as("checkIn"),
                         schedule.checkOut.as("checkOut"),
-                        schedule.totalTime.as("totalTime"),
-                        schedule.workingTime.as("workingTime"),
-                        schedule.workStatus.as("workStatus")
+                        schedule.workStatus.as("workStatus"),
+                        schedule.scheduleEtc.as("scheduleEtc")
                 ))
                 .from(employee)
                 .join(schedule).on(employee.empId.eq(schedule.employee.empId))  // 직원과 근태 정보 조인
@@ -83,11 +81,31 @@ public class ScheduleService {
 
         Employee employee = employeeRepository.findByEmpId(schedule.getEmpId());
 
+        String maxScheduleId = scheduleRepository.findMaxScheduleId();
+
+        String newScheduleId = generateNewScheduleId(maxScheduleId);
+
         Attendance attendance = modelMapper.map(schedule, Attendance.class);
+
+        attendance.setScheduleId(newScheduleId);
 
         attendance.setEmployee(employee);
 
         scheduleRepository.save(attendance);
+    }
+
+    // auto increment 방식
+    private String generateNewScheduleId(String maxScheduleId) {
+        if (maxScheduleId == null) {
+            return "SD001";  // 첫 번째 ID가 SD001
+        }
+
+        // "SD" 접두사를 제외한 숫자 부분 추출
+        String numericPart = maxScheduleId.substring(2);  // 예: "SD123" -> "123"
+        int newId = Integer.parseInt(numericPart) + 1;  // 숫자 부분에 +1
+
+        // 3자리 숫자로 포맷
+        return String.format("SD%03d", newId);
     }
 }
 

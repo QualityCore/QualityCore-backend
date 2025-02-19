@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,23 +18,18 @@ public class EmpScheduleCreateDTO {
     private String scheduleId;
 
     @Schema(description = "출근")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime checkIn; // 출근
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date checkIn;
 
     @Schema(description = "퇴근")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime checkOut; // 출근
-
-    @Schema(description = "총 근무시간", example = "한달동안 일할 총 근무시간")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime totalTime;
-
-    @Schema(description = "현재 근무시간", example = "한달동안 일한 현재 근무시간")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime workingTime;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date checkOut;
 
     @Schema(description = "근무상태", example = "출근, 휴가")
     private String workStatus;
+
+    @Schema(description = "스케줄표 특이사항")
+    private String scheduleEtc;
 
     @Schema(description = "직원 ID")
     private String empId;
