@@ -29,15 +29,17 @@ public class StandardInformationService {
     }
 
     //작업장 등록
-    public Workplace createWorkplace(WorkplaceDTO workplaceDTO) {
+    public WorkplaceDTO createWorkplace(WorkplaceDTO workplaceDTO) {
         LineInformation lineInformation = lineInformationRepository.findByLineId(workplaceDTO.getLineId())
-                .orElseThrow(() -> new IllegalArgumentException
-                        ("존재하지 않는 LINE_ID 입니다: " + workplaceDTO.getLineId()));
-        Workplace workplace= modelMapper.map(workplaceDTO,Workplace.class);
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 LINE_ID 입니다: " + workplaceDTO.getLineId()));
+
+        Workplace workplace = modelMapper.map(workplaceDTO, Workplace.class);
         workplace.setWorkplaceId(generateNextWorkplaceId());
         workplace.setLineInformation(lineInformation);
 
-        return workplaceRepository.save(workplace);
+        Workplace savedWorkplace = workplaceRepository.save(workplace);
+
+        return modelMapper.map(savedWorkplace, WorkplaceDTO.class); // DTO로 변환하여 반환
     }
 
     // ✅ 가장 큰 `workplaceId` 조회 후 다음 ID 생성 (WO001, WO002 형식 유지)
