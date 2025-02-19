@@ -77,17 +77,17 @@ public class PlanController {
         return ResponseEntity.ok(products);
     }
 
-//    // 특정 제품의 생산라인 배정 조회
-//    @GetMapping("/plans/lines/{planProductId}")
-//    public ResponseEntity<List<PlanLineDTO>> getProductionLines(@PathVariable String planProductId) {
-//        List<PlanLineDTO> planLines = planService.getProductionLines(planProductId);
-//        return ResponseEntity.ok(planLines);
-//    }
-//
-//    // 생산라인 배정 등록
-//    @PostMapping("lines")
-//    public ResponseEntity<String> createProductionLine(@RequestBody List<PlanLineDTO> planLineDTOs) {
-//        planService.saveProductionLines(planLineDTOs);
-//        return ResponseEntity.ok("생산라인 배정이 완료되었습니다.");
-//    }
+    // 특정 제품의 생산라인 배정 조회
+    @GetMapping("/plans/lines/{planProductId}")
+    public ResponseEntity<List<PlanLineDTO>> getProductionLines(@PathVariable String planProductId) {
+        List<PlanLineDTO> planLines = planService.getProductionLines(planProductId);
+        return ResponseEntity.ok(planLines);
+    }
+
+    // 생산라인 배정 등록
+    @PostMapping("lines")
+    public ResponseEntity<String> createProductionLine(@RequestBody List<PlanLineDTO> planLineDTOs) {
+        planService.saveProductionLines(planLineDTOs);
+        return ResponseEntity.ok("생산라인 배정이 완료되었습니다.");
+    }
 }

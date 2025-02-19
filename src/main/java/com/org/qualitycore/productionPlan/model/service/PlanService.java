@@ -110,17 +110,17 @@ public class PlanService {
 
     }
 
-//    public List<PlanLineDTO> getProductionLines(String planProductId) {
-//        return planLineRepository.findProductionLinesByProductId(planProductId)
-//                .stream()
-//                .map(PlanLineDTO::fromEntity)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Transactional
-//    public void saveProductionLines(List<PlanLineDTO> planLineDTOs) {
-//        List<PlanLine> planLines = planLineDTOs.stream().map(PlanLineDTO::toEntity).toList();
-//        planLineRepository.saveAll(planLines);
-//
-//    }
+    public List<PlanLineDTO> getProductionLines(String planProductId) {
+        return planLineRepository.findProductionLinesByProductId(planProductId)
+                .stream()
+                .map(PlanLineDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void saveProductionLines(List<PlanLineDTO> planLineDTOs) {
+        List<PlanLine> planLines = planLineDTOs.stream().map(PlanLineDTO::toEntity).toList();
+        planLineRepository.saveAll(planLines);
+
+    }
 }
