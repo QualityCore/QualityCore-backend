@@ -1,4 +1,4 @@
-title: "📑 YYYY-MM-DD | 이부분지우고 만든 기능 적기"
+# 📑 YYYY-MM-DD | 이부분지우고 만든 기능 적기
 
 ## #️⃣ Issue Number
 
