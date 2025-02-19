@@ -65,8 +65,6 @@ public class WorkController {
 
         res.put("work", work);
 
-        System.out.println("워킁ㅇ = " + work);
-
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
