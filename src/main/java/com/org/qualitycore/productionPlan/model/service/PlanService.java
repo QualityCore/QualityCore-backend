@@ -36,7 +36,7 @@ public class PlanService {
     public void saveProductionPlan(ProductionPlanDTO dto) {
 
         System.out.println("📌 saveProductionPlan() 실행됨: " + dto);
-        System.out.flush(); // ✅ 즉시 출력
+        System.out.flush();
         // 🟢 planYm (YYYY-MM-DD) -> LocalDate 그대로 저장 (조회 영향 없음)
         LocalDate planYm = dto.getPlanYm();
 
@@ -48,12 +48,12 @@ public class PlanService {
         PlanMst planMst = new PlanMst();
         planMst.setPlanId(newPlanId);
         planMst.setPlanYm(planYm);
-        planMst.setCreatedBy("SYSTEM"); // 🛑 저장 전에 createdBy 설정
+        planMst.setCreatedBy("SYSTEM");
         planMst.setStatus("미확정");
 
         planMst = planMstRepository.save(planMst); // ✅ 저장
 
-        // 🟢 새로운 PLAN_PRODUCT_ID 생성
+        //  새로운 PLAN_PRODUCT_ID 생성
         String newPlanProductId = generateNewPlanProductId();
         System.out.println("Generated Plan Product ID: " + newPlanProductId);
         System.out.flush();
@@ -62,7 +62,7 @@ public class PlanService {
             throw new RuntimeException("Generated Plan Product ID is null");
         }
 
-        // 🟢 생산 계획 제품 저장
+        //  생산 계획 제품 저장
         PlanProduct planProduct = new PlanProduct();
         planProduct.setPlanProductId(newPlanProductId);
         planProduct.setPlanMst(planMst); // planId 연동
