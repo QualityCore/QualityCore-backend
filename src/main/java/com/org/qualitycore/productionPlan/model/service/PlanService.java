@@ -1,14 +1,13 @@
 package com.org.qualitycore.productionPlan.model.service;
 
 import com.org.qualitycore.exception.ResourceNotFoundException;
+import com.org.qualitycore.productionPlan.model.dto.PlanLineDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductBomDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductionPlanDTO;
+import com.org.qualitycore.productionPlan.model.entity.PlanLine;
 import com.org.qualitycore.productionPlan.model.entity.PlanMst;
 import com.org.qualitycore.productionPlan.model.entity.PlanProduct;
-import com.org.qualitycore.productionPlan.model.repository.PlanMstRepository;
-import com.org.qualitycore.productionPlan.model.repository.PlanProductRepository;
-import com.org.qualitycore.productionPlan.model.repository.PlanRepository;
-import com.org.qualitycore.productionPlan.model.repository.ProductBomRepository;
+import com.org.qualitycore.productionPlan.model.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +26,7 @@ public class PlanService {
     private final PlanMstRepository planMstRepository;
     private final PlanProductRepository planProductRepository;
     private final ProductBomRepository productBomRepository;
+    private final PlanLineRepository planLineRepository;
 
     public List<ProductionPlanDTO> getAllProductionPlans(LocalDate startDate, LocalDate endDate, String status) {
         return planRepository.findProductionPlans(startDate, endDate, status);
@@ -109,4 +109,18 @@ public class PlanService {
 
 
     }
+
+//    public List<PlanLineDTO> getProductionLines(String planProductId) {
+//        return planLineRepository.findProductionLinesByProductId(planProductId)
+//                .stream()
+//                .map(PlanLineDTO::fromEntity)
+//                .collect(Collectors.toList());
+//    }
+//
+//    @Transactional
+//    public void saveProductionLines(List<PlanLineDTO> planLineDTOs) {
+//        List<PlanLine> planLines = planLineDTOs.stream().map(PlanLineDTO::toEntity).toList();
+//        planLineRepository.saveAll(planLines);
+//
+//    }
 }

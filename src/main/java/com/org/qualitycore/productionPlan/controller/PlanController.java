@@ -1,5 +1,6 @@
 package com.org.qualitycore.productionPlan.controller;
 
+import com.org.qualitycore.productionPlan.model.dto.PlanLineDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductBomDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductionPlanDTO;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
@@ -69,9 +70,24 @@ public class PlanController {
         return ResponseEntity.ok(productBom);
     }
 
+
     @GetMapping("/products")
     public ResponseEntity<List<ProductBomDTO>> getAllProducts(){
         List<ProductBomDTO> products = planService.getAllProducts();
         return ResponseEntity.ok(products);
     }
+
+//    // 특정 제품의 생산라인 배정 조회
+//    @GetMapping("/plans/lines/{planProductId}")
+//    public ResponseEntity<List<PlanLineDTO>> getProductionLines(@PathVariable String planProductId) {
+//        List<PlanLineDTO> planLines = planService.getProductionLines(planProductId);
+//        return ResponseEntity.ok(planLines);
+//    }
+//
+//    // 생산라인 배정 등록
+//    @PostMapping("lines")
+//    public ResponseEntity<String> createProductionLine(@RequestBody List<PlanLineDTO> planLineDTOs) {
+//        planService.saveProductionLines(planLineDTOs);
+//        return ResponseEntity.ok("생산라인 배정이 완료되었습니다.");
+//    }
 }
