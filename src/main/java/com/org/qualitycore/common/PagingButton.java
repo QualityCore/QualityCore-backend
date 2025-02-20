@@ -1,4 +1,4 @@
-package com.org.qualitycore.work.model.common;
+package com.org.qualitycore.common;
 
 import lombok.*;
 

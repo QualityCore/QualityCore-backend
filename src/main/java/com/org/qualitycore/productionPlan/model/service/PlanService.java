@@ -99,7 +99,7 @@ public class PlanService {
 
     }
     public List<PlanLineDTO> getProductionLines(String planProductId) {
-        System.out.println("📌 [PlanService] Step2에서 받은 planProductId: " + planProductId);
+        System.out.println(" Step2에서 받은 planProductId: " + planProductId);
 
         // ✅ planProductId가 null이 아닌지 확인
         if (planProductId == null || planProductId.isEmpty()) {
