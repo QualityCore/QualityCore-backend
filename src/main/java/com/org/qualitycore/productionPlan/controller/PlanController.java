@@ -1,23 +1,27 @@
 package com.org.qualitycore.productionPlan.controller;
 
+import com.org.qualitycore.common.Message;
 import com.org.qualitycore.productionPlan.model.dto.PlanLineDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductBomDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductionPlanDTO;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class PlanController {
 
@@ -32,7 +36,15 @@ public class PlanController {
     * http-status-code : 200, 201, 204, 403, 404, 401, 400, 500
     * */
 
+
     private final PlanService planService;
+
+    // ✅ 응답 헤더 기본 설정
+    private HttpHeaders getDefaultHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+        return headers;
+    }
 
     // 생산계획조회
     @GetMapping("/plans")
@@ -59,8 +71,9 @@ public class PlanController {
     // 생산계획 step1
     @PostMapping("/plans/step1")
     @ResponseStatus(HttpStatus.OK)
-    public void createProductionPlan(@RequestBody ProductionPlanDTO dto) {
-         planService.saveProductionPlan(dto);
+    public ResponseEntity<String> createProductionPlan(@RequestBody ProductionPlanDTO dto) {
+        String planProductId = planService.saveProductionPlan(dto); // ✅ 생성된 planProductId 반환
+        return ResponseEntity.ok(planProductId);
     }
 
     //제품 선택시 BOM정보 불러오기
@@ -77,17 +90,30 @@ public class PlanController {
         return ResponseEntity.ok(products);
     }
 
-//    // 특정 제품의 생산라인 배정 조회
-//    @GetMapping("/plans/lines/{planProductId}")
-//    public ResponseEntity<List<PlanLineDTO>> getProductionLines(@PathVariable String planProductId) {
-//        List<PlanLineDTO> planLines = planService.getProductionLines(planProductId);
-//        return ResponseEntity.ok(planLines);
-//    }
-//
-//    // 생산라인 배정 등록
-//    @PostMapping("lines")
-//    public ResponseEntity<String> createProductionLine(@RequestBody List<PlanLineDTO> planLineDTOs) {
-//        planService.saveProductionLines(planLineDTOs);
-//        return ResponseEntity.ok("생산라인 배정이 완료되었습니다.");
-//    }
+    // 특정 제품의 생산라인 배정 조회
+    @GetMapping("/plans/lines/{planProductId}")
+    public ResponseEntity<Message> getProductionLines(@PathVariable String planProductId) {
+        List<PlanLineDTO> planLines = planService.getProductionLines(planProductId);
+
+        if (planLines.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new Message(404, "해당 제품의 생산 라인 배정 데이터가 없습니다.", Map.of()));
+        }
+
+        return ResponseEntity.ok(new Message(200, "생산 라인 배정 데이터 조회 성공", Map.of("planLines", planLines)));
+    }
+
+    // 생산라인 배정 등록
+    @PostMapping("lines")
+    public ResponseEntity<Message> createProductionLine(@RequestBody List<PlanLineDTO> planLineDTOs) {
+        if (planLineDTOs == null || planLineDTOs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new Message(400, "요청 데이터가 비어 있습니다.", Map.of()));
+        }
+
+        planService.saveProductionLines(planLineDTOs);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new Message(201, "생산 라인 배정이 완료되었습니다.", Map.of()));
+    }
 }
