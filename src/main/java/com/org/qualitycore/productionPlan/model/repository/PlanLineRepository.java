@@ -16,16 +16,35 @@ public class PlanLineRepository {
     private final JPAQueryFactory queryFactory;
     private final SpringDataPlanLineRepository springDataPlanLineRepository;
 
-    // 특정 제품의 생산라인 배정 정보 조회 (QueryDSL)
-    public List<PlanLine> findProductionLinesByProductId(String planProductId) {
-        return queryFactory
-                .selectFrom(QPlanLine.planLine)
-                .where(QPlanLine.planLine.planProduct.planProductId.eq(planProductId))
-                .fetch();
-    }
+//    // 특정 제품의 생산라인 배정 정보 조회 (QueryDSL)
+//    public List<PlanLine> findProductionLinesByProductId(String planProductId) {
+//        System.out.println("📌 [PlanLineRepository] Query 실행 - planProductId: " + planProductId);
+//
+//        List<PlanLine> result = queryFactory
+//                .selectFrom(QPlanLine.planLine)
+//                .where(QPlanLine.planLine.planProduct.planProductId.eq(planProductId))
+//                .fetch();
+//
+//        System.out.println("📌 [PlanLineRepository] Query 결과 개수: " + result.size());
+//
+//        if (result.isEmpty()) {
+//            System.out.println("⚠️ [PlanLineRepository] 해당 제품의 생산 라인 데이터 없음!");
+//        }
+//
+//        return result;
+//    }
+
 
     // JPA 기본 저장 메서드 활용
     public void saveAll(List<PlanLine> planLines) {
         springDataPlanLineRepository.saveAll(planLines);
     }
+
+    public List<PlanLine> findProductionLinesByPlanProductId(String planProductId) {
+        return queryFactory
+                .selectFrom(QPlanLine.planLine)
+                .where(QPlanLine.planLine.planProduct.planProductId.eq(planProductId)) // ✅ planProductId 사용
+                .fetch();
+    }
+
 }

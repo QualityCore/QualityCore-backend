@@ -33,46 +33,35 @@ public class PlanService {
     }
 
     @Transactional
-    public void saveProductionPlan(ProductionPlanDTO dto) {
+    public String saveProductionPlan(ProductionPlanDTO dto) {
+        System.out.println(" Step1 - 생산 계획 저장 시작: " + dto);
 
-        System.out.println("📌 saveProductionPlan() 실행됨: " + dto);
-        System.out.flush();
-        // 🟢 planYm (YYYY-MM-DD) -> LocalDate 그대로 저장 (조회 영향 없음)
-        LocalDate planYm = dto.getPlanYm();
+        // ✅ planProductId 생성 후 반환하도록 수정
+        String newPlanProductId = generateNewPlanProductId();
 
-        // 🟢 새로운 PLAN_ID 생성
+        // ✅ 계획 마스터 저장
         String newPlanId = generateNewPlanId();
-        System.out.println("Generated Plan ID: " + newPlanId);
-
-        // 🟢 계획 마스터 저장
         PlanMst planMst = new PlanMst();
         planMst.setPlanId(newPlanId);
-        planMst.setPlanYm(planYm);
+        planMst.setPlanYm(dto.getPlanYm());
         planMst.setCreatedBy("SYSTEM");
         planMst.setStatus("미확정");
+        planMst = planMstRepository.save(planMst);
 
-        planMst = planMstRepository.save(planMst); // ✅ 저장
-
-        //  새로운 PLAN_PRODUCT_ID 생성
-        String newPlanProductId = generateNewPlanProductId();
-        System.out.println("Generated Plan Product ID: " + newPlanProductId);
-        System.out.flush();
-
-        if (newPlanProductId == null) {
-            throw new RuntimeException("Generated Plan Product ID is null");
-        }
-
-        //  생산 계획 제품 저장
+        // ✅ 생산 계획 제품 저장
         PlanProduct planProduct = new PlanProduct();
         planProduct.setPlanProductId(newPlanProductId);
-        planProduct.setPlanMst(planMst); // planId 연동
-        planProduct.setProductId(dto.getProductId()); // dto에서 받아오기
+        planProduct.setPlanMst(planMst);
+        planProduct.setProductId(dto.getProductId());
         planProduct.setProductName(dto.getProductName());
         planProduct.setPlanQty(dto.getPlanQty());
-
         planProductRepository.save(planProduct);
-        System.out.println("Plan Product saved successfully.");
+
+        System.out.println("✅ [PlanService] Step1 - 저장 완료! planProductId: " + newPlanProductId);
+
+        return newPlanProductId; // ✅ 생성된 planProductId 반환
     }
+
 
     // 새로운 PLAN_ID 생성 (PL00001, PL00002...)
     private String generateNewPlanId() {
@@ -109,13 +98,25 @@ public class PlanService {
 
 
     }
-
     public List<PlanLineDTO> getProductionLines(String planProductId) {
-        return planLineRepository.findProductionLinesByProductId(planProductId)
-                .stream()
-                .map(PlanLineDTO::fromEntity)
-                .collect(Collectors.toList());
+        System.out.println("📌 [PlanService] Step2에서 받은 planProductId: " + planProductId);
+
+        // ✅ planProductId가 null이 아닌지 확인
+        if (planProductId == null || planProductId.isEmpty()) {
+            System.out.println("planProductId가 없음! 조회 불가 비상!!!");
+            return List.of(); // 빈 리스트 반환
+        }
+
+        List<PlanLine> planLines = planLineRepository.findProductionLinesByPlanProductId(planProductId); // ✅ 올바른 조회 방식
+
+        System.out.println(" 조회된 생산 라인 개수: " + planLines.size());
+        if (planLines.isEmpty()) {
+            System.out.println("해당 제품의 생산 라인 배정 데이터가 없음!!!");
+        }
+
+        return planLines.stream().map(PlanLineDTO::fromEntity).collect(Collectors.toList());
     }
+
 
     @Transactional
     public void saveProductionLines(List<PlanLineDTO> planLineDTOs) {

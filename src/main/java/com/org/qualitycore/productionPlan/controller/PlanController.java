@@ -17,7 +17,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
-@CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 public class PlanController {
 
@@ -59,8 +58,9 @@ public class PlanController {
     // 생산계획 step1
     @PostMapping("/plans/step1")
     @ResponseStatus(HttpStatus.OK)
-    public void createProductionPlan(@RequestBody ProductionPlanDTO dto) {
-         planService.saveProductionPlan(dto);
+    public ResponseEntity<String> createProductionPlan(@RequestBody ProductionPlanDTO dto) {
+        String planProductId = planService.saveProductionPlan(dto); // ✅ 생성된 planProductId 반환
+        return ResponseEntity.ok(planProductId);
     }
 
     //제품 선택시 BOM정보 불러오기
