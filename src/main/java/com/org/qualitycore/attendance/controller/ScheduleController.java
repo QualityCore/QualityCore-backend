@@ -4,6 +4,7 @@ import com.org.qualitycore.attendance.model.dto.AttendanceDTO;
 import com.org.qualitycore.attendance.model.dto.EmpScheduleCreateDTO;
 import com.org.qualitycore.attendance.model.dto.ScheduleMessage;
 import com.org.qualitycore.attendance.model.service.ScheduleService;
+import com.org.qualitycore.common.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class ScheduleController {
 
 
     @GetMapping("/schedule")
-    public ResponseEntity<ScheduleMessage> findAllSchedule() {
+    public ResponseEntity<Message> findAllSchedule() {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -40,11 +41,11 @@ public class ScheduleController {
 
         res.put("schedule", schedule);
 
-        return ResponseEntity.ok().headers(headers).body(new ScheduleMessage(200, "전체조회 성공", res));
+        return ResponseEntity.ok().headers(headers).body(new Message(200, "전체조회 성공", res));
     }
 
     @GetMapping("/schedule/{scheduleId}")
-    public ResponseEntity<ScheduleMessage> findByCodeSchedule(@PathVariable("scheduleId") String scheduleId) {
+    public ResponseEntity<Message> findByCodeSchedule(@PathVariable("scheduleId") String scheduleId) {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -56,9 +57,7 @@ public class ScheduleController {
 
         res.put("schedule", schedule);
 
-        System.out.println("res = " + res);
-
-        return ResponseEntity.ok().headers(headers).body(new ScheduleMessage(200, "근태 상세조회 성공", res));
+        return ResponseEntity.ok().headers(headers).body(new Message(200, "근태 상세조회 성공", res));
     }
 
     @PostMapping("/schedule")
