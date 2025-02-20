@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name ="WORKPLACE")
 @Builder(toBuilder = true)
@@ -25,13 +26,11 @@ public class Workplace {
     @Schema(description = "작업장 고유 ID", example = "WO001")
     private String workplaceId; // 작업장 고유 ID
 
-
-
     @Column(name = "LINE_ID" , nullable = false , updatable = false , insertable = false )
     @Schema(description = "LINE_ID" , example = "LINE001")
     private String lineId; // 라인 아이디
 
-    @ManyToOne  // 외래 키 설정
+    @ManyToOne(fetch = FetchType.LAZY) //  LAZY 로딩으로 설정하여 필요할떼만 조회
     @JoinColumn(name = "LINE_ID", referencedColumnName = "LINE_ID", nullable = false)
     @Schema(description = "LINE 정보", example = "LINE001")
     private LineInformation lineInformation;
