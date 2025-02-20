@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,16 +20,13 @@ public class Attendance {
     private String scheduleId; // 근태코드
 
     @Column(name = "CHECK_IN")
-    private LocalDateTime checkIn; // 근무시간
+    private Date checkIn; // 근무시간
 
     @Column(name = "CHECK_OUT")
-    private LocalDateTime checkOut; // 근무종료시간
+    private Date checkOut; // 근무종료시간
 
-    @Column(name = "TOTAL_TIME")
-    private LocalDateTime totalTime; // 총 근무시간
-
-    @Column(name = "WORKING_TIME")
-    private LocalDateTime workingTime; // 현재 근무시간
+    @Column(name = "SCHEDULE_ETC")
+    private String scheduleEtc;
 
     @Column(name = "WORK_STATUS")
     private String workStatus; // 근무상태
