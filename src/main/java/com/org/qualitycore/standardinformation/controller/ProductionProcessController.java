@@ -34,9 +34,9 @@ public class ProductionProcessController {
     public ResponseEntity<StandardInformationMessage> createMaterialGrinding(
             @RequestBody @Parameter(description = "등록할 분쇄 정보" ,
                     required = true) MaterialGrindingDTO materialGrindingDTO){
-            productionProcessService.createMaterialGrinding(materialGrindingDTO);
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new StandardInformationMessage(HttpStatus.CREATED.value(),"분쇄공정 등록 완료" ));
+        StandardInformationMessage response = productionProcessService.createMaterialGrinding(materialGrindingDTO);
+            return ResponseEntity.status(response.getHttpStatusCode())
+                    .body(response);
     }
 
 

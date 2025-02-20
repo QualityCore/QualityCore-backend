@@ -2,11 +2,13 @@ package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
+import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
 import com.org.qualitycore.standardinformation.model.entity.WorkOrder;
 import com.org.qualitycore.standardinformation.model.repository.ProductionProcessRepository;
 import com.org.qualitycore.standardinformation.model.repository.WorkOrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 
@@ -18,24 +20,34 @@ public class ProductionProcessService {
 
     private final ProductionProcessRepository productionProcessRepository;
     private final WorkOrderRepository workOrderRepository;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
-    // 작업 등록
-    public MaterialGrindingDTO createMaterialGrinding(MaterialGrindingDTO dto) {
-        MaterialGrinding materialGrinding = modelMapper.map(dto, MaterialGrinding.class);
+    // 분쇄 공정 등록
+    public StandardInformationMessage createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
+        System.out.println("서비스 DTO 데이터 확인!" + materialGrindingDTO);
+
+        MaterialGrinding materialGrinding = modelMapper.map(materialGrindingDTO, MaterialGrinding.class);
+
+        System.out.println("서비스 엔티티 반환 결과!" + materialGrinding);
+
         materialGrinding.setGrindingId(generateNextGrindingId());
-
-        // ✅ Setter 사용하여 시작 시간 설정
         materialGrinding.setStartTime(LocalDateTime.now());
+        materialGrinding.setExpectedEndTime(materialGrinding.getStartTime().plusMinutes(materialGrindingDTO.getGrindDuration()));
 
-        materialGrinding.setExpectedEndTime(materialGrinding.getStartTime().plusMinutes(dto.getGrindDuration()));
+        System.out.println("ID 및 시간 설정 후 " + materialGrinding);
 
-        WorkOrder workOrder = workOrderRepository.findById(dto.getLotNo())
+        WorkOrder workOrder = workOrderRepository.findById(materialGrindingDTO.getLotNo())
                 .orElseThrow(() -> new RuntimeException("작업지시 ID가 존재하지 않습니다."));
         materialGrinding.setWorkOrder(workOrder);
 
+        System.out.println("작업지시 설정 후!!" + materialGrinding);
+
+
         MaterialGrinding savedGrinding = productionProcessRepository.save(materialGrinding);
-        return modelMapper.map(savedGrinding, MaterialGrindingDTO.class);
+
+        System.out.println("저장 완료!!" + savedGrinding);
+
+        return new StandardInformationMessage(HttpStatus.CREATED.value(),"분쇄공정 등록 완료");
     }
 
 
@@ -54,5 +66,9 @@ public class ProductionProcessService {
         int nextId = (maxId != null) ? maxId + 1 : 1;
         return String.format("GR%03d", nextId);  // "GR001" 형식
     }
+
+
+
+
 }
 

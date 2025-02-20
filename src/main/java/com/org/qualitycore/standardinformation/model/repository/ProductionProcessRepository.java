@@ -2,6 +2,7 @@ package com.org.qualitycore.standardinformation.model.repository;
 
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import com.org.qualitycore.standardinformation.model.entity.WorkOrder;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
