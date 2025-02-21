@@ -13,6 +13,7 @@ import java.util.Date;
 @ToString
 @Table(name = "EMP_SCHEDULE")
 @Entity
+@Builder(toBuilder = true)
 public class Attendance {
 
     @Id

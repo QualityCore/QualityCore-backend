@@ -77,6 +77,7 @@ public class ScheduleService {
                 .fetchOne();
     }
 
+    // 스케줄 등록
     @Transactional
     public void createSchedule(EmpScheduleCreateDTO schedule) {
 
@@ -107,6 +108,33 @@ public class ScheduleService {
 
         // 3자리 숫자로 포맷
         return String.format("SD%03d", newId);
+    }
+
+    // 스케줄 수정
+    @Transactional
+    public void updateSchedule(EmpScheduleCreateDTO schedule) {
+    //   수정은 근무상태, 시작일, 종료일, 메모만 수정 가능하게 만들어놓을거임
+
+        Attendance attendance = scheduleRepository.findById(schedule.getScheduleId()).orElseThrow(IllegalArgumentException::new);
+
+        Attendance updateSchedule = attendance.toBuilder()
+                .checkIn(schedule.getCheckIn())
+                .checkOut(schedule.getCheckOut())
+                .scheduleEtc(schedule.getScheduleEtc())
+                .workStatus(schedule.getWorkStatus())
+                .build();
+
+        scheduleRepository.save(updateSchedule);
+    }
+
+    // 스케줄 삭제
+    @Transactional
+    public void deleteSchedule(String scheduleId) {
+
+        modelMapper.map(scheduleId, Attendance.class);
+
+        scheduleRepository.deleteById(scheduleId);
+
     }
 }
 
