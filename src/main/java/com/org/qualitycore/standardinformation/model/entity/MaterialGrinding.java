@@ -21,6 +21,11 @@ public class MaterialGrinding {
     @Schema(description = "분쇄공정 ID" , example = "GR001")
     private String grindingId;
 
+
+    @Column(name = "LOT_NO" , n)
+
+
+
     @ManyToOne
     @JoinColumn(name = "LOT_NO" , nullable = false)
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000")
 @RequiredArgsConstructor
 @Tag(name="ProductionProcess" , description = "생산공정 API")
+@Slf4j
 public class ProductionProcessController {
 
     private final ProductionProcessService productionProcessService;
@@ -32,8 +34,9 @@ public class ProductionProcessController {
     })
     @PostMapping("/materialgrinding")
     public ResponseEntity<StandardInformationMessage> createMaterialGrinding(
-            @RequestBody @Parameter(description = "등록할 분쇄 정보" ,
-                    required = true) MaterialGrindingDTO materialGrindingDTO){
+            @RequestBody @Parameter(description = "등록할 분쇄 정보" , required = true)
+                MaterialGrindingDTO materialGrindingDTO){
+        log.info("컨트롤러 : 분쇄공정 등록 요청 {} " ,materialGrindingDTO);
         StandardInformationMessage response = productionProcessService.createMaterialGrinding(materialGrindingDTO);
             return ResponseEntity.status(response.getHttpStatusCode())
                     .body(response);
