@@ -25,8 +25,7 @@ public class ProductionProcessController {
     private final ProductionProcessService productionProcessService;
 
 
-
-    //분쇄공정
+    //분쇄공정 등록
     @Operation(summary = "분쇄공정" ,description = "분쇄공정 작업을 등록합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201" , description = "등록에 성공!"),
@@ -43,5 +42,17 @@ public class ProductionProcessController {
     }
 
 
-
+    // 실제 종료시간을  위해서 수정 추가 구현
+    @PutMapping("/materialgrinding/{grindingId}")
+    public ResponseEntity<MaterialGrindingDTO> completeGrindingProcess(
+            @PathVariable String grindingId) {
+        log.info("컨트롤러 : 분쇄 공정 완료 요청 - ID: {}", grindingId);
+        MaterialGrindingDTO updatedGrinding = productionProcessService.completeGrindingProcess(grindingId);
+        return ResponseEntity.ok(updatedGrinding);
+    }
 }
+
+
+
+
+

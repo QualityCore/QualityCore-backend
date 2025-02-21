@@ -44,6 +44,6 @@ public class WorkplaceDTO {
     private Integer workplaceCapacity;
 
     @Schema(description = "작업장 용량 단위", example = "L")
-    private String workplaceCapacityUnit; // 새로운 컬럼 추가
+    private String workplaceCapacityUnit;
 
 }
