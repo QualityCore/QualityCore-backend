@@ -97,7 +97,7 @@ public class ScheduleController {
 
         scheduleService.deleteSchedule(scheduleId);
 
-        return ResponseEntity.created(URI.create("api/v1/scheduleAll/")).body(new Message(201, "삭제성공!", null));
+        return ResponseEntity.created(URI.create("api/v1/scheduleAll/")).body(new Message(200, "삭제성공!", null));
     }
 
 }
