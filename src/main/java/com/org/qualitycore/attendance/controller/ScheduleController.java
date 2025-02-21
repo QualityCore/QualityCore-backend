@@ -2,9 +2,9 @@ package com.org.qualitycore.attendance.controller;
 
 import com.org.qualitycore.attendance.model.dto.AttendanceDTO;
 import com.org.qualitycore.attendance.model.dto.EmpScheduleCreateDTO;
-import com.org.qualitycore.attendance.model.dto.ScheduleMessage;
 import com.org.qualitycore.attendance.model.service.ScheduleService;
 import com.org.qualitycore.common.Message;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,22 +20,21 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@Tag(name = "Schedule(스케줄)", description = "스케줄 API_Controller")
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
 
-    @GetMapping("/schedule")
-    public ResponseEntity<Message> findAllSchedule() {
+    //달력에 표시될 여러 스케줄
+    @GetMapping("/scheduleAll/{empId}")
+    public ResponseEntity<Message> findAllSchedulesByEmpId(@PathVariable("empId") String empId) {
 
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        List<AttendanceDTO> schedule = scheduleService.findAllSchedule();
-
-        System.out.println("schedule = " + schedule);
+        List<AttendanceDTO> schedule = scheduleService.findAllSchedulesByEmpId (empId);
 
         Map<String, Object> res = new HashMap<>();
 
@@ -44,14 +43,15 @@ public class ScheduleController {
         return ResponseEntity.ok().headers(headers).body(new Message(200, "전체조회 성공", res));
     }
 
+    // 스케줄 상세페이지
     @GetMapping("/schedule/{scheduleId}")
-    public ResponseEntity<Message> findByCodeSchedule(@PathVariable("scheduleId") String scheduleId) {
+    public ResponseEntity<Message> findByEmpId(@PathVariable("scheduleId") String scheduleId) {
 
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        AttendanceDTO schedule = scheduleService.findByCodeSchedule(scheduleId);
+        AttendanceDTO schedule = scheduleService.findByEmpId(scheduleId);
 
         Map<String, Object> res = new HashMap<>();
 
@@ -60,6 +60,7 @@ public class ScheduleController {
         return ResponseEntity.ok().headers(headers).body(new Message(200, "근태 상세조회 성공", res));
     }
 
+    // 스케줄 등록
     @PostMapping("/schedule")
     public ResponseEntity<?> createSchedule(@RequestBody EmpScheduleCreateDTO schedule) {
 

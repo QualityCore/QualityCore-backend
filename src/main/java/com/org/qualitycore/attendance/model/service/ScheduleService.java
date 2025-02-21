@@ -8,8 +8,6 @@ import com.org.qualitycore.attendance.model.entity.QAttendance;
 import com.org.qualitycore.attendance.model.entity.QEmployee;
 import com.org.qualitycore.attendance.model.repository.EmployeeRepository;
 import com.org.qualitycore.attendance.model.repository.ScheduleRepository;
-import com.org.qualitycore.work.model.repository.WorkRepository;
-import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +26,8 @@ public class ScheduleService {
     private final JPAQueryFactory queryFactory;
     private final ModelMapper modelMapper;
 
-    public List<AttendanceDTO> findAllSchedule() {
-
+    // 직원 한명의 전체스케줄
+    public List<AttendanceDTO> findAllSchedulesByEmpId (String empId) {
         com.org.qualitycore.attendance.model.entity.QEmployee employee = QEmployee.employee;
         QAttendance schedule = QAttendance.attendance;
 
@@ -47,12 +45,15 @@ public class ScheduleService {
                         schedule.workStatus.as("workStatus"),
                         schedule.scheduleEtc.as("scheduleEtc")
                 ))
-                .from(employee)
-                .join(schedule).on(employee.empId.eq(schedule.employee.empId))
-                .fetch();
+                .from(schedule)  // Attendance 엔티티에서 시작
+                .join(schedule.employee, employee)  // employee와 조인
+                .where(employee.empId.eq(empId))  // empId로 필터링
+                .orderBy(schedule.checkIn.asc())  // 스케줄 시간 순으로 정렬 (선택 사항)
+                .fetch();  // 여러 개의 스케줄을 반환
     }
 
-    public AttendanceDTO findByCodeSchedule(String scheduleId) {
+    // 직원 한명의 상세스케줄
+    public AttendanceDTO findByEmpId(String scheduleId) {
         com.org.qualitycore.attendance.model.entity.QEmployee employee = QEmployee.employee;
         QAttendance schedule = QAttendance.attendance;
 
@@ -70,9 +71,9 @@ public class ScheduleService {
                         schedule.workStatus.as("workStatus"),
                         schedule.scheduleEtc.as("scheduleEtc")
                 ))
-                .from(employee)
-                .join(schedule).on(employee.empId.eq(schedule.employee.empId))  // 직원과 근태 정보 조인
-                .where(schedule.scheduleId.eq(scheduleId))  // scheduleId로 필터링
+                .from(schedule)
+                .join(schedule.employee, employee)
+                .where(schedule.scheduleId.eq(scheduleId))
                 .fetchOne();
     }
 
