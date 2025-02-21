@@ -77,6 +77,7 @@ public class ScheduleService {
                 .fetchOne();
     }
 
+    // 스케줄 등록
     @Transactional
     public void createSchedule(EmpScheduleCreateDTO schedule) {
 
@@ -109,6 +110,8 @@ public class ScheduleService {
         return String.format("SD%03d", newId);
     }
 
+    // 스케줄 수정
+    @Transactional
     public void updateSchedule(EmpScheduleCreateDTO schedule) {
     //   수정은 근무상태, 시작일, 종료일, 메모만 수정 가능하게 만들어놓을거임
 
@@ -124,12 +127,14 @@ public class ScheduleService {
         scheduleRepository.save(updateSchedule);
     }
 
-//    public void deleteSchedule(String scheduleId) {
-//
-//        modelMapper.map(scheduleId, Attendance.class);
-//
-//        scheduleRepository.deleteById(scheduleId);
-//
-//    }
+    // 스케줄 삭제
+    @Transactional
+    public void deleteSchedule(String scheduleId) {
+
+        modelMapper.map(scheduleId, Attendance.class);
+
+        scheduleRepository.deleteById(scheduleId);
+
+    }
 }
 

@@ -90,14 +90,14 @@ public class ScheduleController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
-//
-//    // 스케줄 삭제
-//    @DeleteMapping("/schedule/{scheduleId}")
-//    public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") String scheduleId) {
-//
-//        scheduleService.deleteSchedule(scheduleId);
-//
-//        return ResponseEntity.created(URI.create("api/v1/scheduleAll/")).body(new Message(201, "삭제성공!", null));
-//    }
+
+    // 스케줄 삭제
+    @DeleteMapping("/schedule/{scheduleId}")
+    public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") String scheduleId) {
+
+        scheduleService.deleteSchedule(scheduleId);
+
+        return ResponseEntity.created(URI.create("api/v1/scheduleAll/")).body(new Message(201, "삭제성공!", null));
+    }
 
 }
