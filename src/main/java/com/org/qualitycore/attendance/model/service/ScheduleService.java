@@ -108,5 +108,28 @@ public class ScheduleService {
         // 3자리 숫자로 포맷
         return String.format("SD%03d", newId);
     }
+
+    public void updateSchedule(EmpScheduleCreateDTO schedule) {
+    //   수정은 근무상태, 시작일, 종료일, 메모만 수정 가능하게 만들어놓을거임
+
+        Attendance attendance = scheduleRepository.findById(schedule.getScheduleId()).orElseThrow(IllegalArgumentException::new);
+
+        Attendance updateSchedule = attendance.toBuilder()
+                .checkIn(schedule.getCheckIn())
+                .checkOut(schedule.getCheckOut())
+                .scheduleEtc(schedule.getScheduleEtc())
+                .workStatus(schedule.getWorkStatus())
+                .build();
+
+        scheduleRepository.save(updateSchedule);
+    }
+
+//    public void deleteSchedule(String scheduleId) {
+//
+//        modelMapper.map(scheduleId, Attendance.class);
+//
+//        scheduleRepository.deleteById(scheduleId);
+//
+//    }
 }
 

@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
@@ -74,5 +75,29 @@ public class ScheduleController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
+
+    // 스케줄 수정
+    @PutMapping("/schedule")
+    public ResponseEntity<?> updateSchedule(@RequestBody EmpScheduleCreateDTO schedule) {
+
+        scheduleService.updateSchedule(schedule);
+
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("status", 201);
+
+        res.put("message", "스케줄 수정 성공");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+//
+//    // 스케줄 삭제
+//    @DeleteMapping("/schedule/{scheduleId}")
+//    public ResponseEntity<?> deleteSchedule(@PathVariable("scheduleId") String scheduleId) {
+//
+//        scheduleService.deleteSchedule(scheduleId);
+//
+//        return ResponseEntity.created(URI.create("api/v1/scheduleAll/")).body(new Message(201, "삭제성공!", null));
+//    }
 
 }
