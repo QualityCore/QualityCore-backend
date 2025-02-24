@@ -14,11 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
-import static com.org.qualitycore.standardinformation.model.entity.QLineInformation.lineInformation;
+
 
 @Service
 @RequiredArgsConstructor
@@ -103,20 +101,13 @@ public class StandardInformationService {
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                             "작업장 ID를 찾을 수 없습니다. ID: " + workplaceId));
 
-            //  업데이트할 필드 설정
-            workplace.setLineId(workplaceDTO.getLineId());
-            workplace.setWorkplaceName(workplaceDTO.getWorkplaceName());
-            workplace.setWorkplaceType(workplaceDTO.getWorkplaceType());
-            workplace.setWorkplaceCode(workplaceDTO.getWorkplaceCode());
-            workplace.setWorkplaceStatus(workplaceDTO.getWorkplaceStatus());
-            workplace.setWorkplaceLocation(workplaceDTO.getWorkplaceLocation());
-            workplace.setManagerName(workplaceDTO.getManagerName());
-            workplace.setWorkplaceCapacity(workplaceDTO.getWorkplaceCapacity());
-            workplace.setWorkplaceCapacityUnit(workplaceDTO.getWorkplaceCapacityUnit());
+            // ModelMapper 를 사용하여 DTO 를 엔티티로 변환 (null 값은 덮어쓰지 않음)
+            modelMapper.getConfiguration().setSkipNullEnabled(true);
+            modelMapper.map(workplaceDTO, workplace);
 
             // DB 저장 (기존 엔티티 수정)
             Workplace updatedWorkplace = workplaceRepository.save(workplace);
-            log.info(" 서비스 작업장 정보 업데이트 완료 {}", updatedWorkplace);
+            log.info("서비스: 작업장 정보 업데이트 완료 {}", updatedWorkplace);
 
             return new StandardInformationMessage(HttpStatus.OK.value(),
                     "작업장 업데이트 완료. ID: " + updatedWorkplace.getWorkplaceId());
