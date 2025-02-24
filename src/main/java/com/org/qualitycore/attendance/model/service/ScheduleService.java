@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -113,10 +114,10 @@ public class ScheduleService {
     // 스케줄 수정
     @Transactional
     public void updateSchedule(EmpScheduleCreateDTO schedule) {
-    //   수정은 근무상태, 시작일, 종료일, 메모만 수정 가능하게 만들어놓을거임
-
+        // 수정하려는 스케줄이 존재하는지 확인
         Attendance attendance = scheduleRepository.findById(schedule.getScheduleId()).orElseThrow(IllegalArgumentException::new);
 
+        // 수정할 내용
         Attendance updateSchedule = attendance.toBuilder()
                 .checkIn(schedule.getCheckIn())
                 .checkOut(schedule.getCheckOut())
@@ -125,6 +126,7 @@ public class ScheduleService {
                 .build();
 
         scheduleRepository.save(updateSchedule);
+
     }
 
     // 스케줄 삭제
@@ -137,4 +139,3 @@ public class ScheduleService {
 
     }
 }
-

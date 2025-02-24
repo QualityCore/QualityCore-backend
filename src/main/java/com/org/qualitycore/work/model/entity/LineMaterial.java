@@ -12,12 +12,15 @@ import lombok.*;
 @Setter
 @ToString
 @Entity
-@Table(name = "PLAN_MATERIAL")
-public class PlanMaterial {
+@Table(name = "LINE_MATERIAL")
+public class LineMaterial {
 
     @Id
-    @Column(name = "PLAN_MATERIAL_ID")
-    private String planMaterialId;
+    @Column(name = "LINE_MATERIAL_ID")
+    private String lineMaterialId;
+
+    @Column(name = "PLAN_LINE_ID")
+    private String planLineId;
 
     @Column(name = "PLAN_PRODUCT_ID")
     private String planProductId;
@@ -25,21 +28,26 @@ public class PlanMaterial {
     @Column(name = "MATERIAL_ID")
     private String materialId;
 
+    @Column(name = "MATERIAL_NAME")
+    private String materialName;
+
     @Column(name = "MATERIAL_TYPE")
     private String materialType;
 
     @Column(name = "UNIT")
     private String unit;
 
-    @Column(name = "STD_QTY")
-    private String stdQty;
+    @Column(name = "REQUIRED_QTY_PER_UNIT")
+    private int requiredQtyPerUnit;
 
-    @Column(name = "PLAN_QTY")
-    private String planQty;
+    @Column(name = "PRICE_PER_UNIT")
+    private int pricePerUnit;
 
-    @Column(name = "STOCK_QTY")
-    private String stockQty;
+    @Column(name = "TOTAL_COST")
+    private int totalCost;
 
-    @Column(name = "STATUS")
-    private String status;
+    @Column(name = "LOT_NO")
+    private String lotNo;
+
 }
+
