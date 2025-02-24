@@ -2,6 +2,7 @@ package com.org.qualitycore.productionPlan.controller;
 
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.productionPlan.model.dto.PlanLineDTO;
+import com.org.qualitycore.productionPlan.model.dto.PlanMaterialDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductBomDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductionPlanDTO;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
@@ -104,7 +105,7 @@ public class PlanController {
     }
 
     // 생산라인 배정 등록
-    @PostMapping("lines")
+    @PostMapping("/lines")
     public ResponseEntity<Message> createProductionLine(@RequestBody List<PlanLineDTO> planLineDTOs) {
         if (planLineDTOs == null || planLineDTOs.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -115,5 +116,56 @@ public class PlanController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new Message(201, "생산 라인 배정이 완료되었습니다.", Map.of()));
+    }
+
+    // Step3 실시간 자재 소요량 계산
+    @PostMapping("/materials/calculate")
+    public ResponseEntity<Message> calculateMaterials(
+            @RequestBody ProductionPlanDTO productionPlanDTO
+    ) {
+        try {
+            // 받은 데이터 로깅
+            System.out.println("받은 제품 정보: " + productionPlanDTO);
+            System.out.println("제품 목록: " + productionPlanDTO.getProducts());
+
+            Map<String, Object> result = planService.calculateMaterialRequirements(productionPlanDTO);
+
+            return ResponseEntity.ok(new Message(
+                    200,
+                    "자재 소요량 계산 완료",
+                    result
+            ));
+        } catch (Exception e) {
+            // 에러 로깅 추가
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new Message(
+                            500,
+                            "자재 소요량 계산 중 오류 발생: " + e.getMessage(),
+                            Map.of()
+                    ));
+        }
+    }
+
+    // 최종 저장 (Step 1,2,3 모두)
+    @PostMapping("/save")
+    public ResponseEntity<Message> savePlanWithMaterials(
+            @RequestBody ProductionPlanDTO completeProductionPlan
+    ) {
+        try {
+            String savedPlanId = planService.saveCompletePlan(completeProductionPlan);
+            return ResponseEntity.ok(new Message(
+                    201,
+                    "생산 계획이 성공적으로 저장되었습니다.",
+                    Map.of("planId", savedPlanId)
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new Message(
+                            500,
+                            "생산 계획 저장 중 오류 발생: " + e.getMessage(),
+                            Map.of()
+                    ));
+        }
     }
 }

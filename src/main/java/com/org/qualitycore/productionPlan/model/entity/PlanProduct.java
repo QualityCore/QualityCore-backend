@@ -1,10 +1,7 @@
 package com.org.qualitycore.productionPlan.model.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity(name = "ProductionPlanProduct")
 @Table(name = "PLAN_PRODUCT")
@@ -12,6 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Setter
 @Getter
+
 public class PlanProduct{
 
     // 이곳은 생산제품 정보를 저장하는 테이블입니당.
