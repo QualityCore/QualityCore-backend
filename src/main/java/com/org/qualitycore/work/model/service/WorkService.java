@@ -124,7 +124,7 @@ public class WorkService {
                     .where(lm.planLineId.eq(pl.planLineId).and(pp.planProductId.eq(pp.planProductId)))
                     .fetch();
 
-            // 작업지시서 DTO에 자재 목록을 세팅
+            // 작업지시서 DTO에 자재 목록을 세팅한다.
             result.setLineMaterials(lineMaterials);
         }
         return result;
