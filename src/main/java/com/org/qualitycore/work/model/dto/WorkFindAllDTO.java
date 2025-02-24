@@ -1,8 +1,12 @@
 package com.org.qualitycore.work.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import javax.swing.*;
 import java.util.Date;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,18 +35,23 @@ public class WorkFindAllDTO {
     private int planQty;
 
     @Schema(description = "생산시작일")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date startDate;
 
     @Schema(description = "생산종료일")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
 
     @Schema(description = "생산제품")
     private String productName;
 
-    @Schema(description = "규격")
-    private String sizeSpec;
-
-    @Schema(description = "현재 공정")
+    @Schema(description = "진행상태")
     private String processStatus;
+
+    @Schema(description = "공정명")
+    private String processName;
+
+    @Schema(description = "자재 목록")
+    private List<LineMaterialDTO> lineMaterials;  // 추가된 필드
 
 }
