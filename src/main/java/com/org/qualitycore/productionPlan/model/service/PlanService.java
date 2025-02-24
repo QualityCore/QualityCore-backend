@@ -30,7 +30,7 @@ public class PlanService {
     private final BeerRecipeRepository beerRecipeRepository;
     private final MaterialWarehouseRepository materialWarehouseRepository;
     private final PlanMaterialRepository planMaterialRepository;
-
+    private final MaterialRequestRepository materialRequestRepository;
 
     public List<ProductionPlanDTO> getAllProductionPlans(LocalDate startDate, LocalDate endDate, String status) {
         return planRepository.findProductionPlans(startDate, endDate, status);
@@ -116,7 +116,7 @@ public class PlanService {
 
         System.out.println(" 조회된 생산 라인 개수: " + planLines.size());
         if (planLines.isEmpty()) {
-            System.out.println("해당 제품의 생산 라인 배정 데이터가 없음!!!");
+            System.out.println("해당 제품의 생산 라인 배정 데이터가 없음 비상!!!");
         }
 
         return planLines.stream().map(PlanLineDTO::fromEntity).collect(Collectors.toList());
@@ -197,7 +197,7 @@ public class PlanService {
                 material.setStatus("부족");
                 material.setShortageQty(totalPlanQty - totalCurrentStock);
 
-                System.out.println("🚨 부족 자재 발견: " +
+                System.out.println(" 부족 자재 발견: " +
                         "맥주=" + material.getBeerName() +
                         ", 자재명=" + material.getMaterialName() +
                         ", 부족량=" + material.getShortageQty());
@@ -262,7 +262,33 @@ public class PlanService {
             planMaterialRepository.saveAll(planMaterials);
         }
 
+        // Step 4: 자재 구매 신청 저장
+        if (completeProductionPlan.getMaterialRequests() != null) {
+            List<MaterialRequest> materialRequests = completeProductionPlan.getMaterialRequests().stream()
+                    .map(requestDTO -> {
+                        MaterialRequest materialRequest = requestDTO.toEntity();
+                        materialRequest.setRequestId(generateNewMaterialRequestId());
+                        PlanMaterial planMaterial = new PlanMaterial();
+                        planMaterial.setPlanMaterialId(requestDTO.getPlanMaterialId());
+                        materialRequest.setPlanMaterial(planMaterial);
+                        return materialRequest;
+                    })
+                    .collect(Collectors.toList());
+
+            materialRequestRepository.saveAll(materialRequests);
+        }
+
         return planProductId;
+    }
+
+    private String generateNewMaterialRequestId() {
+        String maxId = materialRequestRepository.findMaxRequestId(); // 이 메서드를 Repository에 추가해야 합니다
+        if (maxId == null) {
+            return "MR00001"; // 첫 번째 ID
+        }
+        int numericPart = Integer.parseInt(maxId.substring(2)); // "MR00005" -> 5
+        numericPart++; // 6으로 증가
+        return String.format("MR%05d", numericPart); // "MR00006" 형식으로 변환
     }
 
     private String generateNewPlanMaterialId() {

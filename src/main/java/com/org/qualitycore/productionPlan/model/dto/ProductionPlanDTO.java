@@ -24,6 +24,7 @@ public class ProductionPlanDTO {
     private String beerName;  //
     @JsonProperty("products")
     private List<ProductionPlanDTO> products;
+    private List<MaterialRequestDTO> materialRequests;
 
 }
 
