@@ -8,8 +8,6 @@ import com.org.qualitycore.attendance.model.entity.QAttendance;
 import com.org.qualitycore.attendance.model.entity.QEmployee;
 import com.org.qualitycore.attendance.model.repository.EmployeeRepository;
 import com.org.qualitycore.attendance.model.repository.ScheduleRepository;
-import com.org.qualitycore.work.model.repository.WorkRepository;
-import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +26,8 @@ public class ScheduleService {
     private final JPAQueryFactory queryFactory;
     private final ModelMapper modelMapper;
 
-    public List<AttendanceDTO> findAllSchedule() {
-
+    // 직원 한명의 전체스케줄
+    public List<AttendanceDTO> findAllSchedulesByEmpId (String empId) {
         com.org.qualitycore.attendance.model.entity.QEmployee employee = QEmployee.employee;
         QAttendance schedule = QAttendance.attendance;
 
@@ -47,12 +45,15 @@ public class ScheduleService {
                         schedule.workStatus.as("workStatus"),
                         schedule.scheduleEtc.as("scheduleEtc")
                 ))
-                .from(employee)
-                .join(schedule).on(employee.empId.eq(schedule.employee.empId))
-                .fetch();
+                .from(schedule)  // Attendance 엔티티에서 시작
+                .join(schedule.employee, employee)  // employee와 조인
+                .where(employee.empId.eq(empId))  // empId로 필터링
+                .orderBy(schedule.checkIn.asc())  // 스케줄 시간 순으로 정렬 (선택 사항)
+                .fetch();  // 여러 개의 스케줄을 반환
     }
 
-    public AttendanceDTO findByCodeSchedule(String scheduleId) {
+    // 직원 한명의 상세스케줄
+    public AttendanceDTO findByEmpId(String scheduleId) {
         com.org.qualitycore.attendance.model.entity.QEmployee employee = QEmployee.employee;
         QAttendance schedule = QAttendance.attendance;
 
@@ -70,12 +71,13 @@ public class ScheduleService {
                         schedule.workStatus.as("workStatus"),
                         schedule.scheduleEtc.as("scheduleEtc")
                 ))
-                .from(employee)
-                .join(schedule).on(employee.empId.eq(schedule.employee.empId))  // 직원과 근태 정보 조인
-                .where(schedule.scheduleId.eq(scheduleId))  // scheduleId로 필터링
+                .from(schedule)
+                .join(schedule.employee, employee)
+                .where(schedule.scheduleId.eq(scheduleId))
                 .fetchOne();
     }
 
+    // 스케줄 등록
     @Transactional
     public void createSchedule(EmpScheduleCreateDTO schedule) {
 
@@ -106,6 +108,33 @@ public class ScheduleService {
 
         // 3자리 숫자로 포맷
         return String.format("SD%03d", newId);
+    }
+
+    // 스케줄 수정
+    @Transactional
+    public void updateSchedule(EmpScheduleCreateDTO schedule) {
+    //   수정은 근무상태, 시작일, 종료일, 메모만 수정 가능하게 만들어놓을거임
+
+        Attendance attendance = scheduleRepository.findById(schedule.getScheduleId()).orElseThrow(IllegalArgumentException::new);
+
+        Attendance updateSchedule = attendance.toBuilder()
+                .checkIn(schedule.getCheckIn())
+                .checkOut(schedule.getCheckOut())
+                .scheduleEtc(schedule.getScheduleEtc())
+                .workStatus(schedule.getWorkStatus())
+                .build();
+
+        scheduleRepository.save(updateSchedule);
+    }
+
+    // 스케줄 삭제
+    @Transactional
+    public void deleteSchedule(String scheduleId) {
+
+        modelMapper.map(scheduleId, Attendance.class);
+
+        scheduleRepository.deleteById(scheduleId);
+
     }
 }
 

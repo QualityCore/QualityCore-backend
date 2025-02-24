@@ -1,8 +1,8 @@
 package com.org.qualitycore.work.controller;
 
+import com.org.qualitycore.common.Message;
 import com.org.qualitycore.work.model.dto.WorkFindAllDTO;
 import com.org.qualitycore.work.model.dto.WorkLotDTO;
-import com.org.qualitycore.work.model.entity.WorkMessage;
 import com.org.qualitycore.work.model.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/work")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Tag(name = "WorkOrder(작업지시서)", description = "작업지시서 API_Controller")
 public class WorkController {
@@ -32,12 +32,12 @@ public class WorkController {
     private final WorkService workService;
 
      // 작업지시서 전체 조회
-    @GetMapping("/list")
+    @GetMapping("/work")
     @Operation(summary = "작업지시서 전체 조회", description = "작업지시서 메인화면에서 모든 작업지시서를 조회하는 기능입니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "작업지시서 전체조회 성공"),
             @ApiResponse(responseCode = "404", description = "작업지시서가 없습니다.")})
-    public ResponseEntity<WorkMessage> findAllWorkOrders() {
+    public ResponseEntity<Message> findAllWorkOrders() {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -57,7 +57,7 @@ public class WorkController {
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .headers(headers)
-                    .body(new WorkMessage(404, "작업지시서가 없습니다.", res));
+                    .body(new Message(404, "작업지시서가 없습니다.", res));
         }
 
         // 전체 조회 성공 시
@@ -67,7 +67,7 @@ public class WorkController {
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(new WorkMessage(200, "작업지시서 전체조회 성공", res));
+                .body(new Message(200, "작업지시서 전체조회 성공", res));
     }
 
     // 작업지시서 상세 조회
@@ -77,8 +77,8 @@ public class WorkController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "회원정보 상세조회 성공"),
             @ApiResponse(responseCode = "404", description = "작업지시서를 찾을 수 없습니다.")})
-    @GetMapping("/detail/{lotNo}")
-    public ResponseEntity<WorkMessage> findByWorkOrderCode(@PathVariable("lotNo") String lotNo) {
+    @GetMapping("/work/{lotNo}")
+    public ResponseEntity<Message> findByWorkOrderCode(@PathVariable("lotNo") String lotNo) {
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -99,7 +99,7 @@ public class WorkController {
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .headers(headers)
-                    .body(new WorkMessage(404, "작업지시서를 찾을 수 없습니다.", res));
+                    .body(new Message(404, "작업지시서를 찾을 수 없습니다.", res));
         }
 
         // 작업지시서가 있을 경우 상세 조회
@@ -109,7 +109,7 @@ public class WorkController {
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .body(new WorkMessage(200, "작업지시서 상세조회 성공", res));
+                .body(new Message(200, "작업지시서 상세조회 성공", res));
     }
 //
 //    // 작업지시서 생성
