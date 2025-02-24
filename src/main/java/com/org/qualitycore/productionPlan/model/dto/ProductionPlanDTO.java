@@ -1,8 +1,10 @@
 package com.org.qualitycore.productionPlan.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,5 +19,11 @@ public class ProductionPlanDTO {
     private Integer planQty;    // 계획수량
     private String status;      // 상태
     private String beerType;     // 맥주종류
+    private List<PlanLineDTO> allocatedLines;  // 생산 라인 정보
+    private List<PlanMaterialDTO> materials;   // 자재 정보
+    private String beerName;  //
+    @JsonProperty("products")
+    private List<ProductionPlanDTO> products;
 
 }
+
