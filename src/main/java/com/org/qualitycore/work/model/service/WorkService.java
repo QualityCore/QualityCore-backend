@@ -44,6 +44,8 @@ public class WorkService {
         List<WorkFindAllDTO> workOrders = queryFactory
                 .select(Projections.fields(WorkFindAllDTO.class,
                         wo.lotNo.as("lotNo"),
+                        wo.workProgress.as("workProgress"),
+                        wo.workEtc.as("workEtc"),
                         pp.productName.as("productName"),
                         pl.lineNo.as("lineNo"),
                         pl.planQty.as("planQty"),
@@ -96,6 +98,8 @@ public class WorkService {
         WorkFindAllDTO workOrder = queryFactory
                 .select(Projections.fields(WorkFindAllDTO.class,
                         wo.lotNo.as("lotNo"),
+                        wo.workProgress.as("workProgress"),
+                        wo.workEtc.as("workEtc"),
                         pp.productName.as("productName"),
                         pl.lineNo.as("lineNo"),
                         pl.planQty.as("planQty"),
@@ -177,5 +181,13 @@ public class WorkService {
 
         // 작업지시서 저장
         workRepository.save(workOrder);
+    }
+
+    @Transactional
+    public void workOrderDelete(String lotNo) {
+
+        workRepository.deleteById(lotNo);
+
+        modelMapper.map(lotNo, WorkFindAllDTO.class);
     }
 }
