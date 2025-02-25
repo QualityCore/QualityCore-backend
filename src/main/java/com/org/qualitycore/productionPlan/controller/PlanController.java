@@ -73,7 +73,7 @@ public class PlanController {
     @PostMapping("/plans/step1")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> createProductionPlan(@RequestBody ProductionPlanDTO dto) {
-        String planProductId = planService.saveProductionPlan(dto); // ✅ 생성된 planProductId 반환
+        String planProductId = planService.saveProductionPlan(dto);
         return ResponseEntity.ok(planProductId);
     }
 
@@ -149,23 +149,35 @@ public class PlanController {
 
     // 최종 저장 (Step 1,2,3 모두)
     @PostMapping("/save")
-    public ResponseEntity<Message> savePlanWithMaterials(
-            @RequestBody ProductionPlanDTO completeProductionPlan
-    ) {
+    public ResponseEntity<Message> savePlanWithMaterials(@RequestBody ProductionPlanDTO completeProductionPlan) {
         try {
-            String savedPlanId = planService.saveCompletePlan(completeProductionPlan);
-            return ResponseEntity.ok(new Message(
-                    201,
-                    "생산 계획이 성공적으로 저장되었습니다.",
-                    Map.of("planId", savedPlanId)
-            ));
+            System.out.println("🚀 [컨트롤러] 받은 요청 데이터: " + completeProductionPlan);
+
+            // ✅ Step 3 데이터 확인 (자재 리스트)
+            if (completeProductionPlan.getMaterials() == null) {
+                System.out.println("❌ [컨트롤러] materials 데이터가 NULL입니다.");
+            } else {
+                System.out.println("🔍 [컨트롤러] 받은 materials 크기: " + completeProductionPlan.getMaterials().size());
+                for (PlanMaterialDTO material : completeProductionPlan.getMaterials()) {
+                    System.out.println("   - Material ID: " + material.getMaterialId() + ", Name: " + material.getMaterialName());
+                }
+            }
+
+            // ✅ Step 4 데이터 확인 (자재 구매 신청)
+            if (completeProductionPlan.getMaterialRequests() == null) {
+                System.out.println("❌ [컨트롤러] materialRequests 데이터가 NULL입니다.");
+            } else {
+                System.out.println("🔍 [컨트롤러] 받은 materialRequests: " + completeProductionPlan.getMaterialRequests());
+            }
+
+            List<String> savedPlanIds = planService.saveCompletePlan(completeProductionPlan);
+
+            return ResponseEntity.ok(new Message(201, "생산 계획이 성공적으로 저장되었습니다.", Map.of("planIds", savedPlanIds)));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new Message(
-                            500,
-                            "생산 계획 저장 중 오류 발생: " + e.getMessage(),
-                            Map.of()
-                    ));
+                    .body(new Message(500, "생산 계획 저장 중 오류 발생: " + e.getMessage(), Map.of()));
         }
     }
+
 }

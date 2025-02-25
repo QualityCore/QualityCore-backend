@@ -15,7 +15,6 @@ import java.time.LocalDate;
 public class PlanLine {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PLAN_LINE_ID")
     private String planLineId;
 
@@ -37,4 +36,7 @@ public class PlanLine {
 
     @Column(name = "END_DATE")
     private LocalDate endDate;
+
+    @Column(name = "PRODUCT_ID")
+    private String productId;
 }
