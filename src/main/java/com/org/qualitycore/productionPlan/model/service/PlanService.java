@@ -357,7 +357,7 @@ public class PlanService {
         if (completeProductionPlan.getProducts() != null && !completeProductionPlan.getProducts().isEmpty()) {
             System.out.println("🔍 Step 3: 자재 저장 시작");
 
-            // 제품 리스트를 순회하면서 자재 정보 생성
+            // 기존 레시피 기반 자재 저장 로직
             for (ProductionPlanDTO productDTO : completeProductionPlan.getProducts()) {
                 String productId = productDTO.getProductId();
                 String productName = productDTO.getProductName();
@@ -397,16 +397,111 @@ public class PlanService {
                     planMaterial.setCurrentStock(material.getCurrentStock());
                     planMaterial.setBeerName(productName);
 
-                    // 상태 및 부족 수량 결정
+                    // 상태 결정
                     if (totalQuantity > material.getCurrentStock()) {
                         planMaterial.setStatus("부족");
-                        planMaterial.setShortageQty(totalQuantity - material.getCurrentStock());
                     } else {
                         planMaterial.setStatus("충분");
-                        planMaterial.setShortageQty(0.0);
                     }
 
-                    System.out.println("✅ 저장될 자재 정보: " + planMaterial);
+                    System.out.println("✅ 저장될 레시피 기반 자재 정보: " + planMaterial);
+
+                    planMaterialRepository.save(planMaterial);
+                    entityManager.flush();
+                }
+            }
+
+            // 원자재(Raw Materials) 저장 로직
+            if (completeProductionPlan.getRawMaterials() != null && !completeProductionPlan.getRawMaterials().isEmpty()) {
+                System.out.println("🔍 원자재 저장 시작");
+                for (PlanMaterialDTO materialDTO : completeProductionPlan.getRawMaterials()) {
+                    // 맥주 이름으로 제품 찾기
+                    ProductionPlanDTO relatedProduct = completeProductionPlan.getProducts().stream()
+                            .filter(p -> p.getProductName().equals(materialDTO.getBeerName()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (relatedProduct == null) {
+                        System.out.println("🚨 경고: " + materialDTO.getBeerName() + "에 해당하는 제품 정보 없음");
+                        continue;
+                    }
+
+                    String productId = relatedProduct.getProductId();
+                    String relatedPlanProductId = productPlanIdMap.get(productId);
+
+                    if (relatedPlanProductId == null) {
+                        System.out.println("🚨 경고: " + productId + "에 해당하는 PLAN_PRODUCT_ID 없음");
+                        continue;
+                    }
+
+                    PlanMaterial planMaterial = new PlanMaterial();
+                    planMaterial.setPlanMaterialId(generateNewPlanMaterialId());
+
+                    PlanProduct planProduct = new PlanProduct();
+                    planProduct.setPlanProductId(relatedPlanProductId);
+                    planProduct.setProductId(productId);
+
+                    planMaterial.setPlanProduct(planProduct);
+                    planMaterial.setMaterialId(materialDTO.getMaterialId());
+                    planMaterial.setMaterialName(materialDTO.getMaterialName());
+                    planMaterial.setMaterialType(materialDTO.getMaterialType());
+                    planMaterial.setUnit(materialDTO.getUnit());
+                    planMaterial.setStdQty(materialDTO.getStdQty());
+                    planMaterial.setPlanQty(materialDTO.getPlanQty());
+                    planMaterial.setCurrentStock(materialDTO.getCurrentStock());
+                    planMaterial.setBeerName(materialDTO.getBeerName());
+                    planMaterial.setStatus(materialDTO.getStatus());
+
+
+                    System.out.println("✅ 저장될 원자재 정보: " + planMaterial);
+
+                    planMaterialRepository.save(planMaterial);
+                    entityManager.flush();
+                }
+            }
+
+            // 포장재(Packaging Materials) 저장 로직
+            if (completeProductionPlan.getPackagingMaterials() != null && !completeProductionPlan.getPackagingMaterials().isEmpty()) {
+                System.out.println("🔍 포장재 저장 시작");
+                for (PlanMaterialDTO materialDTO : completeProductionPlan.getPackagingMaterials()) {
+                    // 맥주 이름으로 제품 찾기
+                    ProductionPlanDTO relatedProduct = completeProductionPlan.getProducts().stream()
+                            .filter(p -> p.getProductName().equals(materialDTO.getBeerName()))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (relatedProduct == null) {
+                        System.out.println("🚨 경고: " + materialDTO.getBeerName() + "에 해당하는 제품 정보 없음");
+                        continue;
+                    }
+
+                    String productId = relatedProduct.getProductId();
+                    String relatedPlanProductId = productPlanIdMap.get(productId);
+
+                    if (relatedPlanProductId == null) {
+                        System.out.println("🚨 경고: " + productId + "에 해당하는 PLAN_PRODUCT_ID 없음");
+                        continue;
+                    }
+
+                    PlanMaterial planMaterial = new PlanMaterial();
+                    planMaterial.setPlanMaterialId(generateNewPlanMaterialId());
+
+                    PlanProduct planProduct = new PlanProduct();
+                    planProduct.setPlanProductId(relatedPlanProductId);
+                    planProduct.setProductId(productId);
+
+                    planMaterial.setPlanProduct(planProduct);
+                    planMaterial.setMaterialId(materialDTO.getMaterialId());
+                    planMaterial.setMaterialName(materialDTO.getMaterialName());
+                    planMaterial.setMaterialType(materialDTO.getMaterialType());
+                    planMaterial.setUnit(materialDTO.getUnit());
+                    planMaterial.setStdQty(materialDTO.getStdQty());
+                    planMaterial.setPlanQty(materialDTO.getPlanQty());
+                    planMaterial.setCurrentStock(materialDTO.getCurrentStock());
+                    planMaterial.setBeerName(materialDTO.getBeerName());
+                    planMaterial.setStatus(materialDTO.getStatus());
+
+                    System.out.println("✅ 저장될 포장재 정보: " + planMaterial);
 
                     planMaterialRepository.save(planMaterial);
                     entityManager.flush();
@@ -427,42 +522,47 @@ public class PlanService {
             if (requestDTO.getMaterials() != null && !requestDTO.getMaterials().isEmpty()) {
                 for (MaterialRequestDTO.MaterialRequestInfo materialRequestInfo : requestDTO.getMaterials()) {
                     // null 체크 추가
-                    if (materialRequestInfo.getMaterialId() == null ||
-                            materialRequestInfo.getProductId() == null) {
-                        System.out.println("🚨 경고: materialId 또는 productId가 null입니다.");
+                    if (materialRequestInfo.getMaterialId() == null) {
+                        System.out.println("🚨 경고: materialId가 null입니다.");
                         continue; // 다음 반복으로 건너뜀
                     }
 
-                    // 해당 자재의 PlanMaterial 찾기
-                    Optional<PlanMaterial> planMaterialOpt = planMaterialRepository
-                            .findByMaterialIdAndPlanProduct_PlanProductId(
-                                    materialRequestInfo.getMaterialId(),
-                                    productPlanIdMap.get(materialRequestInfo.getProductId())
-                            );
+                    // 모든 PlanProduct에 대해 반복하며 PlanMaterial 찾기
+                    boolean materialFound = false;
+                    for (String planProductId : productPlanIdMap.values()) {
+                        Optional<PlanMaterial> planMaterialOpt = planMaterialRepository
+                                .findByMaterialIdAndPlanProduct_PlanProductId(
+                                        materialRequestInfo.getMaterialId(),
+                                        planProductId
+                                );
 
-                    // Optional 체크 추가
-                    if (planMaterialOpt.isEmpty()) {
-                        System.out.println("🚨 경고: 해당 자재의 생산 계획 정보를 찾을 수 없습니다.");
-                        continue; // 다음 반복으로 건너뜀
+                        if (planMaterialOpt.isPresent()) {
+                            PlanMaterial planMaterial = planMaterialOpt.get();
+
+                            MaterialRequest materialRequest = new MaterialRequest();
+                            materialRequest.setRequestId(generateNewMaterialRequestId());
+                            materialRequest.setPlanMaterial(planMaterial);
+                            materialRequest.setRequestQty(materialRequestInfo.getRequestQty());
+                            materialRequest.setDeliveryDate(requestDTO.getDeliveryDate());
+                            materialRequest.setReason(requestDTO.getReason());
+                            materialRequest.setNote(requestDTO.getNote());
+
+                            // 로깅 추가
+                            System.out.println("🚀 자재 요청 정보 저장: " +
+                                    "RequestId: " + materialRequest.getRequestId() +
+                                    ", MaterialId: " + materialRequestInfo.getMaterialId() +
+                                    ", RequestQty: " + materialRequest.getRequestQty() +
+                                    ", PlanProductId: " + planProductId);
+
+                            materialRequestRepository.save(materialRequest);
+                            materialFound = true;
+                            break;
+                        }
                     }
 
-                    PlanMaterial planMaterial = planMaterialOpt.get();
-
-                    MaterialRequest materialRequest = new MaterialRequest();
-                    materialRequest.setRequestId(generateNewMaterialRequestId());
-                    materialRequest.setPlanMaterial(planMaterial);
-                    materialRequest.setRequestQty(materialRequestInfo.getRequestQty());
-                    materialRequest.setDeliveryDate(requestDTO.getDeliveryDate());
-                    materialRequest.setReason(requestDTO.getReason());
-                    materialRequest.setNote(requestDTO.getNote());
-
-                    // 로깅 추가
-                    System.out.println("🚀 자재 요청 정보 저장: " +
-                            "RequestId: " + materialRequest.getRequestId() +
-                            ", MaterialId: " + materialRequestInfo.getMaterialId() +
-                            ", RequestQty: " + materialRequest.getRequestQty());
-
-                    materialRequestRepository.save(materialRequest);
+                    if (!materialFound) {
+                        System.out.println("🚨 경고: 해당 자재의 생산 계획 정보를 찾을 수 없습니다. MaterialId: " + materialRequestInfo.getMaterialId());
+                    }
                 }
 
                 System.out.println("✅ 자재 요청 저장 완료");
