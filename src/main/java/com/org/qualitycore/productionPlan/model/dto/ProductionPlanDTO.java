@@ -1,5 +1,6 @@
 package com.org.qualitycore.productionPlan.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Getter
 @ToString
 public class ProductionPlanDTO {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate planYm;      //계획년월
     private String productId;   // 제품코드
     private String productName; // 제품명
@@ -24,6 +26,7 @@ public class ProductionPlanDTO {
     private String beerName;  //
     @JsonProperty("products")
     private List<ProductionPlanDTO> products;
+    private MaterialRequestDTO materialRequests;
 
 }
 

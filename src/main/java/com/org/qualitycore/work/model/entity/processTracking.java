@@ -1,9 +1,6 @@
 package com.org.qualitycore.work.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @NoArgsConstructor
@@ -19,8 +16,8 @@ public class processTracking {
     @Column(name = "TRACKING_ID")
     private String trackingId;
 
-    @Column(name = "LOT_NO")
-    private String lotNo;
+    @OneToOne(mappedBy = "processTracking")
+    private WorkOrders workOrders;
 
     @Column(name = "STATUS_CODE")
     private String statusCode;

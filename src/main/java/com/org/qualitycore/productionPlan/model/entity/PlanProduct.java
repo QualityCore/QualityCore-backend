@@ -15,8 +15,7 @@ public class PlanProduct{
     // 이곳은 생산제품 정보를 저장하는 테이블입니당.
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PLAN_PRODUCT_ID")
+    @Column(name = "PLAN_PRODUCT_ID", nullable = false, unique = true)
     private String planProductId; // 생산계획제품ID
 
     @ManyToOne
@@ -32,4 +31,6 @@ public class PlanProduct{
     @Column(name = "PLAN_QTY", nullable = false)
     private Integer planQty;      //계획수량
 
+    @Column(name = "SIZE_SPEC") //
+    private String sizeSpec;
 }

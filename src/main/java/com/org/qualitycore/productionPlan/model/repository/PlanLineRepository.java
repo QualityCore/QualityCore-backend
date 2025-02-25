@@ -47,4 +47,15 @@ public class PlanLineRepository {
                 .fetch();
     }
 
+    public String findMaxPlanLineId() {
+        return queryFactory
+                .select(QPlanLine.planLine.planLineId.max())
+                .from(QPlanLine.planLine)
+                .fetchOne();
+    }
+
+    public PlanLine save(PlanLine planLine) {
+        return springDataPlanLineRepository.save(planLine);
+    }
+
 }
