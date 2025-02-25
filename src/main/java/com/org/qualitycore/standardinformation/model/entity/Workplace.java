@@ -9,7 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+
 @Entity
 @Table(name ="WORKPLACE")
 @Builder(toBuilder = true)
@@ -17,7 +17,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+
 @Schema(description = "작업장정보 엔티티")
 public class Workplace {
 
@@ -44,7 +44,7 @@ public class Workplace {
     private String workplaceType; // 작업장 타입
 
     @Column(name ="WORKPLACE_CODE" , nullable = false)
-    @Schema(description = "작업장 코드 (유니크)", example = "W001")
+    @Schema(description = "작업장 코드", example = "W001")
     private String workplaceCode; // 작업장 코드
 
 
@@ -79,7 +79,25 @@ public class Workplace {
     private LocalDateTime updatedAt;  // 수정 날짜
 
 
+    @Override
+    public String toString() {
+        return "Workplace{" +
+                "workplaceId='" + workplaceId + '\'' +
+                ", lineId='" + lineId + '\'' +
+                ", lineInformation=" + lineInformation +
+                ", workplaceName='" + workplaceName + '\'' +
+                ", workplaceType='" + workplaceType + '\'' +
+                ", workplaceCode='" + workplaceCode + '\'' +
+                ", workplaceStatus='" + workplaceStatus + '\'' +
+                ", workplaceLocation='" + workplaceLocation + '\'' +
+                ", managerName='" + managerName + '\'' +
+                ", workplaceCapacity=" + workplaceCapacity +
+                ", workplaceCapacityUnit='" + workplaceCapacityUnit + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
 
+    }
 }
 
 
