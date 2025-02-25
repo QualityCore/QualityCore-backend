@@ -1,9 +1,6 @@
 package com.org.qualitycore.work.model.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @NoArgsConstructor
@@ -17,16 +14,7 @@ public class LineMaterial {
 
     @Id
     @Column(name = "LINE_MATERIAL_ID")
-    private String lineMaterialId;
-
-    @Column(name = "PLAN_LINE_ID")
-    private String planLineId;
-
-    @Column(name = "PLAN_PRODUCT_ID")
-    private String planProductId;
-
-    @Column(name = "MATERIAL_ID")
-    private String materialId;
+    private String lineMaterialId; // String 타입으로 UUID 사용 가능
 
     @Column(name = "MATERIAL_NAME")
     private String materialName;
@@ -38,16 +26,18 @@ public class LineMaterial {
     private String unit;
 
     @Column(name = "REQUIRED_QTY_PER_UNIT")
-    private int requiredQtyPerUnit;
+    private Integer requiredQtyPerUnit;
 
     @Column(name = "PRICE_PER_UNIT")
-    private int pricePerUnit;
+    private Integer pricePerUnit;
 
     @Column(name = "TOTAL_COST")
-    private int totalCost;
+    private Integer totalCost;
 
-    @Column(name = "LOT_NO")
-    private String lotNo;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "LOT_NO")
+    private WorkOrders workOrders;
+
 
 }
 

@@ -6,6 +6,7 @@ import com.org.qualitycore.work.model.service.WorkService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -62,5 +63,21 @@ public class WorkController {
                 .headers(headers)
                 .body(new Message(200, "작업지시서 상세조회 성공", res));
     }
+
+
+    // 작업지시서 등록
+    @PostMapping("/work")
+    public ResponseEntity<?> workOrderCreate(@RequestBody WorkFindAllDTO work) {
+
+        workService.createWorkOrder(work);
+
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("status", 201);
+        res.put("message", "작업지시서 생성 성공");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+
 
 }

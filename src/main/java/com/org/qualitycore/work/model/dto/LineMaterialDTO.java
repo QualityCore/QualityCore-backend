@@ -10,6 +10,9 @@ import lombok.*;
 @ToString
 public class LineMaterialDTO {
 
+    @Schema(description = "pk")
+    private String lineMaterialId;
+
     @Schema(description = "자재명")
     private String materialName;
 
