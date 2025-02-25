@@ -48,8 +48,8 @@ public class ProductionProcessService {
                 // LOT_NO 가 존재하는지 확인
                 WorkOrder workOrder =
                     workOrderRepository.findByLotNo(materialGrindingDTO.getLotNo())
-                            .orElseThrow(() -> new IllegalArgumentException(
-                                    "존재하지 않는 LOT_NO 입니다." + materialGrindingDTO.getLotNo()));
+                            .orElseThrow(() -> new IllegalArgumentException
+                                    ("존재하지 않는 LOT_NO 입니다." + materialGrindingDTO.getLotNo()));
 
 
                 // FK 설정

@@ -20,6 +20,9 @@ public class MaterialGrindingDTO {
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
     private String lotNo;
 
+    @Schema(description = "상태 코드 ID", example = "SC001")
+    private String statusCode;
+
     @Schema(description = "주원료" , example ="쌀")
     private String mainMaterial;
 
@@ -40,6 +43,9 @@ public class MaterialGrindingDTO {
 
     @Schema(description = "소요시간" , example = "40")
     private Integer grindDuration;
+
+    @Schema(description = "공정 상태", example = "대기중")
+    private String processStatus;
 
     @Schema(description = "메모사항" , example = "작업자 : 강동원 작업완료")
     private String notes;
