@@ -26,6 +26,7 @@ public class PlanMaterialDTO {
     private String status;
     private Double shortageQty = 0.0;
     private String beerName;
+    private String productId;
 
     public static PlanMaterialDTO fromEntity(PlanMaterial entity) {
         PlanMaterialDTO dto = new PlanMaterialDTO();

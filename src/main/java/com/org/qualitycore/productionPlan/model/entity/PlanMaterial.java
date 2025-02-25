@@ -46,5 +46,7 @@ public class PlanMaterial {
     @Column(name = "BEER_NAME")
     private String beerName;
 
+    @Column(name = "SHORTAGE_QTY")
+    private Double shortageQty;
 
 }
