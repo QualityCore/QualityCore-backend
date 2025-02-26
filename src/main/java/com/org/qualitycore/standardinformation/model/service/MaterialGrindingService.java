@@ -2,9 +2,9 @@ package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
-import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
+import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.entity.WorkOrder;
-import com.org.qualitycore.standardinformation.model.repository.ProductionProcessRepository;
+import com.org.qualitycore.standardinformation.model.repository.MaterialGrindingRepository;
 import com.org.qualitycore.standardinformation.model.repository.WorkOrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,16 +21,16 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ProductionProcessService {
+public class MaterialGrindingService {
 
-        private final ProductionProcessRepository productionProcessRepository;
+        private final MaterialGrindingRepository materialGrindingRepository;
         private final WorkOrderRepository workOrderRepository;
         private final ModelMapper modelMapper;
 
 
         // 분쇄 공정 등록
         @Transactional
-        public StandardInformationMessage createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
+        public ErpMessage createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
             try {
                 log.info("서비스 : 분쇄공정 등록 시작 DTO {}", materialGrindingDTO);
 
@@ -80,10 +80,10 @@ public class ProductionProcessService {
                 log.info("엔티티 변환 완료 !! {}", materialGrinding);
 
                 // DB 저장
-                MaterialGrinding savedMaterialGrinding = productionProcessRepository.save(materialGrinding);
+                MaterialGrinding savedMaterialGrinding = materialGrindingRepository.save(materialGrinding);
                 log.info("서비스 분쇄 공정 등록 완료 ! {}", savedMaterialGrinding);
 
-                return new StandardInformationMessage(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!");
+                return new ErpMessage(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!");
 
               // 필수 값이 빠졌거나 존재하지 않는 값을 입력할경우 예외 발생!
             } catch(IllegalArgumentException e){
@@ -98,14 +98,14 @@ public class ProductionProcessService {
              //알수 없는 예외 오류시 응답 반환!
             }catch(Exception e) {
                 log.error("서비스 : 분쇄공정 등록중 오류 발생 {}" ,e.getMessage(),e);
-                return new StandardInformationMessage(HttpStatus.BAD_REQUEST.value(), "분쇄 공정 등록 실패" + e.getMessage());
+                return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "분쇄 공정 등록 실패" + e.getMessage());
             }
         }
 
 
         // 가장 큰 "grindingId" 조회 후 다음 ID 생성 하룻 있는 코드!
         public String generateNextGrindingId(){
-            Integer maxId = productionProcessRepository.findMaxGrindingId();
+            Integer maxId = materialGrindingRepository.findMaxGrindingId();
             int nextId = (maxId != null) ? maxId + 1 : 1;
             return String.format("GR%03d", nextId); // "GR001"형식!
 
@@ -113,13 +113,12 @@ public class ProductionProcessService {
 
 
 
-
         // 실제 종료시간 업데이트
         public MaterialGrindingDTO completeGrindingProcess(String grindingId) {
-            MaterialGrinding materialGrinding = productionProcessRepository.findById(grindingId)
+            MaterialGrinding materialGrinding = materialGrindingRepository.findById(grindingId)
                 .orElseThrow(() -> new RuntimeException("분쇄 ID가 존재하지 않습니다."));
             materialGrinding.setActualEndTime(LocalDateTime.now());
-            MaterialGrinding updatedGrinding = productionProcessRepository.save(materialGrinding);
+            MaterialGrinding updatedGrinding = materialGrindingRepository.save(materialGrinding);
             return modelMapper.map(updatedGrinding, MaterialGrindingDTO.class);
         }
 

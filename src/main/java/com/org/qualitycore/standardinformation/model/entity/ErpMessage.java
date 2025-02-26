@@ -10,7 +10,7 @@ import lombok.*;
 @Setter
 @ToString
 @Schema(description = "API 응답 메시지 객체")
-public class StandardInformationMessage {
+public class ErpMessage {
 
     @Schema(description = "HTTP 상태 코드", example = "200")
     private int httpStatusCode;

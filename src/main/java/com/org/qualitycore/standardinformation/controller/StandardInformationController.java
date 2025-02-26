@@ -1,7 +1,7 @@
 package com.org.qualitycore.standardinformation.controller;
 
 import com.org.qualitycore.standardinformation.model.dto.WorkplaceDTO;
-import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
+import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.service.StandardInformationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,7 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Tag(name="Workplace" , description = "작업장정보 API")
 @Slf4j
-public class WorkplacesController {
+public class StandardInformationController {
 
     private final StandardInformationService standardInformationService;
 
@@ -51,21 +50,21 @@ public class WorkplacesController {
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")})
 
     @PostMapping("/workplaces/regist")
-    public ResponseEntity<StandardInformationMessage> createWorkplace(
+    public ResponseEntity<ErpMessage> createWorkplace(
             @RequestBody @Parameter(description = "등록할 작업장 정보", required = true)
             WorkplaceDTO workplaceDTO) {
         log.info("컨트롤러 : 작업장 등록 요청 {}" , workplaceDTO );
-        StandardInformationMessage response = standardInformationService.createWorkplace(workplaceDTO);
+        ErpMessage response = standardInformationService.createWorkplace(workplaceDTO);
         return ResponseEntity.status(response.getHttpStatusCode())
                 .body(response);
     }
 
     // 컨트롤러 예외 처리 추가!
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<StandardInformationMessage> handleResponseStatusException(ResponseStatusException e) {
+    public ResponseEntity<ErpMessage> handleResponseStatusException(ResponseStatusException e) {
         log.error(" 컨트롤러: 예외 발생 - {}", e.getReason());
         return ResponseEntity.status(e.getStatusCode())
-                .body(new StandardInformationMessage(e.getStatusCode().value(), e.getReason()));
+                .body(new ErpMessage(e.getStatusCode().value(), e.getReason()));
     }
 
 
@@ -76,11 +75,11 @@ public class WorkplacesController {
             @ApiResponse(responseCode = "404", description = "해당 ID의 작업장을 찾을수없어요")})
 
     @PutMapping("/workplaces/{workplaceId}")
-    public ResponseEntity<StandardInformationMessage> updateWorkplace(
+    public ResponseEntity<ErpMessage> updateWorkplace(
             @PathVariable @Parameter(description = "수정할 작업장의 ID", required = true) String workplaceId,
             @RequestBody @Parameter(description = "수정할 작업장 정보", required = true) WorkplaceDTO workplaceDTO) {
         log.info("컨트롤러 : 작업장 수정 요청 - ID {} ,DTO {} " , workplaceId,workplaceDTO);
-        StandardInformationMessage response = standardInformationService.updateWorkplace(workplaceId, workplaceDTO);
+        ErpMessage response = standardInformationService.updateWorkplace(workplaceId, workplaceDTO);
         return ResponseEntity.status(response.getHttpStatusCode()).body(response);
     }
 
@@ -92,11 +91,11 @@ public class WorkplacesController {
             @ApiResponse(responseCode = "404", description = "해당 ID의 작업장을 찾을 수 없음")})
 
     @DeleteMapping("/workplaces/{workplaceId}")
-    public ResponseEntity<StandardInformationMessage> deleteWorkplace(
+    public ResponseEntity<ErpMessage> deleteWorkplace(
             @PathVariable @Parameter(description = "삭제할 장업장의 ID", required = true) String workplaceId) {
 
         log.info("컨트롤러 : 작업장 삭제 요청 ID {} " , workplaceId);
-        StandardInformationMessage response = standardInformationService.deleteWorkplace(workplaceId);
+        ErpMessage response = standardInformationService.deleteWorkplace(workplaceId);
         return ResponseEntity.status(response.getHttpStatusCode()).body(response);
     }
 
