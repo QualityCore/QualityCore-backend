@@ -3,8 +3,6 @@ package com.org.qualitycore.work.model.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-
-import javax.swing.*;
 import java.util.Date;
 import java.util.List;
 
@@ -66,7 +64,5 @@ public class WorkFindAllDTO {
 
     @Schema(description = "생산제품 PK")
     private String planProductId;
-
-
 
 }

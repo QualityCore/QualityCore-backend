@@ -3,14 +3,13 @@ package com.org.qualitycore.work.model.entity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@ToString(exclude = "lineMaterial")
 @Table(name = "WORK_ORDER")
 @Entity
 @Schema(description = "작업지시서 관련 Entity")
@@ -44,7 +43,6 @@ public class WorkOrders {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TRACKING_ID", referencedColumnName = "TRACKING_ID")
     private processTracking processTracking;
-
 
 }
 
