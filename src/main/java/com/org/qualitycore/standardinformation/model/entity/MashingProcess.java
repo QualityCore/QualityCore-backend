@@ -91,8 +91,8 @@ public class MashingProcess {
 
     @PreUpdate   // update 이전 자동 실행
     public void updateExpectedEndTime() {
-        if (expectedEndTime == null && grindDuration != null) {
-            expectedEndTime = startTime.plusMinutes(grindDuration);
+        if (expectedEndTime == null && mashingTime != null) {
+            expectedEndTime = startTime.plusMinutes(mashingTime);
         }
     }
 
@@ -110,8 +110,8 @@ public class MashingProcess {
         }
 
         // 소요 시간이 있고, 예상 종료 시간이 설정되지 않았다면 계산
-        if (expectedEndTime == null && grindDuration != null) {
-            expectedEndTime = startTime.plusMinutes(grindDuration);
+        if (expectedEndTime == null && mashingTime != null) {
+            expectedEndTime = startTime.plusMinutes(mashingTime);
         }
 
         // 공정 상태 기본값 설정

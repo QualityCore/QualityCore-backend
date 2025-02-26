@@ -13,4 +13,5 @@ public interface WorkOrderRepository extends JpaRepository<WorkOrder, String > {
 
     @Query("SELECT w FROM WorkOrder w WHERE TRIM(UPPER(w.lotNo)) = UPPER(:lotNo)")
     Optional<WorkOrder> findByLotNo (@Param("lotNo") String lotNo);
+
 }

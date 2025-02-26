@@ -36,8 +36,7 @@ public class MaterialGrindingController {
                     required = true) MaterialGrindingDTO materialGrindingDTO){
             log.info("컨트롤러 : 분쇄공정 등록 요청 {} " ,materialGrindingDTO);
             ErpMessage response = materialGrindingService.createMaterialGrinding(materialGrindingDTO);
-            return ResponseEntity.status(response.getHttpStatusCode())
-                    .body(response);
+            return ResponseEntity.status(response.getHttpStatusCode()).body(response);
         }
 
 
