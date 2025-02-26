@@ -69,7 +69,6 @@ public class MaterialGrinding {
     @Schema(description = "공정 상태", example = "대기중")
     private String processStatus;
 
-
     @Column(name = "NOTES")
     @Schema(description = "메모사항" , example = "작업자 : 강동원  작업완료" )
     private String notes;
