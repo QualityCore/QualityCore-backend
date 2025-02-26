@@ -77,12 +77,24 @@ public class PlanService {
     // 새로운 PLAN_ID 생성 (PL00001, PL00002...)
     private String generateNewPlanId() {
         String maxId = planMstRepository.findMaxPlanId();
-        if (maxId == null) {
+        System.out.println("🔍 현재 DB에서 가장 큰 PLAN_ID: " + maxId);
+
+        if (maxId == null || maxId.isEmpty()) {
             return "PL00001"; // 첫 번째 ID
         }
-        int numericPart = Integer.parseInt(maxId.substring(2)); // "PL00005" -> 5
-        numericPart++; // 6으로 증가
-        return String.format("PL%05d", numericPart); // "PL00006" 형식으로 변환
+
+        try {
+            int numericPart = Integer.parseInt(maxId.substring(2)); // "PL00005" -> 5
+            numericPart++; // 6으로 증가
+            String newId = String.format("PL%05d", numericPart); // "PL00006" 형식으로 변환
+
+            // 디버깅을 위한 로그 추가
+            System.out.println("🚀 새롭게 생성된 PLAN_ID: " + newId);
+            return newId;
+        } catch (NumberFormatException e) {
+            System.out.println("🚨 PLAN_ID 생성 중 오류 발생: " + maxId);
+            throw new RuntimeException("PLAN_ID 생성 오류", e);
+        }
     }
 
     private String generateNewPlanLineId() {
@@ -278,8 +290,13 @@ public class PlanService {
         planMst.setCreatedBy("SYSTEM");
         planMst.setStatus("미확정");
 
+        // 대표 제품명 생성
+        planMst.setMainProductName(generateMainProductName(completeProductionPlan.getProducts()));
+
+        // 전체 계획 수량 집계
+        planMst.setTotalPlanQty(calculateTotalPlanQty(completeProductionPlan.getProducts()));
+
         planMst = planMstRepository.save(planMst);
-        System.out.println("🚀 저장된 PLAN_MST ID: " + planMst.getPlanId());
 
         // ✅ Step 2: PLAN_PRODUCT 저장 (여러 제품 가능)
         Map<String, String> productPlanIdMap = new HashMap<>(); // 제품 ID ↔ PLAN_PRODUCT_ID 매핑
@@ -594,6 +611,21 @@ public class PlanService {
         } catch (NumberFormatException e) {
             throw new RuntimeException("🚨 PLAN_MATERIAL_ID 생성 오류: " + maxId, e);
         }
+    }
+
+    // 대표 제품명 생성 메서드
+    private String generateMainProductName(List<ProductionPlanDTO> products) {
+        if (products.size() == 1) {
+            return products.get(0).getProductName();
+        }
+        return products.get(0).getProductName() + " 외 " + (products.size() - 1) + "개";
+    }
+
+    // 전체 계획 수량 계산 메서드
+    private Integer calculateTotalPlanQty(List<ProductionPlanDTO> products) {
+        return products.stream()
+                .mapToInt(ProductionPlanDTO::getPlanQty)
+                .sum();
     }
 
 

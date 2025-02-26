@@ -29,6 +29,9 @@ public class ProductionPlanDTO {
     private MaterialRequestDTO materialRequests;
     private List<PlanMaterialDTO> rawMaterials;
     private List<PlanMaterialDTO> packagingMaterials;
+    private String mainProductName;
+    private Integer totalPlanQty;
+    private String planId;
 
 }
 
