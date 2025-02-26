@@ -3,8 +3,6 @@ package com.org.qualitycore.work.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

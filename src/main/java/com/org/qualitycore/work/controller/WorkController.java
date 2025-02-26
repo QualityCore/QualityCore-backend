@@ -1,6 +1,7 @@
 package com.org.qualitycore.work.controller;
 
 import com.org.qualitycore.common.Message;
+import com.org.qualitycore.exception.ResourceNotFoundException;
 import com.org.qualitycore.work.model.dto.WorkFindAllDTO;
 import com.org.qualitycore.work.model.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,19 +60,27 @@ public class WorkController {
 
     // 작업지시서 상세 조회
     @GetMapping("/work/{lotNo}")
-    @Operation(summary = "직원 스케줄 전체 조회", description = "직원 한 명의 전체 스케줄을 조회합니다.",
-            parameters = {@Parameter(name = "empId", description = "직원 한명의 대한 전체스케줄에 필요한 고유 PK")})
+    @Operation(summary = "작업지시서 상세 조회", description = "작업지시서 상세 조회합니다.",
+            parameters = {@Parameter(name = "lotNo", description = "특정 작업지시서를 조회할 고유 PK")})
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "스케줄 전체조회 성공"),
-            @ApiResponse(responseCode = "404", description = "스케줄 데이터가 없습니다.")})
+            @ApiResponse(responseCode = "200", description = "작업지시서 상세조회 성공"),
+            @ApiResponse(responseCode = "404", description = "작업지시서가 없습니다.")})
     public ResponseEntity<Message> findByCodeWorkOrder(@PathVariable("lotNo") String lotNo) {
 
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        WorkFindAllDTO work = workService.findByCodeWorkOrder(lotNo);
         // 작업지시서가 있을 경우 상세 조회
+        WorkFindAllDTO work = workService.findByCodeWorkOrder(lotNo);
+
+        // 작업지시서가 없을경우
+        if (work == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .headers(headers)
+                    .body(new Message(404, "작업지시서가 없습니다.", null));
+        }
+
         Map<String, Object> res = new HashMap<>();
 
         res.put("work", work);
@@ -81,44 +90,58 @@ public class WorkController {
                 .body(new Message(200, "작업지시서 상세조회 성공", res));
     }
 
-
     // 작업지시서 등록
     @PostMapping("/work")
-    @Operation(summary = "직원 스케줄 전체 조회", description = "직원 한 명의 전체 스케줄을 조회합니다.",
-            parameters = {@Parameter(name = "empId", description = "직원 한명의 대한 전체스케줄에 필요한 고유 PK")})
+    @Operation(summary = "작업지시서 등록", description = "작업지시서를 등록합니다.",
+            parameters = {@Parameter(name = "WorkFindAllDTO", description = "작업지시서 등록에 필요한 DTO")})
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "스케줄 전체조회 성공"),
-            @ApiResponse(responseCode = "404", description = "스케줄 데이터가 없습니다.")})
+            @ApiResponse(responseCode = "201", description = "작업지시서 등록 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")})
     public ResponseEntity<?> workOrderCreate(@RequestBody WorkFindAllDTO work) {
+        try {
 
-        workService.createWorkOrder(work);
+            workService.createWorkOrder(work);
 
-        Map<String, Object> res = new HashMap<>();
+            Map<String, Object> res = new HashMap<>();
+            res.put("status", 201);
+            res.put("message", "작업지시서 생성 성공");
 
-        res.put("status", 201);
-        res.put("message", "작업지시서 생성 성공");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+            return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        } catch (ResourceNotFoundException e) {
+            // 잘못된 요청된 데이터, 필수값 누락
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", 400);
+            errorResponse.put("message", "잘못된 요청입니다. 데이터를 확인해주세요.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
 
     // 작업지시서 삭제
     @DeleteMapping("/work/{lotNo}")
-    @Operation(summary = "직원 스케줄 전체 조회", description = "직원 한 명의 전체 스케줄을 조회합니다.",
-            parameters = {@Parameter(name = "empId", description = "직원 한명의 대한 전체스케줄에 필요한 고유 PK")})
+    @Operation(summary = "작업지시서 삭제", description = "작업지시서를 삭제합니다.",
+            parameters = {@Parameter(name = "lotNo", description = "특정 작업지시서를 한 개를 조회하여 삭제")})
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "스케줄 전체조회 성공"),
-            @ApiResponse(responseCode = "404", description = "스케줄 데이터가 없습니다.")})
+            @ApiResponse(responseCode = "200", description = "작업지시서 삭제 성공"),
+            @ApiResponse(responseCode = "404", description = "작업지시서가 없습니다.")})
     public ResponseEntity<?> workOrderDelete(@PathVariable("lotNo") String lotNo) {
+        try {
 
-        workService.workOrderDelete(lotNo);
+            workService.workOrderDelete(lotNo);
 
-        Map<String, Object> res = new HashMap<>();
+            // 삭제 성공 응답
+            Map<String, Object> res = new HashMap<>();
+            res.put("status", 200);
+            res.put("message", "작업지시서 삭제 성공");
 
-        res.put("status", 200);
-        res.put("message", "작업지시서 삭제 성공");
+            return ResponseEntity.status(HttpStatus.OK).body(res);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        } catch (ResourceNotFoundException e) {
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", 404);
+            errorResponse.put("message", e.getMessage());
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
     }
-
-
 }
