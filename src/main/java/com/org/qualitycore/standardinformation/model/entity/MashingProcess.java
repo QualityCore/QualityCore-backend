@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.entity;
 
+import com.org.qualitycore.work.model.entity.LineMaterial;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,7 +33,7 @@ public class MashingProcess {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "LOT_NO" , referencedColumnName = "LOT_NO", nullable = false)
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
-    private  WorkOrder workOrder;
+    private LineMaterial lineMaterial;
 
 
     @Column(name ="STATUS_CODE" , nullable = false , updatable = false )
@@ -131,7 +132,7 @@ public class MashingProcess {
         return "MashingProcess{" +
                 "mashingId='" + mashingId + '\'' +
                 ", lotNo='" + lotNo + '\'' +
-                ", workOrder=" + workOrder +
+                ", lineMaterial=" + lineMaterial +
                 ", statusCode='" + statusCode + '\'' +
                 ", mashingTime=" + mashingTime +
                 ", temperature='" + temperature + '\'' +

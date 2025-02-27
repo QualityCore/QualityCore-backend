@@ -1,13 +1,11 @@
 package com.org.qualitycore.standardinformation.model.service;
 
-import com.org.qualitycore.standardinformation.model.dto.MashingProcessDTO;
-import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
+import com.org.qualitycore.standardinformation.model.dto.MashingProcessDTO;;
 import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
-import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
-import com.org.qualitycore.standardinformation.model.entity.WorkOrder;
+import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.repository.MashingProcessRepository;
-import com.org.qualitycore.standardinformation.model.repository.WorkOrderRepository;
+import com.org.qualitycore.work.model.repository.LineMaterialRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -24,7 +22,7 @@ import java.time.LocalDateTime;
 public class MashingProcessService {
 
     private final MashingProcessRepository mashingProcessRepository;
-    private final WorkOrderRepository workOrderRepository;
+    private final LineMaterialRepository lineMaterialRepository;
     private final ModelMapper modelMapper;
 
 
@@ -43,15 +41,16 @@ public class MashingProcessService {
            mashingProcess.setMashingId(generatedId);
 
            // LOT_NO 가 존재하는지 확인
-           WorkOrder workOrder =
-                   workOrderRepository.findByLotNo(mashingProcessDTO.getLotNo())
+           LineMaterial lineMaterial =
+                   lineMaterialRepository.findByLotNo(mashingProcessDTO.getLotNo())
+                           .stream().findFirst()
                            .orElseThrow(() -> new IllegalArgumentException
                                    ("존재하지 않는 LOT_NO 입니다." + mashingProcessDTO.getLotNo()));
 
 
            // FK 설정
            mashingProcessDTO.setLotNo(mashingProcessDTO.getLotNo());
-           mashingProcess.setWorkOrder(workOrder);
+           mashingProcess.setLineMaterial(lineMaterial);
 
            // 기본값 설정
            if (mashingProcess.getProcessStatus() == null) {

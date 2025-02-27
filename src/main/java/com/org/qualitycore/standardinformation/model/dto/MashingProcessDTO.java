@@ -1,13 +1,11 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
-import com.org.qualitycore.standardinformation.model.entity.WorkOrder;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 import java.time.LocalDateTime;
+
+
 
 @Getter
 @Setter

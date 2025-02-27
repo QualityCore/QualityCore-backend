@@ -1,7 +1,9 @@
 package com.org.qualitycore.standardinformation.controller;
 
+import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
 import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
+import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.service.MaterialGrindingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -11,8 +13,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
+
 @RestController
 @RequestMapping("/productionprocess")
 @CrossOrigin(origins = "http://localhost:3000")
@@ -22,6 +29,40 @@ import org.springframework.web.bind.annotation.*;
 public class MaterialGrindingController {
 
     private final MaterialGrindingService materialGrindingService;
+
+
+    // ✅ 작업지시 ID 목록 조회 API (DTO 적용)
+    @Operation(summary = "작업지시 ID 목록 조회", description = "현재 등록된 작업지시 ID 목록을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @GetMapping("/linematerial")
+    public ResponseEntity<List<LineMaterialNDTO>> getLineMaterial() {
+        log.info("컨트롤러: 작업지시 ID 목록 조회 요청");
+        List<LineMaterialNDTO> lineMaterials = materialGrindingService.getLineMaterial();
+        return ResponseEntity.ok(lineMaterials);
+    }
+
+
+    // ✅ 특정 LOT_NO에 대한 자재 정보 조회 API (DTO 적용)
+    @Operation(summary = "LOT_NO에 따른 자재 정보 조회", description = "특정 작업지시 ID(LOT_NO)에 대한 자재 정보를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "데이터 없음")
+    })
+    @GetMapping("/{lotNo}")
+    public ResponseEntity<List<LineMaterialNDTO>> getMaterialsByLotNo(@PathVariable String lotNo) {
+        log.info("컨트롤러: LOT_NO={}에 대한 자재 정보 요청", lotNo);
+        List<LineMaterialNDTO> materials = materialGrindingService.getMaterialsByLotNo(lotNo);
+
+        if (materials.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.emptyList());
+        }
+        return ResponseEntity.ok(materials);
+    }
+
+
 
 
     //분쇄공정 등록
