@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,6 +39,35 @@ public class PlanMst {
         if (this.createdBy == null) {
             this.createdBy = "SYSTEM";  // 기본값 설정
         }
+    }
+
+    // 연관관계 추가
+    @OneToMany(mappedBy = "planMst")
+    private List<PlanProduct> products = new ArrayList<>();
+
+    // 데이터베이스에 저장되지 않는 필드
+    @Transient
+    private String mainProductName;
+
+    @Transient
+    private Integer totalPlanQty;
+
+    // 첫 번째 제품의 이름 가져오기
+    public String getMainProductName() {
+        if (products != null && !products.isEmpty()) {
+            return products.get(0).getProductName();
+        }
+        return null;
+    }
+
+    // 모든 제품의 총 계획 수량 계산
+    public Integer getTotalPlanQty() {
+        if (products != null) {
+            return products.stream()
+                    .mapToInt(PlanProduct::getPlanQty)
+                    .sum();
+        }
+        return 0;
     }
 
 }

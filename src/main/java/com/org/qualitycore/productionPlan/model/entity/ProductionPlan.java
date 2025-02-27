@@ -16,7 +16,7 @@ import jakarta.persistence.Id;
 public class ProductionPlan {
 
 
-    // 이곳은 생산계획조회 DTO 입니다.
+//     이곳은 생산계획조회 DTO 입니다.
     @Id
     @Column(name = "PLAN_PRODUCT_ID")
     private String planProductId;     // 생산계획제품 ID
@@ -35,4 +35,11 @@ public class ProductionPlan {
 
     @Column(name = "PRODUCT_ID")
     private String productId;  // 제품 ID
+
+//    private String planProductId;
+//    private String planId;
+//    private String productName;
+//    private String sizeSpec;
+//    private Integer planQty;
+//    private String productId;
 }

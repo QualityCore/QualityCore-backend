@@ -6,6 +6,7 @@ import com.org.qualitycore.productionPlan.model.dto.PlanMaterialDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductBomDTO;
 import com.org.qualitycore.productionPlan.model.dto.ProductionPlanDTO;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
+@Tag(name = "ProductionPlan",description = "생산계획 API_Controller")
 public class PlanController {
 
     /*
@@ -179,5 +181,8 @@ public class PlanController {
                     .body(new Message(500, "생산 계획 저장 중 오류 발생: " + e.getMessage(), Map.of()));
         }
     }
+
+    
+
 
 }
