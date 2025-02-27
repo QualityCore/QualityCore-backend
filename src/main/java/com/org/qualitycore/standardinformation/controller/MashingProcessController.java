@@ -6,6 +6,8 @@ import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.service.MashingProcessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/mashingprocess")
@@ -42,12 +46,23 @@ public class MashingProcessController {
 
 
 
-    // 실제 종료시간을  위해서 수정 추가 구현
-    @PutMapping("/{mashingId}")
+    // 당화공정 pH 값 및 실제종료시간 업데이트
+    @Operation(
+            summary = "당화 공정 완료",
+            description = "주어진 ID의 당화 공정을 완료하고 pH 값을 업데이트합니다."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "성공적으로 공정이 완료됨",
+                    content = @Content(schema = @Schema(implementation = MashingProcessDTO.class))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터입니다")})
+    @PutMapping("/register/{mashingId}")
     public ResponseEntity<MashingProcessDTO> completeMashingProcess(
-            @PathVariable String mashingId) {
-        log.info("컨트롤러 : 분쇄 공정 완료 요청 - ID: {}", mashingId);
-        MashingProcessDTO updatedMashing = mashingProcessService.completeMashingProcess(mashingId);
+            @PathVariable @Parameter(description = "완료할 당화 공정의 ID", required = true) String mashingId,
+            @RequestBody @Parameter(description = "수정할 당화 공정 정보 (pH 값 포함)", required = true)
+            Map<String, Double> requestBody) {
+        log.info("컨트롤러 : 당화 공정 완료 요청 - ID {} , 요청 데이터 {} ", mashingId, requestBody);
+        Double phValue = requestBody.get("phValue"); // 요청에서 pH 값 추출
+        MashingProcessDTO updatedMashing = mashingProcessService.completeMashingProcess(mashingId, phValue);
         return ResponseEntity.ok(updatedMashing);
     }
 

@@ -50,7 +50,7 @@ public class MashingProcess {
     private String temperature;
 
 
-    @Column(name ="PH_VALUE",nullable = false)
+    @Column(name ="PH_VALUE")
     @Schema(description = "pH값" , example = "5.40")
     private Double phValue;
 

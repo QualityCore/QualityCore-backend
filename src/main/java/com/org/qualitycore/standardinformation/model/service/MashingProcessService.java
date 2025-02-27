@@ -101,21 +101,23 @@ public class MashingProcessService {
     }
 
 
-
-
-
     // 가장 큰 "grindingId" 조회 후 다음 ID 생성 하룻 있는 코드!
     public String generateNextMashingId(){
         Integer maxId = mashingProcessRepository.findMaxMashingId();
         int nextId = (maxId != null) ? maxId + 1 : 1;
-        return String.format("GR%03d", nextId); // "GR001"형식!
+        return String.format("MA%03d", nextId); // "MA001"형식!
     }
 
 
     // 실제 종료시간 업데이트
-    public MashingProcessDTO completeMashingProcess(String mashingId) {
+    public MashingProcessDTO completeMashingProcess(String mashingId , Double phValue) {
         MashingProcess mashingProcess = mashingProcessRepository.findById(mashingId)
                 .orElseThrow(() -> new RuntimeException("분쇄 ID가 존재하지 않습니다."));
+        // pH 값을 업데이트
+        if(phValue != null) {
+            mashingProcess.setPhValue(phValue);
+        }
+
         mashingProcess.setActualEndTime(LocalDateTime.now());
         MashingProcess updatedMashing = mashingProcessRepository.save(mashingProcess);
         return modelMapper.map(updatedMashing, MashingProcessDTO.class);

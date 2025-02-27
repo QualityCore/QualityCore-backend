@@ -72,7 +72,7 @@ public class StandardInformationController {
     @Operation(summary = "작업장정보 수정", description = "장업장 정보를 수정합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "작업장 수정 성공!"),
-            @ApiResponse(responseCode = "404", description = "해당 ID의 작업장을 찾을수없어요")})
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터입니다")})
 
     @PutMapping("/workplaces/{workplaceId}")
     public ResponseEntity<ErpMessage> updateWorkplace(
