@@ -763,4 +763,13 @@ public class PlanService {
         step.setEndTime(end);
         return step;
     }
+
+    @Transactional
+    public void updatePlanStatus(String planId, String status) {
+        PlanMst planMst = planMstRepository.findById(planId)
+                .orElseThrow(() -> new ResourceNotFoundException("계획을 찾을 수 없습니다."));
+
+        planMst.setStatus(status);
+        planMstRepository.save(planMst);
+    }
 }
