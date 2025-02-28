@@ -16,5 +16,6 @@ public class BeerRecipesDTO {
     private String processStep;
     private String materialName;
     private String materialType;
+    private String unit;
 
 }

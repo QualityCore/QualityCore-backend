@@ -62,15 +62,19 @@ public class WorkService {
                         wo.lotNo.as("lotNo"),
                         wo.workProgress.as("workProgress"),
                         wo.workEtc.as("workEtc"),
+                        pp.planProductId.as("planProductId"),
                         pp.productName.as("productName"),
+                        pt.trackingId.as("trackingId"),
+                        pt.processStatus.as("processStatus"),
+                        pt.trackingId.as("trackingId"),
+                        pt.processName.as("processName"),
+                        e.empId.as("empId"),
+                        e.workTeam.as("workTeam"),
+                        pl.planLineId.as("planLineId"),
                         pl.lineNo.as("lineNo"),
-                        pl.planQty.as("planQty"),
                         pl.startDate.as("startDate"),
                         pl.endDate.as("endDate"),
-                        pt.processStatus.as("processStatus"),
-                        pt.processName.as("processName"),
-                        pt.trackingId.as("trackingId"),
-                        e.workTeam.as("workTeam")
+                        pl.planQty.as("planQty")
                 ))
                 .from(wo)
                 .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))
@@ -104,7 +108,6 @@ public class WorkService {
         return new PageImpl<>(workOrders, pageable, totalCount);
     }
 
-
     public Page<WorkFindAllDTO> findAllSearchWorkOrders(String lotNo, Pageable pageable) {
         QWorkOrders wo = QWorkOrders.workOrders;
         QPlanLine pl = QPlanLine.planLine;
@@ -120,14 +123,18 @@ public class WorkService {
                         wo.workProgress.as("workProgress"),
                         wo.workEtc.as("workEtc"),
                         pp.productName.as("productName"),
-                        pl.lineNo.as("lineNo"),
-                        pl.planQty.as("planQty"),
-                        pl.startDate.as("startDate"),
-                        pl.endDate.as("endDate"),
                         pt.processStatus.as("processStatus"),
                         pt.processName.as("processName"),
                         pt.trackingId.as("trackingId"),
-                        e.workTeam.as("workTeam")
+                        e.workTeam.as("workTeam"),
+
+                        // ✅ PlanLineDTO를 JSON에 맞게 변환
+                        Projections.fields(PlanLineDTO.class,
+                                pl.lineNo.as("lineNo"),
+                                pl.startDate.as("startDate"),
+                                pl.endDate.as("endDate"),
+                                pl.planQty.as("planQty")
+                        ).as("planLineId")  // ✅ 여기서 PlanLineDTO로 변환
                 ))
                 .from(wo)
                 .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))
@@ -190,15 +197,19 @@ public class WorkService {
                         wo.lotNo.as("lotNo"),
                         wo.workProgress.as("workProgress"),
                         wo.workEtc.as("workEtc"),
+                        pp.planProductId.as("planProductId"),
                         pp.productName.as("productName"),
-                        pl.lineNo.as("lineNo"),
-                        pl.planQty.as("planQty"),
-                        pl.startDate.as("startDate"),
-                        pl.endDate.as("endDate"),
+                        pt.trackingId.as("trackingId"),
                         pt.processStatus.as("processStatus"),
                         pt.trackingId.as("trackingId"),
                         pt.processName.as("processName"),
-                        e.workTeam.as("workTeam")
+                        e.empId.as("empId"),
+                        e.workTeam.as("workTeam"),
+                        pl.planLineId.as("planLineId"),
+                        pl.lineNo.as("lineNo"),
+                        pl.startDate.as("startDate"),
+                        pl.endDate.as("endDate"),
+                        pl.planQty.as("planQty")
                 ))
                 .from(wo)
                 .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))
@@ -237,9 +248,10 @@ public class WorkService {
         Employee employee = employeeRepository.findById(work.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다: " + work.getEmpId()));
 
-        // 제품, 생산 라인, 진행 상태 조회
         PlanLine planLine = planLineRepository.findById(work.getPlanLineId())
-                .orElseThrow(() -> new IllegalArgumentException("생산라인을 찾을 수 없습니다: " + work.getPlanLineId()));
+                .orElseThrow(() -> new IllegalArgumentException("생산라인을 찾을 수 없습니다. planLineId: " + work.getPlanLineId()));
+
+        // 제품, 진행 상태 조회
         PlanProduct planProduct = planProductRepository.findById(work.getPlanProductId())
                 .orElseThrow(() -> new IllegalArgumentException("생산제품을 찾을 수 없습니다: " + work.getPlanProductId()));
         processTracking processTracking = processTrackingRepository.findById(work.getTrackingId())
@@ -249,11 +261,11 @@ public class WorkService {
 
         // 작업지시서 객체 생성 및 설정
         WorkOrders workOrder = modelMapper.map(work, WorkOrders.class);
-        workOrder.setPlanProduct(planProduct);
-        workOrder.setEmployee(employee);
-        workOrder.setPlanLine(planLine);
-        workOrder.setProcessTracking(processTracking);
         workOrder.setPlanMst(planMst);
+        workOrder.setPlanProduct(planProduct);
+        workOrder.setPlanLine(planLine); // PlanLine을 FK로 설정
+        workOrder.setEmployee(employee);
+        workOrder.setProcessTracking(processTracking);
 
         // 가장 최신 작업지시서 LOT 번호 조회 및 새 LOT 번호 생성
         String maxWorkOrderId = workRepository.findTopByOrderByLotNoDesc()
@@ -266,7 +278,7 @@ public class WorkService {
         List<LineMaterial> lineMaterials = work.getLineMaterials().stream()
                 .map(lineMaterialDTO -> {
                     LineMaterial lineMaterial = modelMapper.map(lineMaterialDTO, LineMaterial.class);
-                    lineMaterial.setWorkOrders(workOrder);
+                    lineMaterial.setWorkOrders(workOrder); // 자재 목록에 연결
                     return lineMaterial;
                 })
                 .collect(Collectors.toList());
@@ -277,6 +289,7 @@ public class WorkService {
         // 작업지시서 저장
         workRepository.save(workOrder);
     }
+
 
     // auto increment 방식으로 작업지시서 번호 생성
     private String generateNewWorkOrderId(String maxWorkOrderId) {
@@ -330,15 +343,16 @@ public class WorkService {
                         br.beerName.as("beerName"),
                         br.quantity.as("quantity"),
                         br.processStep.as("processStep"),
-                        br.material.materialId.as("materialId"), // ✅ 추가
+                        br.material.materialId.as("materialId"),
                         mw.materialName.as("materialName"),
-                        mw.materialType.as("materialType")
+                        mw.materialType.as("materialType"),
+                        mw.unit.as("unit")
                 ))
                 .from(br)
-                .leftJoin(mw).on(br.material.materialId.eq(mw.materialId)) // ✅ leftJoin 변경
+                .leftJoin(mw).on(br.material.materialId.eq(mw.materialId))
                 .fetch();
 
-        // ✅ 맥주별 + 공정별로 그룹화
+        // 맥주별, 공정별로 그룹화
         return recipes.stream()
                 .collect(Collectors.groupingBy(
                         BeerRecipesDTO::getBeerName,
@@ -356,7 +370,9 @@ public class WorkService {
                 .select(Projections.fields(PlanInfoDTO.class,
                         pm.planId.as("planId"),
                         pm.status.as("status"),
+                        pp.planProductId.as("planProductId"),
                         pp.productName.as("productName"),
+                        pl.planLineId.as("planLineId"),
                         pl.lineNo.as("lineNo"),
                         pl.planQty.as("planQty"),
                         pl.startDate.as("startDate"),
