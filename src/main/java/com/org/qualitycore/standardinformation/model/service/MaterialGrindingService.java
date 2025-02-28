@@ -1,11 +1,14 @@
 package com.org.qualitycore.standardinformation.model.service;
 
+import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
+import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
-import com.org.qualitycore.standardinformation.model.entity.WorkOrder;
+import com.org.qualitycore.work.model.entity.WorkOrders;
+import com.org.qualitycore.work.model.repository.LineMaterialRepository;
 import com.org.qualitycore.standardinformation.model.repository.MaterialGrindingRepository;
-import com.org.qualitycore.standardinformation.model.repository.WorkOrderRepository;
+import com.org.qualitycore.work.model.repository.WorkRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -14,9 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-
-
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +27,35 @@ import java.time.LocalDateTime;
 public class MaterialGrindingService {
 
         private final MaterialGrindingRepository materialGrindingRepository;
-        private final WorkOrderRepository workOrderRepository;
+        private final LineMaterialRepository lineMaterialRepository;
         private final ModelMapper modelMapper;
+
+
+        // ✅ 작업지시 ID 목록 조회
+        @Transactional(readOnly = true)
+        public List<LineMaterialNDTO> getLineMaterial() {
+            log.info("서비스: 작업지시 ID 목록 조회 시작");
+            List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
+            log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
+            return lineMaterialList.stream()
+                    .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
+                    .collect(Collectors.toList());
+        }
+
+
+        // ✅ 특정 LOT_NO에 대한 자재 정보 조회
+        @Transactional(readOnly = true)
+        public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
+            log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
+            List<LineMaterial> materials = lineMaterialRepository.findByLotNo(lotNo);
+
+            return materials.stream()
+                    .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
+                    .collect(Collectors.toList());
+        }
+
+
+
 
 
         // 분쇄 공정 등록
@@ -46,15 +76,16 @@ public class MaterialGrindingService {
                 materialGrinding.setGrindingId(generatedId);
 
                 // LOT_NO 가 존재하는지 확인
-                WorkOrder workOrder =
-                    workOrderRepository.findByLotNo(materialGrindingDTO.getLotNo())
-                            .orElseThrow(() -> new IllegalArgumentException
+                LineMaterial lineMaterial =
+                        lineMaterialRepository.findByLotNo(materialGrindingDTO.getLotNo())
+                                .stream().findFirst()
+                                .orElseThrow(() -> new IllegalArgumentException
                                     ("존재하지 않는 LOT_NO 입니다." + materialGrindingDTO.getLotNo()));
 
 
                 // FK 설정
                 materialGrinding.setLotNo(materialGrindingDTO.getLotNo());
-                materialGrinding.setWorkOrder(workOrder);
+                materialGrinding.setLineMaterial(lineMaterial);
 
                 // 기본값 설정
                 if (materialGrinding.getProcessStatus() == null) {
@@ -103,6 +134,7 @@ public class MaterialGrindingService {
         }
 
 
+
         // 가장 큰 "grindingId" 조회 후 다음 ID 생성 하룻 있는 코드!
         public String generateNextGrindingId(){
             Integer maxId = materialGrindingRepository.findMaxGrindingId();
@@ -110,7 +142,6 @@ public class MaterialGrindingService {
             return String.format("GR%03d", nextId); // "GR001"형식!
 
         }
-
 
 
         // 실제 종료시간 업데이트
@@ -123,4 +154,5 @@ public class MaterialGrindingService {
         }
 
 
-    }
+
+}

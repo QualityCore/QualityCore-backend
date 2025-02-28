@@ -1,5 +1,7 @@
 package com.org.qualitycore.standardinformation.model.entity;
 
+import com.org.qualitycore.work.model.entity.LineMaterial;
+import com.org.qualitycore.work.model.entity.WorkOrders;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,7 +32,7 @@ public class MaterialGrinding {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "LOT_NO" , referencedColumnName = "LOT_NO", nullable = false)
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
-    private  WorkOrder workOrder;
+    private LineMaterial lineMaterial;
 
     @Column(name ="STATUS_CODE" , nullable = false , updatable = false )
     @Schema(description = "상태 코드 ID", example = "SC001")
@@ -119,15 +121,12 @@ public class MaterialGrinding {
         }
     }
 
-
-
-
     @Override
     public String toString() {
         return "MaterialGrinding{" +
                 "grindingId='" + grindingId + '\'' +
                 ", lotNo='" + lotNo + '\'' +
-                ", workOrder=" + workOrder +
+                ", lineMaterial=" + lineMaterial +
                 ", statusCode='" + statusCode + '\'' +
                 ", mainMaterial='" + mainMaterial + '\'' +
                 ", mainMaterialInputVolume=" + mainMaterialInputVolume +
