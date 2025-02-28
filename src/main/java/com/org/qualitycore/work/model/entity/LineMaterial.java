@@ -24,8 +24,8 @@ public class LineMaterial {
     @Column(name = "MATERIAL_NAME")
     private String materialName;
 
-    @Column(name = "MATERIAL_TYPE")
-    private String materialType;
+    @Column(name = "TOTAL_QTY")
+    private String totalQty;
 
     @Column(name = "UNIT")
     private String unit;
@@ -33,11 +33,8 @@ public class LineMaterial {
     @Column(name = "REQUIRED_QTY_PER_UNIT")
     private double requiredQtyPerUnit;
 
-    @Column(name = "PRICE_PER_UNIT")
-    private BigDecimal pricePerUnit;
-
-    @Column(name = "TOTAL_COST")
-    private BigDecimal totalCost;
+    @Column(name = "PROCESS_STEP")
+    private String processStep;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "LOT_NO")
