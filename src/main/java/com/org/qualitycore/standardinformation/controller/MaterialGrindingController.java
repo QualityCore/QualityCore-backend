@@ -1,8 +1,8 @@
 package com.org.qualitycore.standardinformation.controller;
 
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
-import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
-import com.org.qualitycore.standardinformation.model.service.ProductionProcessService;
+import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
+import com.org.qualitycore.standardinformation.model.service.MaterialGrindingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Tag(name="ProductionProcess" , description = "생산공정 API")
 @Slf4j
-public class ProductionProcessController {
+public class MaterialGrindingController {
 
-    private final ProductionProcessService productionProcessService;
+    private final MaterialGrindingService materialGrindingService;
 
 
     //분쇄공정 등록
@@ -31,13 +31,12 @@ public class ProductionProcessController {
             @ApiResponse(responseCode = "400" , description = "잘못된 요청입니다!")
     })
     @PostMapping("/materialgrinding")
-    public ResponseEntity<StandardInformationMessage> createMaterialGrinding(
+    public ResponseEntity<ErpMessage> createMaterialGrinding(
             @RequestBody @Parameter(description = "등록할 분쇄 정보" ,
                     required = true) MaterialGrindingDTO materialGrindingDTO){
             log.info("컨트롤러 : 분쇄공정 등록 요청 {} " ,materialGrindingDTO);
-            StandardInformationMessage response = productionProcessService.createMaterialGrinding(materialGrindingDTO);
-            return ResponseEntity.status(response.getHttpStatusCode())
-                    .body(response);
+            ErpMessage response = materialGrindingService.createMaterialGrinding(materialGrindingDTO);
+            return ResponseEntity.status(response.getHttpStatusCode()).body(response);
         }
 
 
@@ -47,7 +46,7 @@ public class ProductionProcessController {
         public ResponseEntity<MaterialGrindingDTO> completeGrindingProcess(
                 @PathVariable String grindingId) {
             log.info("컨트롤러 : 분쇄 공정 완료 요청 - ID: {}", grindingId);
-            MaterialGrindingDTO updatedGrinding = productionProcessService.completeGrindingProcess(grindingId);
+            MaterialGrindingDTO updatedGrinding = materialGrindingService.completeGrindingProcess(grindingId);
             return ResponseEntity.ok(updatedGrinding);
         }
     }

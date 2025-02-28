@@ -22,9 +22,6 @@ public class WorkplaceDTO {
     @Schema(description = "LINE ID", example = "LINE001")
     private String lineId;
 
-    @Schema(description = "상태 코드 ID", example = "SC001")
-    private String statusCode;
-
     @Schema(description = "작업장 이름", example = "제1작업장")
     private String workplaceName;
 

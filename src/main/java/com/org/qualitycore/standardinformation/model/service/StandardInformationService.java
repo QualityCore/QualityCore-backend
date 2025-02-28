@@ -2,7 +2,7 @@ package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.standardinformation.model.dto.WorkplaceDTO;
 import com.org.qualitycore.standardinformation.model.entity.LineInformation;
-import com.org.qualitycore.standardinformation.model.entity.StandardInformationMessage;
+import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.entity.Workplace;
 import com.org.qualitycore.standardinformation.model.repository.LineInformationRepository;
 import com.org.qualitycore.standardinformation.model.repository.WorkplaceRepository;
@@ -42,7 +42,7 @@ public class StandardInformationService {
 
     //작업장 등록
     @Transactional
-    public StandardInformationMessage createWorkplace(WorkplaceDTO workplaceDTO) {
+    public ErpMessage createWorkplace(WorkplaceDTO workplaceDTO) {
         try {
             log.info("서비스 작업장 등록 시작 DTO{}", workplaceDTO);
 
@@ -71,13 +71,13 @@ public class StandardInformationService {
             Workplace saveWorkplace = workplaceRepository.save(workplace);
             log.info("서비스 작업장 등록 완료 {}", saveWorkplace);
 
-            return new StandardInformationMessage(HttpStatus.CREATED.value(), "작업장 등록 완료");
+            return new ErpMessage(HttpStatus.CREATED.value(), "작업장 등록 완료");
         } catch (DataIntegrityViolationException e){
             log.info("서비스 : 데이터 무결성 오류 발생! {} ",e.getMessage(),e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "작업장 등록 실패: 데이터 무결성 오류");
         } catch (Exception e) {
             log.error("서비스 :작업장 등록중 오류 발생 {}", e.getMessage(), e);
-            return new StandardInformationMessage(HttpStatus.BAD_REQUEST.value(), "작업장 등록 실패!" + e.getMessage());
+            return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "작업장 등록 실패!" + e.getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ public class StandardInformationService {
 
     // 작업장 등록 수정하기
     @Transactional
-    public StandardInformationMessage updateWorkplace(String workplaceId, WorkplaceDTO workplaceDTO) {
+    public ErpMessage updateWorkplace(String workplaceId, WorkplaceDTO workplaceDTO) {
         try {
             log.info("서비스: 작업장 정보 업데이트 시작 - ID: {}", workplaceId);
 
@@ -109,13 +109,13 @@ public class StandardInformationService {
             Workplace updatedWorkplace = workplaceRepository.save(workplace);
             log.info("서비스: 작업장 정보 업데이트 완료 {}", updatedWorkplace);
 
-            return new StandardInformationMessage(HttpStatus.OK.value(),
+            return new ErpMessage(HttpStatus.OK.value(),
                     "작업장 업데이트 완료. ID: " + updatedWorkplace.getWorkplaceId());
 
         } catch (Exception e) {
             log.error(" 서비스 : 작업장 업데이트 중 오류 발생 {}", e.getMessage(), e);
 
-            return new StandardInformationMessage(HttpStatus.BAD_REQUEST.value(),
+            return new ErpMessage(HttpStatus.BAD_REQUEST.value(),
                     "작업장 업데이트 실패!" + e.getMessage());
         }
     }
@@ -126,7 +126,7 @@ public class StandardInformationService {
     // 작업장 등록 삭제
 
     @Transactional
-    public StandardInformationMessage  deleteWorkplace(String workplaceId) {
+    public ErpMessage deleteWorkplace(String workplaceId) {
         log.info("서비스 : 작업장 삭제 시작 - ID {} ", workplaceId);
 
         Workplace workplace = workplaceRepository.findById(workplaceId)
@@ -137,6 +137,6 @@ public class StandardInformationService {
         workplaceRepository.delete(workplace);
         log.info("서비스 : 작업장 삭제 완료 ID {}", workplaceId);
 
-        return new StandardInformationMessage(HttpStatus.OK.value(), "작업장 삭제 완료!! ID :" + workplaceId);
+        return new ErpMessage(HttpStatus.OK.value(), "작업장 삭제 완료!! ID :" + workplaceId);
     }
 }
