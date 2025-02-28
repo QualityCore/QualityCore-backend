@@ -27,6 +27,11 @@ public class ProductionPlanDTO {
     @JsonProperty("products")
     private List<ProductionPlanDTO> products;
     private MaterialRequestDTO materialRequests;
+    private List<PlanMaterialDTO> rawMaterials;
+    private List<PlanMaterialDTO> packagingMaterials;
+    private String mainProductName;
+    private Integer totalPlanQty;
+    private String planId;
 
 }
 

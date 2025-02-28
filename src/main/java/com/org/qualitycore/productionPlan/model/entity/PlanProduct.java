@@ -31,6 +31,14 @@ public class PlanProduct{
     @Column(name = "PLAN_QTY", nullable = false)
     private Integer planQty;      //계획수량
 
-    @Column(name = "SIZE_SPEC") //
+    @Column(name = "SIZE_SPEC", nullable = false)
     private String sizeSpec;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.sizeSpec == null) {
+            this.sizeSpec = "500ml";
+        }
+    }
 }
+
