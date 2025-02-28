@@ -57,4 +57,17 @@ public class PlanMaterialRepository{
     public PlanMaterial save(PlanMaterial planMaterial) {
         return springDataPlanMaterialRepository.save(planMaterial);
     }
+
+
+    // PlanMaterialRepository.java에 추가할 메서드
+    public List<PlanMaterial> findByPlanProduct_PlanProductId(String planProductId) {
+        if (planProductId == null || planProductId.isEmpty()) {
+            throw new IllegalArgumentException("planProductId는 null일 수 없습니다.");
+        }
+
+        return queryFactory
+                .selectFrom(QPlanMaterial.planMaterial)
+                .where(QPlanMaterial.planMaterial.planProduct.planProductId.eq(planProductId))
+                .fetch();
+    }
 }

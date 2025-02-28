@@ -1,11 +1,14 @@
 package com.org.qualitycore.productionPlan.controller;
 
 import com.org.qualitycore.common.Message;
-import com.org.qualitycore.productionPlan.model.dto.PlanLineDTO;
-import com.org.qualitycore.productionPlan.model.dto.PlanMaterialDTO;
-import com.org.qualitycore.productionPlan.model.dto.ProductBomDTO;
-import com.org.qualitycore.productionPlan.model.dto.ProductionPlanDTO;
+import com.org.qualitycore.exception.ResourceNotFoundException;
+import com.org.qualitycore.productionPlan.model.dto.*;
+import com.org.qualitycore.productionPlan.model.entity.PlanProduct;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,8 +22,10 @@ import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -182,7 +187,107 @@ public class PlanController {
         }
     }
 
-    
+    @GetMapping("detail/{planId}")
+    @Operation(summary = "생산 계획 상세조회", description = "생산계획의 모든 상세정보를 조회합니다.",
+            parameters = {@Parameter(name ="planId", description = "생산계획ID")})
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "생산 계획 상세 조회 성공"),
+            @ApiResponse(responseCode = "404", description = "생산 계획 정보가 없습니다.")
+    })
+    public ResponseEntity<Message> getProductionPlanDetail(@PathVariable String planId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        try {
+            ProductionPlanDetailDTO planDetail = planService.getProductionPlanDetail(planId);
+
+            // 불필요한 중첩 제거를 위한 맵 생성
+            Map<String, Object> simplifiedPlanDetail = new HashMap<>();
+
+            // planMst 직접 추가
+            simplifiedPlanDetail.put("planMst", planDetail.getPlanMst());
+
+            // planProducts 중복 참조 제거
+            List<PlanProduct> simplifiedProducts = planDetail.getPlanProducts().stream()
+                    .map(product -> {
+                        // 중복된 planMst 참조 제거
+                        product.setPlanMst(null);
+                        return product;
+                    })
+                    .collect(Collectors.toList());
+            simplifiedPlanDetail.put("planProducts", simplifiedProducts);
+
+            // 다른 주요 속성들 추가
+            simplifiedPlanDetail.put("planLines", planDetail.getPlanLines());
+            simplifiedPlanDetail.put("processSteps", planDetail.getProcessSteps());
+            simplifiedPlanDetail.put("productBeerTypes", planDetail.getProductBeerTypes());
+            simplifiedPlanDetail.put("rawMaterials", planDetail.getRawMaterials());
+            simplifiedPlanDetail.put("packagingMaterials", planDetail.getPackagingMaterials());
+
+            // 최종 응답 생성
+            Map<String, Object> res = new HashMap<>();
+            res.put("planDetail", simplifiedPlanDetail);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new Message(200, "생산 계획 상세 조회 성공", res));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .headers(headers)
+                    .body(new Message(404, "생산 계획 정보가 없습니다.", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .headers(headers)
+                    .body(new Message(500, "서버 오류: " + e.getMessage(), null));
+        }
+    }
+
+    @PostMapping("statusUpdate/{planId}")
+    @Operation(summary = "생산 계획 상태 변경", description = "생산 계획의 상태를 변경합니다.",
+            parameters = {
+                    @Parameter(name = "planId", description = "생산 계획 ID", required = true),
+                    @Parameter(name = "status", description = "변경할 상태 (예: 미확정, 확정)", required = true)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "생산 계획 상태 변경 성공!!"),
+            @ApiResponse(responseCode = "404", description = "생산 계획 정보를 찾을 수 없음"),
+            @ApiResponse(responseCode = "400", description = "잘못된 상태 값"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류?")
+    })
+    public ResponseEntity<Message> updatePlanStatus(  @PathVariable @Parameter(description = "생산 계획 ID") String planId,
+                                                      @RequestParam @Parameter(description = "변경할 상태") String status
+    ){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        try {
+            // 유효한 상태 값인지 검증쓰
+            if (!"미확정".equals(status) && !"확정".equals(status)) {
+                return ResponseEntity.badRequest()
+                        .headers(headers)
+                        .body(new Message(400, "유효하지 않은 상태 값입니다.", null));
+            }
+            // 상태 변경 서비스 호출
+            planService.updatePlanStatus(planId, status);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new Message(200, "생산 계획 상태가 성공적으로 변경되었습니다.", null));
+
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .headers(headers)
+                    .body(new Message(404, "생산 계획 정보를 찾을 수 없습니다.", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .headers(headers)
+                    .body(new Message(500, "상태 변경 중 서버 오류 발생: " + e.getMessage(), null));
+        }
+    }
+
+
+
 
 
 }

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -639,5 +640,136 @@ public class PlanService {
                 .collect(Collectors.toList());
 
         planLineRepository.saveAll(planLines);
+    }
+
+    public ProductionPlanDetailDTO getProductionPlanDetail(String planId) {
+        // 1. 기본 계획 정보 조회
+        PlanMst planMst = planMstRepository.findById(planId)
+                .orElseThrow(() -> new ResourceNotFoundException("계획을 찾을 수 없습니다."));
+
+        // 2. 계획에 포함된 제품 정보 조회
+        List<PlanProduct> planProducts = planProductRepository.findByPlanMst_PlanId(planId);
+
+        // 3. 제품별 공정 라인 정보 조회
+        List<PlanLine> planLines = new ArrayList<>();
+        for (PlanProduct product : planProducts) {
+            planLines.addAll(planLineRepository.findProductionLinesByPlanProductId(product.getPlanProductId()));
+        }
+
+        // 4. 제품별 BOM 정보 조회하여 맥주 타입 확인
+        Map<String, String> productBeerTypes = new HashMap<>();
+        for (PlanProduct product : planProducts) {
+            ProductBom bom = productBomRepository.findById(product.getProductId()).orElse(null);
+            if (bom != null) {
+                productBeerTypes.put(product.getProductId(), bom.getBeerType());
+            }
+        }
+
+        // 5. 각 계획별 공정 단계 생성 (분쇄, 당화, 여과 등)
+        List<ProcessStepDTO> processSteps = generateProcessSteps(planLines, productBeerTypes);
+
+        // 6. 자재 정보 조회
+        List<PlanMaterialDTO> rawMaterials = new ArrayList<>();
+        List<PlanMaterialDTO> packagingMaterials = new ArrayList<>();
+
+        for (PlanProduct product : planProducts) {
+            List<PlanMaterial> materials = planMaterialRepository.findByPlanProduct_PlanProductId(product.getPlanProductId());
+
+            for (PlanMaterial material : materials) {
+                PlanMaterialDTO materialDTO = PlanMaterialDTO.fromEntity(material);
+
+                if ("부자재".equals(material.getMaterialType())) {
+                    packagingMaterials.add(materialDTO);
+                } else {
+                    rawMaterials.add(materialDTO);
+                }
+            }
+        }
+
+        // 7. 결과 DTO 생성 및 반환
+        ProductionPlanDetailDTO result = new ProductionPlanDetailDTO();
+        result.setPlanMst(planMst);
+        result.setPlanProducts(planProducts);
+        result.setPlanLines(planLines);
+        result.setProcessSteps(processSteps);
+        result.setProductBeerTypes(productBeerTypes);
+        result.setRawMaterials(rawMaterials);
+        result.setPackagingMaterials(packagingMaterials);
+
+        return result;
+    }
+
+    // 공정 단계 생성 메서드
+    private List<ProcessStepDTO> generateProcessSteps(List<PlanLine> planLines, Map<String, String> productBeerTypes) {
+        List<ProcessStepDTO> steps = new ArrayList<>();
+
+        for (PlanLine line : planLines) {
+            String beerType = productBeerTypes.getOrDefault(line.getProductId(), "에일"); // 기본값은 에일로 설정
+            LocalDate startDate = line.getStartDate();
+
+            if (startDate == null) continue; // 시작일이 없으면 건너뜀
+
+            LocalDateTime currentTime = startDate.atTime(8, 0); // 기본 시작 시간 8:00 AM
+
+            // 1. 분쇄 (40분)
+            steps.add(createProcessStep(line, "분쇄", currentTime, currentTime.plusMinutes(40)));
+            currentTime = currentTime.plusMinutes(40);
+
+            // 2. 당화 (50분)
+            steps.add(createProcessStep(line, "당화", currentTime, currentTime.plusMinutes(50)));
+            currentTime = currentTime.plusMinutes(50);
+
+            // 3. 여과 (50분)
+            steps.add(createProcessStep(line, "여과", currentTime, currentTime.plusMinutes(50)));
+            currentTime = currentTime.plusMinutes(50);
+
+            // 4. 끓임 (60분)
+            steps.add(createProcessStep(line, "끓임", currentTime, currentTime.plusMinutes(60)));
+            currentTime = currentTime.plusMinutes(60);
+
+            // 5. 냉각 (20분)
+            steps.add(createProcessStep(line, "냉각", currentTime, currentTime.plusMinutes(20)));
+            currentTime = currentTime.plusMinutes(20);
+
+            // 6. 발효 (에일: 14일, 라거: 21일)
+            int fermentDays = "라거".equals(beerType) ? 21 : 14;
+            steps.add(createProcessStep(line, "발효", currentTime, currentTime.plusDays(fermentDays)));
+            currentTime = currentTime.plusDays(fermentDays);
+
+            // 7. 숙성 (에일: 10일, 라거: 30일)
+            int matureDays = "라거".equals(beerType) ? 30 : 10;
+            steps.add(createProcessStep(line, "숙성", currentTime, currentTime.plusDays(matureDays)));
+            currentTime = currentTime.plusDays(matureDays);
+
+            // 8. 숙성후여과 (120분)
+            steps.add(createProcessStep(line, "숙성후여과", currentTime, currentTime.plusMinutes(120)));
+            currentTime = currentTime.plusMinutes(120);
+
+            // 9. 탄산조정 (120분)
+            steps.add(createProcessStep(line, "탄산조정", currentTime, currentTime.plusMinutes(120)));
+        }
+
+        return steps;
+    }
+
+    private ProcessStepDTO createProcessStep(PlanLine line, String processName, LocalDateTime start, LocalDateTime end) {
+        ProcessStepDTO step = new ProcessStepDTO();
+        step.setPlanLineId(line.getPlanLineId());
+        step.setProductId(line.getProductId());
+        step.setLineNo(line.getLineNo());
+        step.setBatchNo(line.getPlanBatchNo());
+        step.setProcessName(processName);
+        step.setStartTime(start);
+        step.setEndTime(end);
+        return step;
+    }
+
+    @Transactional
+    public void updatePlanStatus(String planId, String status) {
+        PlanMst planMst = planMstRepository.findById(planId)
+                .orElseThrow(() -> new ResourceNotFoundException("계획을 찾을 수 없습니다."));
+
+        planMst.setStatus(status);
+        planMstRepository.save(planMst);
     }
 }

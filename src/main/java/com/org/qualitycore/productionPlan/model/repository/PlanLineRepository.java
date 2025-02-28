@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -57,5 +58,7 @@ public class PlanLineRepository {
     public PlanLine save(PlanLine planLine) {
         return springDataPlanLineRepository.save(planLine);
     }
+
+
 
 }
