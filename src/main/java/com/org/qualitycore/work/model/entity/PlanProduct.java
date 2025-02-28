@@ -28,22 +28,22 @@ public class PlanProduct {
     private String productName;
 
     @Column(name = "PLAN_QTY")
-    private int planQty;
+    private Integer planQty;
 
     @Column(name = "BASE_TEMP")
-    private int baseTemp;
+    private Integer baseTemp;
 
     @Column(name = "STD_PROCESS_TIME")
-    private int stdProcessTime;
+    private Integer stdProcessTime;
 
     @Column(name = "FERMENT_TIME")
-    private int fermentTime;
+    private Integer fermentTime;
 
     @Column(name = "ALC_PERCENT")
-    private int alcPercent;
+    private Integer alcPercent;
 
     @Column(name = "FILTER_TEMP")
-    private int filterTemp;
+    private Integer filterTemp;
 
     @Column(name = "SIZE_SPEC")
     private String sizeSpec;
