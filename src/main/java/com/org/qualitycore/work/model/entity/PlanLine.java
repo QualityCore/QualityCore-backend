@@ -1,19 +1,19 @@
 package com.org.qualitycore.work.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.hibernate.annotations.GenericGenerator;
+import lombok.*;
+import org.hibernate.annotations.DynamicInsert;
 
 import java.util.Date;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @ToString
 @Entity
+@DynamicInsert
 @Table(name = "PLAN_LINE")
 public class PlanLine {
 
@@ -28,7 +28,7 @@ public class PlanLine {
     private Integer lineNo; // 생산라인 번호
 
     @Column(name = "PRODUCT_ID")
-    private String ProductId; // 제품 ID
+    private String productId; // 제품 ID
 
     @Column(name = "PLAN_BATCH_NO")
     private Integer planBatchNo; // 생산 회차 번호
