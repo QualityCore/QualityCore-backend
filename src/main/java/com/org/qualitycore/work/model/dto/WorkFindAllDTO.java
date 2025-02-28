@@ -65,4 +65,7 @@ public class WorkFindAllDTO {
     @Schema(description = "생산제품 PK")
     private String planProductId;
 
+    @Schema(description = "생산계획 PK")
+    private String planId;
+
 }

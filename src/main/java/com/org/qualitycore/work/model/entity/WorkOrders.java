@@ -44,5 +44,9 @@ public class WorkOrders {
     @JoinColumn(name = "TRACKING_ID", referencedColumnName = "TRACKING_ID")
     private processTracking processTracking;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PLAN_ID")
+    private PlanMst planMst;
+
 }
 

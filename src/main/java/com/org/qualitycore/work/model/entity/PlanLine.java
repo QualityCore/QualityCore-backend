@@ -25,16 +25,16 @@ public class PlanLine {
     private String planProductId; // 생산계획 제품 ID
 
     @Column(name = "LINE_NO")
-    private int lineNo; // 생산라인 번호
+    private Integer lineNo; // 생산라인 번호
 
     @Column(name = "PRODUCT_ID")
     private String ProductId; // 제품 ID
 
     @Column(name = "PLAN_BATCH_NO")
-    private int planBatchNo; // 생산 회차 번호
+    private Integer planBatchNo; // 생산 회차 번호
 
     @Column(name = "PLAN_QTY")
-    private int planQty; // 해당 라인 배정수량
+    private Integer planQty; // 해당 라인 배정수량
 
     @Column(name = "START_DATE")
     private Date startDate; // 생산시작일
