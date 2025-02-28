@@ -15,7 +15,7 @@ public interface LineMaterialRepository extends JpaRepository<LineMaterial, Stri
     List<LineMaterial> findByWorkOrdersLotNo(String lotNo);
 
     // 남규 !  레파지토리 잘 빌려쓰겠습니다.
-    @Query("SELECT lm FROM LineMaterial lm JOIN FETCH lm.workOrders wo WHERE wo.lotNo = :lotNo")
+    @Query("SELECT lm FROM LineMaterial lm WHERE lm.lotNo = :lotNo")
     List<LineMaterial> findByLotNo(@Param("lotNo") String lotNo);
 
     // 남규 레파지토리 잘쓸께요

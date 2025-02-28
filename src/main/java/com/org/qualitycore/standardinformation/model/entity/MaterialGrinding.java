@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name="MATERIAL_GRINDING")
@@ -29,10 +30,9 @@ public class MaterialGrinding {
     @Schema(description = "작업지시 ID" , example = "LOT2025021201")
     private String lotNo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "LOT_NO" , referencedColumnName = "LOT_NO", nullable = false)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "materialGrinding")
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
-    private LineMaterial lineMaterial;
+    private List<LineMaterial> lineMaterials;
 
     @Column(name ="STATUS_CODE" , nullable = false , updatable = false )
     @Schema(description = "상태 코드 ID", example = "SC001")
@@ -126,7 +126,7 @@ public class MaterialGrinding {
         return "MaterialGrinding{" +
                 "grindingId='" + grindingId + '\'' +
                 ", lotNo='" + lotNo + '\'' +
-                ", lineMaterial=" + lineMaterial +
+                ", lineMaterials=" + lineMaterials +
                 ", statusCode='" + statusCode + '\'' +
                 ", mainMaterial='" + mainMaterial + '\'' +
                 ", mainMaterialInputVolume=" + mainMaterialInputVolume +

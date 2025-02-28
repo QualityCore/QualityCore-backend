@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -76,6 +77,7 @@ public class MaterialGrindingController {
             @RequestBody @Parameter(description = "등록할 분쇄 정보" ,
                     required = true) MaterialGrindingDTO materialGrindingDTO){
             log.info("컨트롤러 : 분쇄공정 등록 요청 {} " ,materialGrindingDTO);
+
             ErpMessage response = materialGrindingService.createMaterialGrinding(materialGrindingDTO);
             return ResponseEntity.status(response.getHttpStatusCode()).body(response);
         }
