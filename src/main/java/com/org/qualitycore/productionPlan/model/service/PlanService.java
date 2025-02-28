@@ -264,9 +264,6 @@ public class PlanService {
     }
 
 
-
-
-
     private String generateNewMaterialRequestId() {
         String maxId = materialRequestRepository.findMaxRequestId(); // 이 메서드를 Repository에 추가해야 합니다
         if (maxId == null) {

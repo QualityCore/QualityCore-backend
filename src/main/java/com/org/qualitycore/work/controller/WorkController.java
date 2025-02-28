@@ -2,7 +2,7 @@ package com.org.qualitycore.work.controller;
 
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.exception.ResourceNotFoundException;
-import com.org.qualitycore.work.model.dto.WorkFindAllDTO;
+import com.org.qualitycore.work.model.dto.*;
 import com.org.qualitycore.work.model.service.WorkService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,12 +37,12 @@ public class WorkController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "작업지시서 전체조회 성공"),
             @ApiResponse(responseCode = "404", description = "작업지시서가 없습니다.")})
-    public ResponseEntity<Message> findAllWorkOrders() {
+    public ResponseEntity<Message> findAllWorkOrders(@PageableDefault Pageable pageable) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        List<WorkFindAllDTO> work = workService.findAllWorkOrders();
+        Page<WorkFindAllDTO> work = workService.findAllWorkOrders(pageable);
 
         // 작업지시서가 없을경우
         if (work == null || work.isEmpty()) {
@@ -57,6 +60,25 @@ public class WorkController {
                 .body(new Message(200, "작업지시서 전체조회 성공", res));
     }
 
+    @GetMapping("/work/search")
+    @Operation(summary = "작업지시서 검색", description = "조건에 따라 작업지시서를 검색합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "작업지시서 검색 성공"),
+            @ApiResponse(responseCode = "404", description = "검색된 작업지시서가 없습니다.")})
+    public ResponseEntity<Message> findAllSearchWorkOrders (@RequestParam(required = false) String LotNo, @PageableDefault Pageable pageable) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        Page<WorkFindAllDTO> work = workService.findAllSearchWorkOrders(LotNo, pageable);
+
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("work", work);
+
+        return ResponseEntity.ok().headers(headers).body(new Message(200, "작업지시서 검색완료", res));
+
+    }
 
     // 작업지시서 상세 조회
     @GetMapping("/work/{lotNo}")
@@ -115,6 +137,38 @@ public class WorkController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
+    // 생산계획에 포함된 작업지시서 데이터로 insert 할때 필요함
+    @GetMapping("/planInfo")
+    public ResponseEntity<Message> workOrderPlanInfo () {
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        List<PlanInfoDTO> planInfo = workService.workOrderPlanInfo();
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("planInfo", planInfo);
+
+        return ResponseEntity.ok().headers(headers).body(new Message(200, "조회성공", res));
+    }
+
+
+    // 맥주레시피
+    @GetMapping("/beerRecipes")
+    public ResponseEntity<Message> beerRecipes() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+
+        Map<String, Map<String, List<BeerRecipesDTO>>> groupedBeerRecipes = workService.beerRecipes();
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("beerRecipe", groupedBeerRecipes);
+
+        return ResponseEntity.ok().headers(headers).body(new Message(200, "조회 성공", res));
+    }
+
 
     // 작업지시서 삭제
     @DeleteMapping("/work/{lotNo}")
