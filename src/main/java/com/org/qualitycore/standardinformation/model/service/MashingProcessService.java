@@ -3,9 +3,11 @@ package com.org.qualitycore.standardinformation.model.service;
 import com.org.qualitycore.standardinformation.model.dto.MashingProcessDTO;;
 import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
+import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.repository.MashingProcessRepository;
 import com.org.qualitycore.work.model.repository.LineMaterialRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -15,6 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,77 +31,64 @@ public class MashingProcessService {
     private final ModelMapper modelMapper;
 
 
+
+    @Transactional
     public ErpMessage createMashingProcess(MashingProcessDTO mashingProcessDTO) {
-       try{
-           log.info("서비스 : 당화공정 등록 시작 DTO {}" , mashingProcessDTO );
+        try {
+            log.info("서비스 : 당화공정 등록 시작 DTO {}", mashingProcessDTO);
 
-           //ID 자동 생성
-           String generatedId = generateNextMashingId();
-           log.info("자동으로 생성되는 ID {}", generatedId);
+            // ID 자동 생성
+            String generatedId = generateNextMashingId();
+            log.info("자동으로 생성되는 ID {}", generatedId);
 
-           //DTO 에서 엔티티로 변환
-           MashingProcess mashingProcess = modelMapper
-                   .map(mashingProcessDTO, MashingProcess.class);
-           // ID 수동 설정 ( 엔티티 변환 후)
-           mashingProcess.setMashingId(generatedId);
+            // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
+            List<LineMaterial> lineMaterials =lineMaterialRepository.findByLotNo(mashingProcessDTO.getLotNo());
+            if (lineMaterials.isEmpty()) {
+               return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.");
+            }
 
-           // LOT_NO 가 존재하는지 확인
-           LineMaterial lineMaterial =
-                   lineMaterialRepository.findByLotNo(mashingProcessDTO.getLotNo())
-                           .stream().findFirst()
-                           .orElseThrow(() -> new IllegalArgumentException
-                                   ("존재하지 않는 LOT_NO 입니다." + mashingProcessDTO.getLotNo()));
+            // ✅ 첫 번째 엔티티 선택 (또는 특정 기준으로 필터링 가능)
+             LineMaterial selectedLineMaterial = lineMaterials.get(0);
 
-
-           // FK 설정
-           mashingProcessDTO.setLotNo(mashingProcessDTO.getLotNo());
-           mashingProcess.setLineMaterial(lineMaterial);
-
-           // 기본값 설정
-           if (mashingProcess.getProcessStatus() == null) {
-               mashingProcess.setProcessStatus("대기중");
-           }
-           if (mashingProcess.getStatusCode() == null) {
-               mashingProcess.setStatusCode("SC002");
-           }
-
-           // 시작 시간이 null 이면 현재시간을 설정
-           if(mashingProcess.getStartTime() == null){
-               mashingProcess.setStartTime(LocalDateTime.now());
-           }
-
-           // 소요시간이 null 이면 예외 발생
-           if(mashingProcess.getMashingTime()==null){
-               throw new IllegalArgumentException("분쇄 소요 시간이 입력되지 않았습니다.");
-           }
-
-           // 예상 종료 시간 자동 계산 (시작시간 + 소요시간)
-           mashingProcess.setExpectedEndTime(mashingProcess.getStartTime()
-                   .plusMinutes(mashingProcess.getMashingTime()));
-           log.info("엔티티 변환 완료 !! {}", mashingProcess);
-
-           // DB 저장
-           MashingProcess savedMashingProcess = mashingProcessRepository.save(mashingProcess);
-           log.info("서비스 분쇄 공정 등록 완료 ! {}", savedMashingProcess);
-
-           return new ErpMessage(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!");
-
-           // 필수 값이 빠졌거나 존재하지 않는 값을 입력할경우 예외 발생!
-       } catch(IllegalArgumentException e){
-           log.error("서비스 : 입력값 오류 발생 - 이유: {}" , e.getMessage(), e);
-           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            MashingProcess mashingProcess = new MashingProcess();
+            mashingProcess.setMashingId(generatedId);
+            mashingProcess.setLineMaterials(lineMaterials);
+            mashingProcess.setProcessStatus("대기중");
+            mashingProcess.setStartTime(LocalDateTime.now());
 
 
-       }catch(DataIntegrityViolationException e){
-           log.info("서비스 : 데이터 무결성 오류 발생 !!! {} " , e.getMessage(),e);
-           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"데이터베이스 제약 조건 위반: 필수 입력값 누락 또는 중복된 값 입력");
+            // 기본값 설정
+            if (mashingProcess.getProcessStatus() == null) {
+                mashingProcess.setProcessStatus("대기중");
+            }
+            if (mashingProcess.getStatusCode() == null) {
+                mashingProcess.setStatusCode("SC002");
+            }
 
-           //알수 없는 예외 오류시 응답 반환!
-       }catch(Exception e) {
-           log.error("서비스 : 분쇄공정 등록중 오류 발생 {}" ,e.getMessage(),e);
-           return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "분쇄 공정 등록 실패" + e.getMessage());
-       }
+            // 시작 시간이 null 이면 현재시간을 설정
+            if(mashingProcess.getStartTime() == null){
+                mashingProcess.setStartTime(LocalDateTime.now());
+            }
 
+            // 예상 종료 시간 자동 계산
+            mashingProcess.setExpectedEndTime(mashingProcess.getStartTime()
+                    .plusMinutes(mashingProcess.getMashingTime()));
+
+            log.info("엔티티 변환 완료 !! {}", mashingProcess);
+
+            // DB 저장
+            MashingProcess savedMashingProcess = mashingProcessRepository.save(mashingProcess);
+            log.info("서비스: 당화공정 등록 완료! {}", savedMashingProcess);
+
+            return new ErpMessage(HttpStatus.CREATED.value(), "당화공정 등록 완료!");
+
+        } catch (DataIntegrityViolationException e) {
+            log.error("❌ 데이터 무결성 오류 발생: {}", e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "데이터베이스 제약 조건 위반: 필수 입력값 누락 또는 중복된 값 입력");
+        } catch (Exception e) {
+            log.error("❌ 당화공정 등록 중 오류 발생: {}", e.getMessage(), e);
+            return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "당화공정 등록 실패: " + e.getMessage());
+        }
     }
 
 

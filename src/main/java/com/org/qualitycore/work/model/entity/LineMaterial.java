@@ -1,5 +1,7 @@
 package com.org.qualitycore.work.model.entity;
 
+import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
+import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,6 +48,18 @@ public class LineMaterial {
     @Column(name = "LOT_NO" , nullable = false, updatable = false ,insertable = false)
     @Schema(description = "작업지시 ID" , example = "LOT2025021201")
     private String lotNo;
+
+    // 남규  당화 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "MASHING_ID")  // 외래키 설정
+    private MashingProcess mashingProcess;  // <-- 이 필드명을 사용해야 함
+
+    // 남규 분쇄 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "GRINDING_ID")  // 외래키 설정
+    private MaterialGrinding materialGrinding;  // <-- 이 필드명을 사용해야 함
+
+
 
 
 

@@ -16,10 +16,7 @@ public class LineMaterialNDTO {
 
     @Schema(description = "자재명", example = "패일 몰트")
     private String materialName;
-
-    @Schema(description = "자재단위", example = "kg")
-    private String materialType;
-
+    
     @Schema(description = "자재단위", example = "kg")
     private String unit;
 
