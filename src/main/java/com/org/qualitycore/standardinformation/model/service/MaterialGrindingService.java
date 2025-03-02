@@ -34,15 +34,15 @@ public class MaterialGrindingService {
 
 
     // ✅ 작업지시 ID 목록 조회
-        @Transactional(readOnly = true)
-        public List<LineMaterialNDTO> getLineMaterial() {
-            log.info("서비스: 작업지시 ID 목록 조회 시작");
-            List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
-            log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
-            return lineMaterialList.stream()
-                    .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
-                    .collect(Collectors.toList());
-        }
+    @Transactional
+    public List<LineMaterialNDTO> getLineMaterial() {
+        log.info("서비스: 작업지시 ID 목록 조회 시작");
+        List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
+        log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
+        return lineMaterialList.stream()
+                .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
+                .collect(Collectors.toList());
+    }
 
 
         // ✅ 특정 LOT_NO에 대한 자재 정보 조회
@@ -59,7 +59,6 @@ public class MaterialGrindingService {
 
 
 
-
         // 분쇄 공정 등록
         @Transactional
         public ErpMessage createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
@@ -70,24 +69,22 @@ public class MaterialGrindingService {
                 String generatedId = generateNextGrindingId();
                 log.info("자동으로 생성되는 ID {}", generatedId);
 
-
                 // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
-                List<LineMaterial> lineMaterials =lineMaterialRepository.findByLotNo(materialGrindingDTO.getLotNo());
+                List<LineMaterial> lineMaterials = lineMaterialRepository.findByLotNo(materialGrindingDTO.getLotNo());
                 if (lineMaterials.isEmpty()) {
                     return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.");
                 }
 
-                // ✅ 첫 번째 엔티티 선택 (또는 특정 기준으로 필터링 가능)
-                LineMaterial selectedLineMaterial = lineMaterials.get(0);
+                // ✅ ModelMapper 를 사용하여 DTO -> Entity 변환
+                MaterialGrinding materialGrinding = modelMapper.map(materialGrindingDTO, MaterialGrinding.class);
 
-                MaterialGrinding materialGrinding = new MaterialGrinding();
+                // ✅ ID 자동 생성
                 materialGrinding.setGrindingId(generatedId);
+
+                // ✅ 관련 엔티티 매핑 (LOT_NO 기반으로 LineMaterial 리스트 설정)
                 materialGrinding.setLineMaterials(lineMaterials);
-                materialGrinding.setProcessStatus("대기중");
-                materialGrinding.setStartTime(LocalDateTime.now());
 
-
-                // 기본값 설정
+                // ✅ 기본값 설정
                 if (materialGrinding.getProcessStatus() == null) {
                     materialGrinding.setProcessStatus("대기중");
                 }
@@ -95,34 +92,29 @@ public class MaterialGrindingService {
                     materialGrinding.setStatusCode("SC001");
                 }
 
-                // ✅ 시작 시간이 null이면 현재 시간으로 설정 (DTO에서 값을 못 가져올 경우 대비)
-                if (materialGrindingDTO.getStartTime() != null) {
-                    materialGrinding.setStartTime(materialGrindingDTO.getStartTime());
-                } else {
+                // ✅ 시작 시간 설정 (DTO 값이 있으면 사용, 없으면 현재 시간)
+                if (materialGrinding.getStartTime() == null) {
                     materialGrinding.setStartTime(LocalDateTime.now());
                 }
 
-                // ✅ expectedEndTime 자동 설정
+                // ✅ 예상 종료 시간 자동 계산
                 if (materialGrinding.getExpectedEndTime() == null && materialGrinding.getGrindDuration() != null) {
                     materialGrinding.setExpectedEndTime(materialGrinding.getStartTime().plusMinutes(materialGrinding.getGrindDuration()));
                 }
 
-                log.info("엔티티 변환 완료 !! {}", materialGrinding);
+                log.info("ModelMapper 변환 완료 !! {}", materialGrinding);
 
                 // DB 저장
                 MaterialGrinding savedMaterialGrinding = materialGrindingRepository.save(materialGrinding);
                 log.info("서비스 분쇄 공정 등록 완료 ! {}", savedMaterialGrinding);
                 return new ErpMessage(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!");
 
-
-              // 필수 값이 빠졌거나 존재하지 않는 값을 입력할경우 예외 발생!
             } catch(IllegalArgumentException e){
                 log.error("서비스 : 입력값 오류 발생 - 이유: {}", e.getMessage(), e);
                 return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "입력값 오류: " + e.getMessage());
 
-             //알수 없는 예외 오류시 응답 반환!
-            }catch(Exception e) {
-                log.error("서비스 : 분쇄공정 등록중 오류 발생 {}" ,e.getMessage(),e);
+            } catch(Exception e) {
+                log.error("서비스 : 분쇄공정 등록중 오류 발생 {}", e.getMessage(), e);
                 return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "분쇄 공정 등록 실패" + e.getMessage());
             }
         }
