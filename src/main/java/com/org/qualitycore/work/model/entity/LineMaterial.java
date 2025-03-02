@@ -40,14 +40,10 @@ public class LineMaterial {
     @Column(name = "PROCESS_STEP")
     private String processStep;
 
+    //남규 @JoinColumn(referencedColumnName = "LOT_NO") 추가입력함.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "LOT_NO")
+    @JoinColumn(name = "LOT_NO", referencedColumnName = "LOT_NO")
     private WorkOrders workOrders;
-
-    // 남규  LOT_NO 추가함.
-    @Column(name = "LOT_NO" , nullable = false, updatable = false ,insertable = false)
-    @Schema(description = "작업지시 ID" , example = "LOT2025021201")
-    private String lotNo;
 
     // 남규  당화 공정 추가함 fk 추가
     @ManyToOne
@@ -58,7 +54,6 @@ public class LineMaterial {
     @ManyToOne
     @JoinColumn(name = "GRINDING_ID")  // 외래키 설정
     private MaterialGrinding materialGrinding;  // <-- 이 필드명을 사용해야 함
-
 
 
 

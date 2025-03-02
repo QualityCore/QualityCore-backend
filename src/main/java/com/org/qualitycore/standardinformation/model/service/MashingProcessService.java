@@ -29,14 +29,20 @@ public class MashingProcessService {
     private final ModelMapper modelMapper;
 
 
+
     // ✅ 작업지시 ID 목록 조회
     @Transactional
     public List<LineMaterialNDTO> getLineMaterial() {
         log.info("서비스: 작업지시 ID 목록 조회 시작");
+
         List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
         log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
         return lineMaterialList.stream()
-                .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
+                .map(material -> {
+                    LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
+                    dto.setLotNo(material.getWorkOrders() != null ? material.getWorkOrders().getLotNo() : null);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -45,10 +51,14 @@ public class MashingProcessService {
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
         log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
-        List<LineMaterial> materials = lineMaterialRepository.findByLotNo(lotNo);
+        List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
 
         return materials.stream()
-                .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
+                .map(material -> {
+                    LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
+                    dto.setLotNo(material.getWorkOrders() != null ? material.getWorkOrders().getLotNo() : null);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -66,7 +76,7 @@ public class MashingProcessService {
             log.info("자동으로 생성되는 ID {}", generatedId);
 
             // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
-            List<LineMaterial> lineMaterials = lineMaterialRepository.findByLotNo(mashingProcessDTO.getLotNo());
+            List<LineMaterial> lineMaterials = lineMaterialRepository.findByWorkOrders_LotNo(mashingProcessDTO.getLotNo());
             if (lineMaterials.isEmpty()) {
                 return new Message(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.", new HashMap<>());
             }
@@ -105,9 +115,9 @@ public class MashingProcessService {
             log.info("서비스 당화 공정 등록 완료 ! {}", savedMashingProcess);
 
             // ✅ DTO 변환 후 반환
-            MashingProcessDTO responseDTO = modelMapper.map(savedMashingProcess, MashingProcessDTO.class);
+            MashingProcessDTO mashingDTO = modelMapper.map(savedMashingProcess, MashingProcessDTO.class);
             Map<String, Object> result = new HashMap<>();
-            result.put("mashingProcess", responseDTO);
+            result.put("mashingProcess", mashingDTO);
             return new Message(HttpStatus.CREATED.value(), "당화공정 등록 완료!", result);
 
         } catch(IllegalArgumentException e){

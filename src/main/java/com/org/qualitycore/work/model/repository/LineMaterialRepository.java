@@ -13,14 +13,13 @@ public interface LineMaterialRepository extends JpaRepository<LineMaterial, Stri
 
     List<LineMaterial> findByWorkOrdersLotNo(String lotNo);
 
-    // 남규 !  레파지토리 잘 빌려쓰겠습니다.
-    @Query("SELECT lm FROM LineMaterial lm WHERE lm.lotNo = :lotNo")
-    List<LineMaterial> findByLotNo(@Param("lotNo") String lotNo);
 
     // 남규 레파지토리 잘쓸께요
-    @Query("SELECT lm FROM LineMaterial lm ORDER BY lm.lotNo ASC") // 최신순 정렬
+    // ✅ 전체 LineMaterial 데이터 조회 (정렬 추가)
+    @Query("SELECT lm FROM LineMaterial lm ORDER BY lm.workOrders.lotNo ASC")
     List<LineMaterial> findAllLineMaterial();
 
-
-
+    // 남규 레파지토리 잘쓸께요
+    // ✅ WorkOrders 의 LOT_NO를 기준으로 LineMaterial 데이터 조회
+    List<LineMaterial> findByWorkOrders_LotNo(String lotNo);
 }

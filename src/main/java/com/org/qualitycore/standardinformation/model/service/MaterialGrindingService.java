@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.service;
 
+import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
 import com.org.qualitycore.work.model.entity.LineMaterial;
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -40,28 +43,34 @@ public class MaterialGrindingService {
         List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
         log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
         return lineMaterialList.stream()
-                .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
+                .map(material -> {
+                    LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
+                    dto.setLotNo(material.getWorkOrders() != null ? material.getWorkOrders().getLotNo() : null);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
 
-        // ✅ 특정 LOT_NO에 대한 자재 정보 조회
-        @Transactional(readOnly = true)
-        public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
-            log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
-            List<LineMaterial> materials = lineMaterialRepository.findByLotNo(lotNo);
+    // ✅ 특정 LOT_NO에 대한 자재 정보 조회
+    @Transactional(readOnly = true)
+    public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
+        log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
+        List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
+        return materials.stream()
+                .map(material -> {
+                    LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
+                    dto.setLotNo(material.getWorkOrders() != null ? material.getWorkOrders().getLotNo() : null);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
-            return materials.stream()
-                    .map(material -> modelMapper.map(material, LineMaterialNDTO.class))
-                    .collect(Collectors.toList());
-        }
 
 
-
-
-        // 분쇄 공정 등록
+    // 분쇄 공정 등록
         @Transactional
-        public ErpMessage createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
+        public Message createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
             try {
                 log.info("서비스 : 분쇄공정 등록 시작 DTO {}", materialGrindingDTO);
 
@@ -70,9 +79,9 @@ public class MaterialGrindingService {
                 log.info("자동으로 생성되는 ID {}", generatedId);
 
                 // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
-                List<LineMaterial> lineMaterials = lineMaterialRepository.findByLotNo(materialGrindingDTO.getLotNo());
+                List<LineMaterial> lineMaterials = lineMaterialRepository.findByWorkOrders_LotNo(materialGrindingDTO.getLotNo());
                 if (lineMaterials.isEmpty()) {
-                    return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.");
+                    return new Message(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.", null);
                 }
 
                 // ✅ ModelMapper 를 사용하여 DTO -> Entity 변환
@@ -104,18 +113,25 @@ public class MaterialGrindingService {
 
                 log.info("ModelMapper 변환 완료 !! {}", materialGrinding);
 
-                // DB 저장
+                // ✅  DB 저장
                 MaterialGrinding savedMaterialGrinding = materialGrindingRepository.save(materialGrinding);
                 log.info("서비스 분쇄 공정 등록 완료 ! {}", savedMaterialGrinding);
-                return new ErpMessage(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!");
+
+
+                // ✅ DTO 변환 후 반환
+                MaterialGrindingDTO responseDTO = modelMapper.map(savedMaterialGrinding, MaterialGrindingDTO.class);
+                Map<String, Object> result = new HashMap<>();
+                result.put("savedMaterialGrinding", responseDTO);
+                return new Message(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!", result);
+
 
             } catch(IllegalArgumentException e){
                 log.error("서비스 : 입력값 오류 발생 - 이유: {}", e.getMessage(), e);
-                return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "입력값 오류: " + e.getMessage());
+                return new Message(HttpStatus.BAD_REQUEST.value(), "입력값 오류: " + e.getMessage(),new HashMap<>());
 
             } catch(Exception e) {
                 log.error("서비스 : 분쇄공정 등록중 오류 발생 {}", e.getMessage(), e);
-                return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "분쇄 공정 등록 실패" + e.getMessage());
+                return new Message(HttpStatus.BAD_REQUEST.value(), "분쇄 공정 등록 실패" + e.getMessage(),new HashMap<>());
             }
         }
 
