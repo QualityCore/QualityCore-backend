@@ -19,7 +19,10 @@ public class LineMaterialNDTO {
 
     @Schema(description = "자재명", example = "패일 몰트")
     private String materialName;
-    
+
+    @Schema(description = "총 소요량" ,example = "318")
+    private String totalQty;
+
     @Schema(description = "자재단위", example = "kg")
     private String unit;
 
