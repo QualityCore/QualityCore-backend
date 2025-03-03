@@ -47,8 +47,5 @@ public class LineMaterial {
     @Schema(description = "작업지시 ID" , example = "LOT2025021201")
     private String lotNo;
 
-
-
-
 }
 

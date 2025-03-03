@@ -40,8 +40,7 @@ public class WorkOrders {
     @OneToMany(mappedBy = "workOrders", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<LineMaterial> lineMaterial;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TRACKING_ID", referencedColumnName = "TRACKING_ID")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "workOrders", cascade = CascadeType.ALL)
     private processTracking processTracking;
 
     @ManyToOne(fetch = FetchType.LAZY)
