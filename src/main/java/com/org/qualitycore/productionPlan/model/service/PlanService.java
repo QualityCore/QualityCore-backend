@@ -786,16 +786,19 @@ public class PlanService {
     public MaterialRequest requestMaterial(MaterialRequestSimpleDTO requestDTO) {
         MaterialRequest materialRequest = new MaterialRequest();
 
-        // ✅ 기존 자재 요청 (planMaterialId 존재)
         if (requestDTO.getPlanMaterialId() != null && !requestDTO.getPlanMaterialId().isEmpty()) {
+            // ✅ 기존 PlanMaterial 가져오기
             PlanMaterial planMaterial = planMaterialRepository.findById(requestDTO.getPlanMaterialId())
                     .orElseThrow(() -> new ResourceNotFoundException("PlanMaterial을 찾을 수 없습니다: " + requestDTO.getPlanMaterialId()));
             materialRequest.setPlanMaterial(planMaterial);
-        }
-        // ✅ 신규 자재 요청 (planMaterialId 없음)
-        else {
-            materialRequest.setMaterialId(requestDTO.getMaterialId());
-            materialRequest.setMaterialName(requestDTO.getMaterialName());
+        } else {
+            // ✅ 신규 요청일 경우, 더미 PlanMaterial 생성 및 설정
+            PlanMaterial newPlanMaterial = new PlanMaterial();
+            newPlanMaterial.setPlanMaterialId("NEW_REQUEST");
+            newPlanMaterial.setMaterialName("신규 자재 요청");
+            newPlanMaterial = planMaterialRepository.save(newPlanMaterial); // DB 저장
+
+            materialRequest.setPlanMaterial(newPlanMaterial);
         }
 
         materialRequest.setRequestId(generateNewMaterialRequestId());
@@ -803,7 +806,7 @@ public class PlanService {
         materialRequest.setDeliveryDate(requestDTO.getDeliveryDate());
         materialRequest.setReason(requestDTO.getReason());
         materialRequest.setNote(requestDTO.getNote());
-        materialRequest.setRequestDate(LocalDate.now()); // 현재 날짜 저장
+        materialRequest.setRequestDate(LocalDate.now());
 
         return materialRequestRepository.save(materialRequest);
     }
@@ -813,10 +816,11 @@ public class PlanService {
 
 
 
-    public List<MaterialRequestSimpleDTO> getSimpleMaterialRequests() {
+
+    public List<MaterialRequestSimpleDTO> getMaterialRequests() {
         List<MaterialRequest> requests = materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
         return requests.stream()
-                .map(MaterialRequestSimpleDTO::fromEntity) //
+                .map(MaterialRequestSimpleDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 

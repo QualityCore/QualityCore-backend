@@ -12,4 +12,7 @@ import java.util.Optional;
 public interface MaterialWarehouseRepository extends JpaRepository<MaterialWarehouse, String> {
     @Query("SELECT m FROM MaterialWarehouse m")
     List<MaterialWarehouse> findAllStockStatus();
+
+
+    Optional<Object> findByMaterialName(String materialName);
 }
