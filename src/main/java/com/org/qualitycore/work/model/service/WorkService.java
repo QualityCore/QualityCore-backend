@@ -126,15 +126,7 @@ public class WorkService {
                         pt.processStatus.as("processStatus"),
                         pt.processName.as("processName"),
                         pt.trackingId.as("trackingId"),
-                        e.workTeam.as("workTeam"),
-
-                        // ✅ PlanLineDTO를 JSON에 맞게 변환
-                        Projections.fields(PlanLineDTO.class,
-                                pl.lineNo.as("lineNo"),
-                                pl.startDate.as("startDate"),
-                                pl.endDate.as("endDate"),
-                                pl.planQty.as("planQty")
-                        ).as("planLineId")  // ✅ 여기서 PlanLineDTO로 변환
+                        e.workTeam.as("workTeam")
                 ))
                 .from(wo)
                 .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))

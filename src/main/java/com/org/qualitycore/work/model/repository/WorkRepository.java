@@ -1,14 +1,9 @@
 package com.org.qualitycore.work.model.repository;
 
-import aj.org.objectweb.asm.commons.Remapper;
 import com.org.qualitycore.work.model.entity.WorkOrders;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 import java.util.Optional;
 
 @Repository

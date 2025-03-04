@@ -42,7 +42,7 @@ public class WorkOrders {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TRACKING_ID", referencedColumnName = "TRACKING_ID")
-    private processTracking processTracking;
+    private com.org.qualitycore.work.model.entity.processTracking processTracking;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PLAN_ID")
