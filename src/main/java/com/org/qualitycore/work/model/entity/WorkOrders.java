@@ -19,9 +19,6 @@ public class WorkOrders {
     @Column(name = "LOT_NO")
     private String lotNo; // 작업지시 번호(PK)
 
-    @Column(name = "WORK_PROGRESS")
-    private String workProgress; // 진행률
-
     @Column(name = "WORK_ETC")
     private String workEtc;
 

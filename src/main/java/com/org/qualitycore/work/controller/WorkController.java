@@ -53,17 +53,13 @@ public class WorkController {
 
         Page<WorkFindAllDTO> work = workService.findAllWorkOrders(pageable, workTeam, productName, lotNo, lineNo, startDate, endDate);
 
-        System.out.println("Received parameters - workTeam: " + workTeam + ", productName: " + productName +
-                ", lotNo: " + lotNo + ", lineNo: " + lineNo + ", startDate: " + startDate +
-                ", endDate: " + endDate + ", pageable: " + pageable);
-
         // 작업지시서가 없을경우
         if (work == null || work.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .headers(headers)
                     .body(new Message(404, "작업지시서가 없습니다.", null));
         }
-
+//
         // 전체 조회 성공 시
         Map<String, Object> res = new HashMap<>();
         res.put("work", work);
