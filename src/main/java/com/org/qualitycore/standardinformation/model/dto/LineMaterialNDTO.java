@@ -3,6 +3,9 @@ package com.org.qualitycore.standardinformation.model.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import static com.org.qualitycore.work.model.entity.QWorkOrders.workOrders;
+
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -16,7 +19,10 @@ public class LineMaterialNDTO {
 
     @Schema(description = "자재명", example = "패일 몰트")
     private String materialName;
-    
+
+    @Schema(description = "총 소요량" ,example = "318")
+    private String totalQty;
+
     @Schema(description = "자재단위", example = "kg")
     private String unit;
 
@@ -25,5 +31,8 @@ public class LineMaterialNDTO {
 
     @Schema(description = "작업지시 ID" , example = "LOT2025021201")
     private String lotNo;  // workOrders 대신 lotNo만 포함
+
+
 }
+
 

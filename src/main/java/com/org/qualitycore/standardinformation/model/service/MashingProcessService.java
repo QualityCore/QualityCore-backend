@@ -1,9 +1,9 @@
 package com.org.qualitycore.standardinformation.model.service;
 
+import com.org.qualitycore.common.Message;
+import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MashingProcessDTO;;
-import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
-import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.repository.MashingProcessRepository;
 import com.org.qualitycore.work.model.repository.LineMaterialRepository;
@@ -11,15 +11,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,8 +30,44 @@ public class MashingProcessService {
 
 
 
+    // ✅ 작업지시 ID 목록 조회
     @Transactional
-    public ErpMessage createMashingProcess(MashingProcessDTO mashingProcessDTO) {
+    public List<LineMaterialNDTO> getLineMaterial() {
+        log.info("서비스: 작업지시 ID 목록 조회 시작");
+
+        List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
+        log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
+        return lineMaterialList.stream()
+                .map(material -> {
+                    LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
+                    dto.setLotNo(material.getWorkOrders() != null ? material.getWorkOrders().getLotNo() : null);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    // ✅ 특정 LOT_NO에 대한 자재 정보 조회
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
+        log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
+        List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
+
+        return materials.stream()
+                .map(material -> {
+                    LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
+                    dto.setLotNo(material.getWorkOrders() != null ? material.getWorkOrders().getLotNo() : null);
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    // ✅ 당화 공정 등록
+    @Transactional
+    public Message createMashingProcess(MashingProcessDTO mashingProcessDTO) {
         try {
             log.info("서비스 : 당화공정 등록 시작 DTO {}", mashingProcessDTO);
 
@@ -42,22 +76,21 @@ public class MashingProcessService {
             log.info("자동으로 생성되는 ID {}", generatedId);
 
             // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
-            List<LineMaterial> lineMaterials =lineMaterialRepository.findByLotNo(mashingProcessDTO.getLotNo());
+            List<LineMaterial> lineMaterials = lineMaterialRepository.findByWorkOrders_LotNo(mashingProcessDTO.getLotNo());
             if (lineMaterials.isEmpty()) {
-               return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.");
+                return new Message(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.", new HashMap<>());
             }
 
-            // ✅ 첫 번째 엔티티 선택 (또는 특정 기준으로 필터링 가능)
-             LineMaterial selectedLineMaterial = lineMaterials.get(0);
+            // ✅ ModelMapper 를 사용하여 DTO -> Entity 변환
+            MashingProcess mashingProcess = modelMapper.map(mashingProcessDTO, MashingProcess.class);
 
-            MashingProcess mashingProcess = new MashingProcess();
+            // ✅ ID 자동 생성
             mashingProcess.setMashingId(generatedId);
+
+            // ✅ 관련 엔티티 매핑 (LOT_NO 기반으로 LineMaterial 리스트 설정)
             mashingProcess.setLineMaterials(lineMaterials);
-            mashingProcess.setProcessStatus("대기중");
-            mashingProcess.setStartTime(LocalDateTime.now());
 
-
-            // 기본값 설정
+            // ✅ 기본값 설정
             if (mashingProcess.getProcessStatus() == null) {
                 mashingProcess.setProcessStatus("대기중");
             }
@@ -65,29 +98,35 @@ public class MashingProcessService {
                 mashingProcess.setStatusCode("SC002");
             }
 
-            // 시작 시간이 null 이면 현재시간을 설정
-            if(mashingProcess.getStartTime() == null){
+            // ✅ 시작 시간 설정 (DTO 값이 있으면 사용, 없으면 현재 시간)
+            if (mashingProcess.getStartTime() == null) {
                 mashingProcess.setStartTime(LocalDateTime.now());
             }
 
-            // 예상 종료 시간 자동 계산
-            mashingProcess.setExpectedEndTime(mashingProcess.getStartTime()
-                    .plusMinutes(mashingProcess.getMashingTime()));
+            // ✅ 예상 종료 시간 자동 계산
+            if (mashingProcess.getExpectedEndTime() == null && mashingProcess.getMashingTime() != null) {
+                mashingProcess.setExpectedEndTime(mashingProcess.getStartTime().plusMinutes(mashingProcess.getMashingTime()));
+            }
 
-            log.info("엔티티 변환 완료 !! {}", mashingProcess);
+            log.info("ModelMapper 변환 완료 !! {}", mashingProcess);
 
-            // DB 저장
+            // ✅ DB 저장
             MashingProcess savedMashingProcess = mashingProcessRepository.save(mashingProcess);
-            log.info("서비스: 당화공정 등록 완료! {}", savedMashingProcess);
+            log.info("서비스 당화 공정 등록 완료 ! {}", savedMashingProcess);
 
-            return new ErpMessage(HttpStatus.CREATED.value(), "당화공정 등록 완료!");
+            // ✅ DTO 변환 후 반환
+            MashingProcessDTO mashingDTO = modelMapper.map(savedMashingProcess, MashingProcessDTO.class);
+            Map<String, Object> result = new HashMap<>();
+            result.put("mashingProcess", mashingDTO);
+            return new Message(HttpStatus.CREATED.value(), "당화공정 등록 완료!", result);
 
-        } catch (DataIntegrityViolationException e) {
-            log.error("❌ 데이터 무결성 오류 발생: {}", e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "데이터베이스 제약 조건 위반: 필수 입력값 누락 또는 중복된 값 입력");
-        } catch (Exception e) {
-            log.error("❌ 당화공정 등록 중 오류 발생: {}", e.getMessage(), e);
-            return new ErpMessage(HttpStatus.BAD_REQUEST.value(), "당화공정 등록 실패: " + e.getMessage());
+        } catch(IllegalArgumentException e){
+            log.error("서비스 : 입력값 오류 발생 - 이유: {}", e.getMessage(), e);
+            return new Message(HttpStatus.BAD_REQUEST.value(), "입력값 오류: " + e.getMessage(), new HashMap<>());
+
+        } catch(Exception e) {
+            log.error("서비스 : 당화공정 등록중 오류 발생 {}", e.getMessage(), e);
+            return new Message(HttpStatus.BAD_REQUEST.value(), "당화 공정 등록 실패: " + e.getMessage(), new HashMap<>());
         }
     }
 
@@ -100,10 +139,11 @@ public class MashingProcessService {
     }
 
 
-    // 실제 종료시간 업데이트
-    public MashingProcessDTO completeMashingProcess(String mashingId , Double phValue) {
+    // 실제 종료 시간 업데이트
+    public Message completeMashingProcess(String mashingId , Double phValue) {
         MashingProcess mashingProcess = mashingProcessRepository.findById(mashingId)
                 .orElseThrow(() -> new RuntimeException("분쇄 ID가 존재하지 않습니다."));
+
         // pH 값을 업데이트
         if(phValue != null) {
             mashingProcess.setPhValue(phValue);
@@ -111,6 +151,10 @@ public class MashingProcessService {
 
         mashingProcess.setActualEndTime(LocalDateTime.now());
         MashingProcess updatedMashing = mashingProcessRepository.save(mashingProcess);
-        return modelMapper.map(updatedMashing, MashingProcessDTO.class);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("updatedMashing", modelMapper.map(updatedMashing, MashingProcessDTO.class));
+
+        return new Message(HttpStatus.OK.value(), "당화 공정 완료", result);
     }
 }

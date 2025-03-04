@@ -26,7 +26,7 @@ public class MashingProcess {
     private String mashingId;
 
 
-    @Column(name = "LOT_NO" , nullable = false, updatable = false ,insertable = false)
+    @Column(name = "LOT_NO" , nullable = false)
     @Schema(description = "작업지시 ID" , example = "LOT2025021201")
     private String lotNo;
 
