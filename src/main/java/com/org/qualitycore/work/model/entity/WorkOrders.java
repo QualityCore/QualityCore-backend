@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
-import static com.org.qualitycore.work.model.entity.QWorkOrders.workOrders;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -20,9 +18,6 @@ public class WorkOrders {
     @Id
     @Column(name = "LOT_NO")
     private String lotNo; // 작업지시 번호(PK)
-
-    @Column(name = "WORK_PROGRESS")
-    private String workProgress; // 진행률
 
     @Column(name = "WORK_ETC")
     private String workEtc;
@@ -48,13 +43,6 @@ public class WorkOrders {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PLAN_ID")
     private PlanMst planMst;
-
-
-    // ✅ LOT_NO 값을 가져올 수 있도록 메서드 추가
-    public String getLotNo() {
-        return lotNo;
-    }
-
 
 }
 

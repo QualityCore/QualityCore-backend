@@ -55,6 +55,5 @@ public class LineMaterial {
     @JoinColumn(name = "GRINDING_ID")  // 외래키 설정
     private MaterialGrinding materialGrinding;  // <-- 이 필드명을 사용해야 함
 
-
 }
 
