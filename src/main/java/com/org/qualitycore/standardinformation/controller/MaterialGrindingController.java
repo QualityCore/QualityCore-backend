@@ -99,10 +99,31 @@ public class MaterialGrindingController {
 
         // 실제 종료시간을  위해서 수정 추가 구현
         @PutMapping("/materialgrinding/{grindingId}")
-        public ResponseEntity<MaterialGrindingDTO> completeGrindingProcess(
+        public ResponseEntity<MaterialGrindingDTO> completeEndTime(
                 @PathVariable String grindingId) {
             log.info("컨트롤러 : 분쇄 공정 완료 요청 - ID: {}", grindingId);
+            MaterialGrindingDTO updatedGrinding = materialGrindingService.completeEndTime(grindingId);
+            return ResponseEntity.ok(updatedGrinding);
+        }
+
+
+        @PutMapping("/start/{grindingId}")
+        public ResponseEntity<MaterialGrindingDTO> startGrinding(
+                @PathVariable String grindingId) {
+            log.info("▶ 분쇄 공정 시작 요청 - ID: {}", grindingId);
+            MaterialGrindingDTO updatedGrinding = materialGrindingService.startGrindingProcess(grindingId);
+            return ResponseEntity.ok(updatedGrinding);
+        }
+
+
+
+        @PutMapping("/complete/{grindingId}")
+        public ResponseEntity<MaterialGrindingDTO> completeGrinding(
+                @PathVariable String grindingId) {
+            log.info("▶ 분쇄 공정 완료 요청 - ID: {}", grindingId);
             MaterialGrindingDTO updatedGrinding = materialGrindingService.completeGrindingProcess(grindingId);
             return ResponseEntity.ok(updatedGrinding);
         }
-    }
+
+
+}
