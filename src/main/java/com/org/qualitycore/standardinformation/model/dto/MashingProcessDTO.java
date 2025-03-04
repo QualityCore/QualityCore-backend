@@ -46,6 +46,9 @@ public class MashingProcessDTO {
     @Schema(description = "공정 상태", example = "대기중")
     private String processStatus;
 
+    @Schema(description = "공정 이름", example = "당화")
+    private String processName;
+
     @Schema(description = "메모사항" , example = "작업자 : 강동원  작업완료" )
     private String notes;
 
