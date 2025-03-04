@@ -42,7 +42,7 @@ public class LineMaterial {
 
     //남규 @JoinColumn(referencedColumnName = "LOT_NO") 추가입력함.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "LOT_NO", referencedColumnName = "LOT_NO")
+    @JoinColumn(name = "LOT_NO")
     private WorkOrders workOrders;
 
     // 남규  당화 공정 추가함 fk 추가

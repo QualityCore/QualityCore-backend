@@ -779,14 +779,45 @@ public class PlanService {
         return materialWarehouseRepository.findAllStockStatus();
     }
 
-    // 자재 구매 신청 내역 조회
-    public List<MaterialRequest> getMaterialRequests() {
-        return materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
-    }
+    
 
     // 자재 구매 신청
-    public MaterialRequest requestMaterial(MaterialRequestDTO requestDTO) {
-        MaterialRequest request = requestDTO.toEntity();
-        return materialRequestRepository.save(request);
+    @Transactional
+    public MaterialRequest requestMaterial(MaterialRequestSimpleDTO requestDTO) {
+        MaterialRequest materialRequest = new MaterialRequest();
+
+        // ✅ 기존 자재 요청 (planMaterialId 존재)
+        if (requestDTO.getPlanMaterialId() != null && !requestDTO.getPlanMaterialId().isEmpty()) {
+            PlanMaterial planMaterial = planMaterialRepository.findById(requestDTO.getPlanMaterialId())
+                    .orElseThrow(() -> new ResourceNotFoundException("PlanMaterial을 찾을 수 없습니다: " + requestDTO.getPlanMaterialId()));
+            materialRequest.setPlanMaterial(planMaterial);
+        }
+        // ✅ 신규 자재 요청 (planMaterialId 없음)
+        else {
+            materialRequest.setMaterialId(requestDTO.getMaterialId());
+            materialRequest.setMaterialName(requestDTO.getMaterialName());
+        }
+
+        materialRequest.setRequestId(generateNewMaterialRequestId());
+        materialRequest.setRequestQty(requestDTO.getRequestQty());
+        materialRequest.setDeliveryDate(requestDTO.getDeliveryDate());
+        materialRequest.setReason(requestDTO.getReason());
+        materialRequest.setNote(requestDTO.getNote());
+        materialRequest.setRequestDate(LocalDate.now()); // 현재 날짜 저장
+
+        return materialRequestRepository.save(materialRequest);
     }
+
+
+
+
+
+
+    public List<MaterialRequestSimpleDTO> getSimpleMaterialRequests() {
+        List<MaterialRequest> requests = materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
+        return requests.stream()
+                .map(MaterialRequestSimpleDTO::fromEntity) //
+                .collect(Collectors.toList());
+    }
+
 }

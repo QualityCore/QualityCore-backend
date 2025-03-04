@@ -300,21 +300,23 @@ public class PlanController {
 
     // 자재 구매 신청 내역 조회
     @GetMapping("/materials/requests")
-    @Operation(summary = "자재 구매 신청 내역 조회",description = "모든 자재 구매 신청 내역을 조회합니당.")
-    @ApiResponse(responseCode = "200",description = "자재 구매 신청 내역 조회 성공")
-    public ResponseEntity<Message> getMaterialRequests() {
-        List<MaterialRequest> requests = planService.getMaterialRequests();
+    @Operation(summary = "자재 구매 신청 내역 조회 (순환 참조 방지)", description = "순환 참조 없는 자재 구매 신청 내역을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "자재 구매 신청 내역 조회 성공")
+    public ResponseEntity<Message> getSimpleMaterialRequests() {
+        List<MaterialRequestSimpleDTO> requests = planService.getSimpleMaterialRequests();
         return ResponseEntity.ok(new Message(200, "자재 구매 신청 내역 조회 성공", Map.of("requests", requests)));
     }
+
 
     // 자재 구매 신청
     @PostMapping("/materials/request")
     @Operation(summary = "자재 구매 신청", description = "자재 구매를 신청합니다.")
     @ApiResponse(responseCode = "201", description = "자재 구매 신청 성공")
-    public ResponseEntity<Message> requestMaterial(@RequestBody MaterialRequestDTO requestDTO) {
+    public ResponseEntity<Message> requestMaterial(@RequestBody MaterialRequestSimpleDTO requestDTO) {
         MaterialRequest savedRequest = planService.requestMaterial(requestDTO);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new Message(201, "자재 구매 신청 성공", Map.of("request", savedRequest)));
     }
+
 
 }

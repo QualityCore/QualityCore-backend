@@ -1,5 +1,6 @@
 package com.org.qualitycore.productionPlan.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -37,4 +38,12 @@ public class MaterialRequest {
 
     @Column(name = "REQUEST_DATE")
     private LocalDate requestDate = LocalDate.now();
+
+
+    @Column(name = "MATERIAL_ID", nullable = true)
+    private String materialId;
+
+    @Column(name = "MATERIAL_NAME", nullable = true)
+    private String materialName;
+
 }
