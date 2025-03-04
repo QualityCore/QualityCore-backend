@@ -772,4 +772,21 @@ public class PlanService {
         planMst.setStatus(status);
         planMstRepository.save(planMst);
     }
+
+
+    // 자재 재고 현황 조회
+    public List<MaterialWarehouse> getStockStatus() {
+        return materialWarehouseRepository.findAllStockStatus();
+    }
+
+    // 자재 구매 신청 내역 조회
+    public List<MaterialRequest> getMaterialRequests() {
+        return materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
+    }
+
+    // 자재 구매 신청
+    public MaterialRequest requestMaterial(MaterialRequestDTO requestDTO) {
+        MaterialRequest request = requestDTO.toEntity();
+        return materialRequestRepository.save(request);
+    }
 }
