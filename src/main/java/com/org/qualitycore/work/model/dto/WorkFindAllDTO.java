@@ -2,6 +2,7 @@ package com.org.qualitycore.work.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import lombok.*;
 import java.util.Date;
 import java.util.List;
@@ -18,9 +19,6 @@ public class WorkFindAllDTO {
     @Schema(description = "작업지시서 번호")
     private String lotNo;
 
-    @Schema(description = "진행상태 PK")
-    private String trackingId;
-
     @Schema(description = "진행률", example = "50%, 100%")
     private String workProgress;
 
@@ -30,11 +28,20 @@ public class WorkFindAllDTO {
     @Schema(description = "작업조")
     private String workTeam;
 
-    @Schema(description = "생산라인번호")
-    private int lineNo;
+    @Schema(description = "생산제품")
+    private String productName;
 
-    @Schema(description = "생산계획수량")
-    private int planQty;
+    @Schema(description = "진행상태")
+    private String processStatus;
+
+    @Schema(description = "진행상태코드")
+    private String statusCode;
+
+    @Schema(description = "생산라인 번호")
+    private Integer lineNo;
+
+    @Schema(description = "해당 라인 배정수량")
+    private Integer planQty;
 
     @Schema(description = "생산시작일")
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -44,20 +51,11 @@ public class WorkFindAllDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date endDate;
 
-    @Schema(description = "생산제품")
-    private String productName;
-
-    @Schema(description = "진행상태")
-    private String processStatus;
-
-    @Schema(description = "공정명")
-    private String processName;
-
     @Schema(description = "자재 목록")
-    private List<LineMaterialDTO> lineMaterials;  // 추가된 필드
+    private List<LineMaterialDTO> lineMaterials;
 
     @Schema(description = "생산라인 PK")
-    private String planLineId;
+    private String  planLineId;
 
     @Schema(description = "직원 PK")
     private String empId;
@@ -67,5 +65,8 @@ public class WorkFindAllDTO {
 
     @Schema(description = "생산계획 PK")
     private String planId;
+
+    @Schema(description = "진행상태 PK")
+    private Long trackingId;
 
 }

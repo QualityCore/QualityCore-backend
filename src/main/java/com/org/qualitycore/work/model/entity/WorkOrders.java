@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
+import static com.org.qualitycore.work.model.entity.QWorkOrders.workOrders;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -40,13 +42,19 @@ public class WorkOrders {
     @OneToMany(mappedBy = "workOrders", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<LineMaterial> lineMaterial;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TRACKING_ID", referencedColumnName = "TRACKING_ID")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "workOrders", cascade = CascadeType.ALL)
     private processTracking processTracking;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PLAN_ID")
     private PlanMst planMst;
+
+
+    // ✅ LOT_NO 값을 가져올 수 있도록 메서드 추가
+    public String getLotNo() {
+        return lotNo;
+    }
+
 
 }
 

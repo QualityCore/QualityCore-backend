@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "MASHING_PROCESS")
@@ -25,15 +26,14 @@ public class MashingProcess {
     private String mashingId;
 
 
-    @Column(name = "LOT_NO" , nullable = false, updatable = false ,insertable = false)
+    @Column(name = "LOT_NO" , nullable = false)
     @Schema(description = "작업지시 ID" , example = "LOT2025021201")
     private String lotNo;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "LOT_NO" , referencedColumnName = "LOT_NO", nullable = false)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "mashingProcess")
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
-    private LineMaterial lineMaterial;
+    private List<LineMaterial> lineMaterials;
 
 
     @Column(name ="STATUS_CODE" , nullable = false , updatable = false )
@@ -132,7 +132,7 @@ public class MashingProcess {
         return "MashingProcess{" +
                 "mashingId='" + mashingId + '\'' +
                 ", lotNo='" + lotNo + '\'' +
-                ", lineMaterial=" + lineMaterial +
+                ", lineMaterials=" + lineMaterials +
                 ", statusCode='" + statusCode + '\'' +
                 ", mashingTime=" + mashingTime +
                 ", temperature='" + temperature + '\'' +
