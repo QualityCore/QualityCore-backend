@@ -772,4 +772,56 @@ public class PlanService {
         planMst.setStatus(status);
         planMstRepository.save(planMst);
     }
+
+
+    // 자재 재고 현황 조회
+    public List<MaterialWarehouse> getStockStatus() {
+        return materialWarehouseRepository.findAllStockStatus();
+    }
+
+    
+
+    // 자재 구매 신청
+    @Transactional
+    public MaterialRequest requestMaterial(MaterialRequestSimpleDTO requestDTO) {
+        MaterialRequest materialRequest = new MaterialRequest();
+
+        if (requestDTO.getPlanMaterialId() != null && !requestDTO.getPlanMaterialId().isEmpty()) {
+            // ✅ 기존 PlanMaterial 가져오기
+            PlanMaterial planMaterial = planMaterialRepository.findById(requestDTO.getPlanMaterialId())
+                    .orElseThrow(() -> new ResourceNotFoundException("PlanMaterial을 찾을 수 없습니다: " + requestDTO.getPlanMaterialId()));
+            materialRequest.setPlanMaterial(planMaterial);
+        } else {
+            // ✅ 신규 요청일 경우, 더미 PlanMaterial 생성 및 설정
+            PlanMaterial newPlanMaterial = new PlanMaterial();
+            newPlanMaterial.setPlanMaterialId("NEW_REQUEST");
+            newPlanMaterial.setMaterialName("신규 자재 요청");
+            newPlanMaterial = planMaterialRepository.save(newPlanMaterial); // DB 저장
+
+            materialRequest.setPlanMaterial(newPlanMaterial);
+        }
+
+        materialRequest.setRequestId(generateNewMaterialRequestId());
+        materialRequest.setRequestQty(requestDTO.getRequestQty());
+        materialRequest.setDeliveryDate(requestDTO.getDeliveryDate());
+        materialRequest.setReason(requestDTO.getReason());
+        materialRequest.setNote(requestDTO.getNote());
+        materialRequest.setRequestDate(LocalDate.now());
+
+        return materialRequestRepository.save(materialRequest);
+    }
+
+
+
+
+
+
+
+    public List<MaterialRequestSimpleDTO> getMaterialRequests() {
+        List<MaterialRequest> requests = materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
+        return requests.stream()
+                .map(MaterialRequestSimpleDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -3,6 +3,8 @@ package com.org.qualitycore.productionPlan.controller;
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.exception.ResourceNotFoundException;
 import com.org.qualitycore.productionPlan.model.dto.*;
+import com.org.qualitycore.productionPlan.model.entity.MaterialRequest;
+import com.org.qualitycore.productionPlan.model.entity.MaterialWarehouse;
 import com.org.qualitycore.productionPlan.model.entity.PlanProduct;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -286,7 +288,38 @@ public class PlanController {
         }
     }
 
+    // 자재 재고 현황 조회
+    @GetMapping("/materials")
+    @Operation(summary = "자재 재고 현황 조회", description = "모든 자재의 현재 재고 현황을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "자재 재고 현황 조회 성공")
+    public ResponseEntity<Message> getStockStatus() {
+        List<MaterialWarehouse> stockStatus = planService.getStockStatus();
+        return ResponseEntity.ok(new Message(200, "자재 재고 현황 조회 성공", Map.of("stockStatus", stockStatus)));
+    }
 
+
+    // 자재 구매 신청 내역 조회
+    @GetMapping("/materials/requests")
+    @Operation(summary = "자재 구매 신청 내역 조회 (순환 참조 방지)", description = "순환 참조 없는 자재 구매 신청 내역을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "자재 구매 신청 내역 조회 성공")
+    public ResponseEntity<Message> getMaterialRequests() {
+        List<MaterialRequestSimpleDTO> requests = planService.getMaterialRequests();
+        return ResponseEntity.ok(new Message(200, "자재 구매 신청 내역 조회 성공", Map.of("requests", requests)));
+    }
+
+
+    // 자재 구매 신청
+    @PostMapping("/materials/request")
+    @Operation(summary = "자재 구매 신청", description = "자재 구매를 신청합니다.")
+    @ApiResponse(responseCode = "201", description = "자재 구매 신청 성공")
+    public ResponseEntity<Message> requestMaterial(@RequestBody MaterialRequestSimpleDTO requestDTO) {
+        System.out.println("📌 [자재 구매 신청] 요청 데이터: " + requestDTO);
+
+        MaterialRequest savedRequest = planService.requestMaterial(requestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new Message(201, "자재 구매 신청 성공", Map.of("request", savedRequest)));
+    }
 
 
 
