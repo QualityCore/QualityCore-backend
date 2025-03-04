@@ -73,7 +73,11 @@ public class MashingProcess {
 
     @Column(name = "PROCESS_STATUS", nullable = false)
     @Schema(description = "공정 상태", example = "대기중")
-    private String processStatus;
+    private String processStatus="대기중";
+
+    @Column(name = "PROCESS_NAME", nullable = false)
+    @Schema(description = "공정 이름", example = "당화")
+    private String processName="당화";
 
     @Column(name = "NOTES")
     @Schema(description = "메모사항" , example = "작업자 : 강동원  작업완료" )

@@ -21,8 +21,6 @@ public class WorkOrders {
     @Column(name = "LOT_NO")
     private String lotNo; // 작업지시 번호(PK)
 
-
-
     @Column(name = "WORK_ETC")
     private String workEtc;
 
@@ -47,13 +45,6 @@ public class WorkOrders {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PLAN_ID")
     private PlanMst planMst;
-
-
-    // ✅ LOT_NO 값을 가져올 수 있도록 메서드 추가
-    public String getLotNo() {
-        return lotNo;
-    }
-
 
 }
 
