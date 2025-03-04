@@ -3,6 +3,7 @@ package com.org.qualitycore.work.model.service;
 import com.org.qualitycore.work.model.dto.*;
 import com.org.qualitycore.work.model.entity.*;
 import com.org.qualitycore.work.model.repository.*;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -14,11 +15,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +38,7 @@ public class WorkService {
     private final ModelMapper modelMapper;
 
     // 작업지시서 전체 조회
-    public Page<WorkFindAllDTO> findAllWorkOrders(Pageable pageable) {
+    public Page<WorkFindAllDTO> findAllWorkOrders(Pageable pageable, String workTeam, String productName, String lotNo, String lineNo, Date startDate, Date endDate) {
         QWorkOrders wo = QWorkOrders.workOrders;
         QPlanLine pl = QPlanLine.planLine;
         QPlanProduct pp = QPlanProduct.planProduct;
@@ -44,30 +46,50 @@ public class WorkService {
         QEmployee e = QEmployee.employee;
         QprocessTracking pt = QprocessTracking.processTracking;
 
-        // 전체 데이터 개수 조회
-        long totalCount = Optional.ofNullable(
-                queryFactory
+        BooleanBuilder where = new BooleanBuilder();
+
+        if (StringUtils.hasText(workTeam)) {
+            where.and(e.workTeam.containsIgnoreCase(workTeam));
+        }
+        if (StringUtils.hasText(productName)) {
+            where.and(pp.productName.containsIgnoreCase(productName));
+        }
+        if (StringUtils.hasText(lotNo)) {
+            where.and(wo.lotNo.containsIgnoreCase(lotNo));
+        }
+        if (StringUtils.hasText(lineNo)) {
+            where.and(pl.lineNo.eq(Integer.parseInt(lineNo)));
+        }
+        if (startDate != null) {
+            where.and(pl.startDate.goe(startDate));
+        }
+        if (endDate != null) {
+            where.and(pl.endDate.loe(endDate));
+        }
+
+        // 전체 데이터 개수 조회 (필터링 적용)
+        long totalCount = Optional.ofNullable(queryFactory
                         .select(wo.count())
                         .from(wo)
                         .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))
                         .join(pp).on(pl.planProductId.eq(pp.planProductId))
                         .join(e).on(wo.employee.empId.eq(e.empId))
                         .join(pt).on(wo.lotNo.eq(pt.workOrders.lotNo))
-                        .fetchOne()
-        ).orElse(0L);
+                        .where(where)
+                        .fetchOne())
+                .orElse(0L);
 
-        // 페이지네이션 적용하여 데이터 조회
+        // 페이지네이션 적용하여 데이터 조회 (필터링 적용)
         List<WorkFindAllDTO> workOrders = queryFactory
                 .select(Projections.fields(WorkFindAllDTO.class,
                         wo.lotNo.as("lotNo"),
-                        wo.workProgress.as("workProgress"),
                         wo.workEtc.as("workEtc"),
                         pp.planProductId.as("planProductId"),
                         pp.productName.as("productName"),
                         pt.trackingId.as("trackingId"),
                         pt.processStatus.as("processStatus"),
-                        pt.trackingId.as("trackingId"),
                         pt.processName.as("processName"),
+                        pt.statusCode.as("statusCode"),
                         e.empId.as("empId"),
                         e.workTeam.as("workTeam"),
                         pl.planLineId.as("planLineId"),
@@ -81,9 +103,10 @@ public class WorkService {
                 .join(pp).on(pl.planProductId.eq(pp.planProductId))
                 .join(e).on(wo.employee.empId.eq(e.empId))
                 .join(pt).on(wo.lotNo.eq(pt.workOrders.lotNo))
+                .where(where)
                 .orderBy(wo.lotNo.desc())
-                .offset(pageable.getOffset()) // 시작 위치 지정
-                .limit(pageable.getPageSize()) // 페이지 크기 지정
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
 
         // 각 작업지시서에 자재 정보 추가
@@ -108,72 +131,6 @@ public class WorkService {
         return new PageImpl<>(workOrders, pageable, totalCount);
     }
 
-    public Page<WorkFindAllDTO> findAllSearchWorkOrders(String lotNo, Pageable pageable) {
-        QWorkOrders wo = QWorkOrders.workOrders;
-        QPlanLine pl = QPlanLine.planLine;
-        QPlanProduct pp = QPlanProduct.planProduct;
-        QLineMaterial lm = QLineMaterial.lineMaterial;
-        QEmployee e = QEmployee.employee;
-        QprocessTracking pt = QprocessTracking.processTracking;
-
-        // 쿼리 빌더 생성
-        JPAQuery<WorkFindAllDTO> query = queryFactory
-                .select(Projections.fields(WorkFindAllDTO.class,
-                        wo.lotNo.as("lotNo"),
-                        wo.workProgress.as("workProgress"),
-                        wo.workEtc.as("workEtc"),
-                        pp.productName.as("productName"),
-                        pt.processStatus.as("processStatus"),
-                        pt.processName.as("processName"),
-                        pt.trackingId.as("trackingId"),
-                        e.workTeam.as("workTeam")
-                ))
-                .from(wo)
-                .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))
-                .join(pp).on(pl.planProductId.eq(pp.planProductId))
-                .join(e).on(wo.employee.empId.eq(e.empId))
-                .join(pt).on(wo.lotNo.eq(pt.workOrders.lotNo));
-
-        // ✅ 검색 조건 추가 (LotNo가 있을 경우 필터링)
-        if (lotNo != null && !lotNo.trim().isEmpty()) {
-            query.where(wo.lotNo.containsIgnoreCase(lotNo));
-        }
-
-        // 전체 데이터 개수 조회
-        long totalCount = Optional.ofNullable(
-                queryFactory.select(wo.count())
-                        .from(wo)
-                        .where(lotNo != null && !lotNo.trim().isEmpty() ? wo.lotNo.containsIgnoreCase(lotNo) : null)
-                        .fetchOne()
-        ).orElse(0L);
-
-        // 페이지네이션 적용하여 데이터 조회
-        List<WorkFindAllDTO> workOrders = query
-                .orderBy(wo.lotNo.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .fetch();
-
-        // 각 작업지시서에 자재 정보 추가
-        for (WorkFindAllDTO workOrder : workOrders) {
-            List<LineMaterialDTO> lineMaterials = queryFactory
-                    .select(Projections.fields(LineMaterialDTO.class,
-                            lm.lineMaterialId.as("lineMaterialId"),
-                            lm.materialName.as("materialName"),
-                            lm.totalQty.castToNum(Integer.class).as("totalQty"),
-                            lm.unit.as("unit"),
-                            lm.requiredQtyPerUnit.castToNum(Double.class).as("requiredQtyPerUnit"),
-                            lm.processStep.as("processStep")
-                    ))
-                    .from(lm)
-                    .where(lm.workOrders.lotNo.eq(workOrder.getLotNo()))
-                    .fetch();
-
-            workOrder.setLineMaterials(lineMaterials);
-        }
-
-        return new PageImpl<>(workOrders, pageable, totalCount);
-    }
 
     // 특정 작업지시서 조회
     public WorkFindAllDTO findByCodeWorkOrder(String lotNo) {
@@ -187,14 +144,13 @@ public class WorkService {
         WorkFindAllDTO workOrder = queryFactory
                 .select(Projections.fields(WorkFindAllDTO.class,
                         wo.lotNo.as("lotNo"),
-                        wo.workProgress.as("workProgress"),
                         wo.workEtc.as("workEtc"),
                         pp.planProductId.as("planProductId"),
                         pp.productName.as("productName"),
                         pt.trackingId.as("trackingId"),
                         pt.processStatus.as("processStatus"),
-                        pt.trackingId.as("trackingId"),
                         pt.processName.as("processName"),
+                        pt.statusCode.as("statusCode"),
                         e.empId.as("empId"),
                         e.workTeam.as("workTeam"),
                         pl.planLineId.as("planLineId"),
@@ -240,24 +196,27 @@ public class WorkService {
         Employee employee = employeeRepository.findById(work.getEmpId())
                 .orElseThrow(() -> new IllegalArgumentException("사원을 찾을 수 없습니다: " + work.getEmpId()));
 
+        // 생산라인 정보 조회
         PlanLine planLine = planLineRepository.findById(work.getPlanLineId())
                 .orElseThrow(() -> new IllegalArgumentException("생산라인을 찾을 수 없습니다. planLineId: " + work.getPlanLineId()));
 
         // 제품, 진행 상태 조회
         PlanProduct planProduct = planProductRepository.findById(work.getPlanProductId())
                 .orElseThrow(() -> new IllegalArgumentException("생산제품을 찾을 수 없습니다: " + work.getPlanProductId()));
-        processTracking processTracking = processTrackingRepository.findById(work.getTrackingId())
-                .orElseThrow(() -> new IllegalArgumentException("진행상태를 찾을 수 없습니다: " + work.getTrackingId()));
+
         PlanMst planMst = workPlanMstRepository.findById(work.getPlanId())
                 .orElseThrow(() -> new IllegalArgumentException("생산계획을 찾을 수 없습니다: " + work.getPlanId()));
+
+        planMst.setStatus("생산지시");
+
+        workPlanMstRepository.save(planMst);
 
         // 작업지시서 객체 생성 및 설정
         WorkOrders workOrder = modelMapper.map(work, WorkOrders.class);
         workOrder.setPlanMst(planMst);
         workOrder.setPlanProduct(planProduct);
-        workOrder.setPlanLine(planLine); // PlanLine을 FK로 설정
+        workOrder.setPlanLine(planLine);
         workOrder.setEmployee(employee);
-        workOrder.setProcessTracking(processTracking);
 
         // 가장 최신 작업지시서 LOT 번호 조회 및 새 LOT 번호 생성
         String maxWorkOrderId = workRepository.findTopByOrderByLotNoDesc()
@@ -266,7 +225,6 @@ public class WorkService {
         String newWorkOrderId = generateNewWorkOrderId(maxWorkOrderId);
         workOrder.setLotNo(newWorkOrderId);  // 새 LOT 번호 설정
 
-        // 자재 목록 생성 및 계산
         List<LineMaterial> lineMaterials = work.getLineMaterials().stream()
                 .map(lineMaterialDTO -> {
                     LineMaterial lineMaterial = modelMapper.map(lineMaterialDTO, LineMaterial.class);
@@ -275,11 +233,21 @@ public class WorkService {
                 })
                 .collect(Collectors.toList());
 
-        // 작업지시서에 자재 목록 설정
         workOrder.setLineMaterial(lineMaterials);
 
-        // 작업지시서 저장
+        // 작업지시서 저장 (첫 번째 저장)
         workRepository.save(workOrder);
+
+        // 진행상태 (ProcessTracking) 추가
+        processTracking processTracking = new processTracking();
+        processTracking.setWorkOrders(workOrder);  // 작업지시서와 연결
+
+        // ProcessTracking 저장
+        processTrackingRepository.save(processTracking);
+
+        // 진행상태가 설정된 후 작업지시서를 업데이트 (두 번째 저장은 불필요)
+        workOrder.setProcessTracking(processTracking);  // 작업지시서에 진행상태 연결
+//        workRepository.save(workOrder);  // 작업지시서와 진행상태 연결 후 저장
     }
 
 

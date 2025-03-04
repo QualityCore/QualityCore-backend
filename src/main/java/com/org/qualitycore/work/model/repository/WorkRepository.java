@@ -12,6 +12,5 @@ public interface WorkRepository extends JpaRepository<WorkOrders, String> {
     Optional<WorkOrders> findTopByOrderByLotNoDesc();
 
 
-
-
+    Optional<WorkOrders> findByLotNo(String lotNo);
 }

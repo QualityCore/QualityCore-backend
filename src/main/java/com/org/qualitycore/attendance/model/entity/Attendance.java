@@ -36,4 +36,5 @@ public class Attendance {
     @JoinColumn(name = "EMP_ID")
     private Employee employee;
 
+
 }

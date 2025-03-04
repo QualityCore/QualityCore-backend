@@ -10,15 +10,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.nio.charset.Charset;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +40,22 @@ public class WorkController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "작업지시서 전체조회 성공"),
             @ApiResponse(responseCode = "404", description = "작업지시서가 없습니다.")})
-    public ResponseEntity<Message> findAllWorkOrders(@PageableDefault Pageable pageable) {
+    public ResponseEntity<Message> findAllWorkOrders(@PageableDefault Pageable pageable,
+                                                     @RequestParam(required = false) String workTeam,
+                                                     @RequestParam(required = false) String productName,
+                                                     @RequestParam(required = false) String lotNo,
+                                                     @RequestParam(required = false) String lineNo,
+                                                     @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
+                                                     @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endDate) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        Page<WorkFindAllDTO> work = workService.findAllWorkOrders(pageable);
+        Page<WorkFindAllDTO> work = workService.findAllWorkOrders(pageable, workTeam, productName, lotNo, lineNo, startDate, endDate);
+
+        System.out.println("Received parameters - workTeam: " + workTeam + ", productName: " + productName +
+                ", lotNo: " + lotNo + ", lineNo: " + lineNo + ", startDate: " + startDate +
+                ", endDate: " + endDate + ", pageable: " + pageable);
 
         // 작업지시서가 없을경우
         if (work == null || work.isEmpty()) {
@@ -58,26 +71,6 @@ public class WorkController {
         return ResponseEntity.ok()
                 .headers(headers)
                 .body(new Message(200, "작업지시서 전체조회 성공", res));
-    }
-
-    @GetMapping("/work/search")
-    @Operation(summary = "작업지시서 검색", description = "조건에 따라 작업지시서를 검색합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "작업지시서 검색 성공"),
-            @ApiResponse(responseCode = "404", description = "검색된 작업지시서가 없습니다.")})
-    public ResponseEntity<Message> findAllSearchWorkOrders (@RequestParam(required = false) String LotNo, @PageableDefault Pageable pageable) {
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
-
-        Page<WorkFindAllDTO> work = workService.findAllSearchWorkOrders(LotNo, pageable);
-
-        Map<String, Object> res = new HashMap<>();
-
-        res.put("work", work);
-
-        return ResponseEntity.ok().headers(headers).body(new Message(200, "작업지시서 검색완료", res));
-
     }
 
     // 작업지시서 상세 조회
@@ -154,7 +147,6 @@ public class WorkController {
         return ResponseEntity.ok().headers(headers).body(new Message(200, "조회성공", res));
     }
 
-
     // 맥주레시피
     @GetMapping("/beerRecipes")
     public ResponseEntity<Message> beerRecipes() {
@@ -168,7 +160,6 @@ public class WorkController {
 
         return ResponseEntity.ok().headers(headers).body(new Message(200, "조회 성공", res));
     }
-
 
     // 작업지시서 삭제
     @DeleteMapping("/work/{lotNo}")

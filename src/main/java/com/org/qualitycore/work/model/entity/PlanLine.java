@@ -1,6 +1,5 @@
 package com.org.qualitycore.work.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
@@ -41,6 +40,5 @@ public class PlanLine {
 
     @Column(name = "END_DATE")
     private Date endDate; // 생산종료일
-
 
 }
