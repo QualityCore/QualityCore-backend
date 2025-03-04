@@ -5,19 +5,15 @@ import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
-import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.work.model.repository.LineMaterialRepository;
 import com.org.qualitycore.standardinformation.model.repository.MaterialGrindingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +142,7 @@ public class MaterialGrindingService {
 
 
         // 실제 종료시간 업데이트
-        public MaterialGrindingDTO completeGrindingProcess(String grindingId) {
+        public MaterialGrindingDTO completeEndTime(String grindingId) {
             MaterialGrinding materialGrinding = materialGrindingRepository.findById(grindingId)
                 .orElseThrow(() -> new RuntimeException("분쇄 ID가 존재하지 않습니다."));
             materialGrinding.setActualEndTime(LocalDateTime.now());
@@ -155,5 +151,37 @@ public class MaterialGrindingService {
         }
 
 
+    // 🔹 공정 시작 (대기중 → 진행중)
+    public MaterialGrindingDTO startGrindingProcess(String grindingId) {
+        MaterialGrinding materialGrinding = materialGrindingRepository.findById(grindingId)
+                .orElseThrow(() -> new RuntimeException("❌ 분쇄 ID가 존재하지 않습니다."));
 
+        materialGrinding.setProcessStatus("진행중");
+        materialGrinding.setStartTime(LocalDateTime.now());
+        materialGrinding.setExpectedEndTime(materialGrinding.getStartTime().plusMinutes(materialGrinding.getGrindDuration()));
+
+        MaterialGrinding updatedGrinding = materialGrindingRepository.save(materialGrinding);
+        return modelMapper.map(updatedGrinding, MaterialGrindingDTO.class);
+    }
+
+    // 🔹 공정 완료 (진행중 → 완료)
+    public MaterialGrindingDTO completeGrindingProcess(String grindingId) {
+        MaterialGrinding materialGrinding = materialGrindingRepository.findById(grindingId)
+                .orElseThrow(() -> new RuntimeException("❌ 분쇄 ID가 존재하지 않습니다."));
+
+        if (!"진행중".equals(materialGrinding.getProcessStatus())) {
+            throw new RuntimeException("❌ 진행중 상태가 아닌 공정을 완료할 수 없습니다.");
+        }
+
+        materialGrinding.setProcessStatus("완료");
+        materialGrinding.setActualEndTime(LocalDateTime.now());
+
+        MaterialGrinding updatedGrinding = materialGrindingRepository.save(materialGrinding);
+        return modelMapper.map(updatedGrinding, MaterialGrindingDTO.class);
+    }
 }
+
+
+
+
+
