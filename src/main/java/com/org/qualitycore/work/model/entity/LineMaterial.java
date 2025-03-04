@@ -56,8 +56,5 @@ public class LineMaterial {
     private MaterialGrinding materialGrinding;  // <-- 이 필드명을 사용해야 함
 
 
-
-
-
 }
 

@@ -8,7 +8,4 @@ import java.util.Date;
 import java.util.Optional;
 
 @Repository
-public interface WorkPlanLineRepository extends JpaRepository<PlanLine, String> {
-
-    Optional<PlanLine> findByLineNoAndStartDateAndEndDateAndPlanQty(int lineNo, Date startDate, Date endDate, int planQty);
-}
+public interface WorkPlanLineRepository extends JpaRepository<PlanLine, String> {}
