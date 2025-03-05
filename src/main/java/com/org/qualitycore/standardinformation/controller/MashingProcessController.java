@@ -3,7 +3,6 @@ package com.org.qualitycore.standardinformation.controller;
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MashingProcessDTO;
-import com.org.qualitycore.standardinformation.model.entity.ErpMessage;
 import com.org.qualitycore.standardinformation.model.service.MashingProcessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,6 +109,20 @@ public class MashingProcessController {
         log.info("컨트롤러 : 당화 공정 완료 요청 - ID {} , 요청 데이터 {} ", mashingId, requestBody);
         Double phValue = requestBody.get("phValue"); // 요청에서 pH 값 추출
         Message response = mashingProcessService.completeMashingProcess(mashingId, phValue);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
+    // ✅ 특정 LOT_NO에 대한 분쇄 공정 상태 업데이트
+    @Operation(summary = "LOT_NO에 따른 공정 상태 업데이트", description = "LOT_NO를 기준으로 공정 상태를 업데이트합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "업데이트 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
+            @ApiResponse(responseCode = "404", description = "해당 LOT_NO 없음")
+    })
+    @PutMapping("/update")
+    public ResponseEntity<Message> updateMashingProcess(@RequestBody MashingProcessDTO mashingProcessDTO) {
+        log.info("컨트롤러: LOT_NO={} 공정 상태 업데이트 요청", mashingProcessDTO.getLotNo());
+        Message response = mashingProcessService.updateMashingProcess(mashingProcessDTO);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

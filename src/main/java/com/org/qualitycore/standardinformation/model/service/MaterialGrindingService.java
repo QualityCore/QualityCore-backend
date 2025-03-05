@@ -69,7 +69,7 @@ public class MaterialGrindingService {
 
 
 
-    // 분쇄 공정 등록
+    // ✅ 분쇄 공정 등록
         @Transactional
         public Message createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
 
@@ -122,7 +122,7 @@ public class MaterialGrindingService {
 
                 // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
                 processTracking.setStatusCode("SC001");
-                processTracking.setProcessStatus("대기중");
+                processTracking.setProcessStatus("대기 중");
                 processTracking.setProcessName("분쇄 및 원재료투입");
 
 
@@ -248,7 +248,7 @@ public class MaterialGrindingService {
 
             // ✅ 기존 데이터를 업데이트 (UPDATE 수행)
             processTrackingRepository.save(processTracking);
-            processTrackingRepository.flush(); // 변경 사항 즉시 반영
+
 
             // ✅ Hibernate Proxy 를 제거한 DTO 변환 후 반환
             ProcessTrackingDTONam responseDTO = modelMapper.map(processTracking, ProcessTrackingDTONam.class);
