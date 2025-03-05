@@ -38,7 +38,7 @@ public class MaterialRequestSimpleDTO {
         // ✅ 신규 자재 요청이면 직접 저장된 `materialId`, `materialName` 사용
         else {
             dto.setMaterialId(entity.getMaterialId());
-            dto.setMaterialName(entity.getMaterialName());
+
         }
 
         return dto;

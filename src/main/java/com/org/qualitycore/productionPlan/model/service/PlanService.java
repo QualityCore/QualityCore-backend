@@ -782,27 +782,15 @@ public class PlanService {
         return materialWarehouseRepository.findAllStockStatus();
     }
 
-    
 
-    // 자재 구매 신청
+    // 자재구매신청
     @Transactional
-    public MaterialRequest requestMaterial(MaterialRequestSimpleDTO requestDTO) {
+    public MaterialRequest requestMaterial(MaterialRequestDTO requestDTO) {
         MaterialRequest materialRequest = new MaterialRequest();
 
-        if (requestDTO.getPlanMaterialId() != null && !requestDTO.getPlanMaterialId().isEmpty()) {
-            // ✅ 기존 PlanMaterial 가져오기
-            PlanMaterial planMaterial = planMaterialRepository.findById(requestDTO.getPlanMaterialId())
-                    .orElseThrow(() -> new ResourceNotFoundException("PlanMaterial을 찾을 수 없습니다: " + requestDTO.getPlanMaterialId()));
-            materialRequest.setPlanMaterial(planMaterial);
-        } else {
-            // ✅ 신규 요청일 경우, 더미 PlanMaterial 생성 및 설정
-            PlanMaterial newPlanMaterial = new PlanMaterial();
-            newPlanMaterial.setPlanMaterialId("NEW_REQUEST");
-            newPlanMaterial.setMaterialName("신규 자재 요청");
-            newPlanMaterial = planMaterialRepository.save(newPlanMaterial); // DB 저장
-
-            materialRequest.setPlanMaterial(newPlanMaterial);
-        }
+        PlanMaterial planMaterial = planMaterialRepository.findById(requestDTO.getPlanMaterialId())
+                .orElseThrow(() -> new ResourceNotFoundException("PlanMaterial을 찾을 수 없습니다: " + requestDTO.getPlanMaterialId()));
+        materialRequest.setPlanMaterial(planMaterial);
 
         materialRequest.setRequestId(generateNewMaterialRequestId());
         materialRequest.setRequestQty(requestDTO.getRequestQty());
@@ -810,6 +798,8 @@ public class PlanService {
         materialRequest.setReason(requestDTO.getReason());
         materialRequest.setNote(requestDTO.getNote());
         materialRequest.setRequestDate(LocalDate.now());
+        materialRequest.setMaterialId(requestDTO.getMaterialId());
+        materialRequest.setStatus("미발주");
 
         return materialRequestRepository.save(materialRequest);
     }
@@ -820,11 +810,45 @@ public class PlanService {
 
 
 
-    public List<MaterialRequestSimpleDTO> getMaterialRequests() {
+
+
+    public List<MaterialRequestDTO> getMaterialRequests() {
         List<MaterialRequest> requests = materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
+
+        // 📌 요청 개수 로그 출력
+        System.out.println("📌 [DEBUG] 요청 개수: " + requests.size());
+
         return requests.stream()
-                .map(MaterialRequestSimpleDTO::fromEntity)
+                .map(request -> {
+                    // ✅ fromEntity() 호출 로그 추가
+                    System.out.println("📌 [DEBUG] fromEntity() 호출 전 - 요청 ID: " + request.getRequestId());
+
+                    // ✅ fromEntity()를 사용하여 변환
+                    MaterialRequestDTO dto = MaterialRequestDTO.fromEntity(request);
+
+                    // ✅ 변환된 DTO 로그 출력
+                    System.out.println("📌 변환 완료된 DTO: " + dto);
+
+                    return dto;
+                })
                 .collect(Collectors.toList());
+    }
+
+
+
+
+    public boolean updateMaterialRequestStatus(String requestId, String status) {
+        // 요청 조회
+        Optional<MaterialRequest> optionalRequest = materialRequestRepository.findById(requestId);
+
+        if (optionalRequest.isPresent()) {
+            MaterialRequest request = optionalRequest.get();
+            request.setStatus(status);
+            materialRequestRepository.save(request);
+            return true;
+        }
+
+        return false; // 요청을 찾을 수 없는 경우
     }
 
 }

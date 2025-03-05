@@ -43,7 +43,7 @@ public class MaterialRequest {
     @Column(name = "MATERIAL_ID", nullable = true)
     private String materialId;
 
-    @Column(name = "MATERIAL_NAME", nullable = true)
-    private String materialName;
 
+    @Column(name = "STATUS")
+    private String status;
 }
