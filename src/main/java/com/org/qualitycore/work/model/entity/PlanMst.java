@@ -3,7 +3,6 @@ package com.org.qualitycore.work.model.entity;
 import com.org.qualitycore.productionPlan.model.entity.PlanProduct;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.util.List;
 

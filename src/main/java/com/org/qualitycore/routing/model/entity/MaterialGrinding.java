@@ -35,5 +35,4 @@ public class MaterialGrinding {
     @Column(name = "EXPECTED_END_TIME")
     private LocalDateTime expectedEndTime;
 
-
 }
