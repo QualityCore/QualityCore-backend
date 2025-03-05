@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 @NoArgsConstructor
@@ -10,13 +11,26 @@ import lombok.*;
 public class EquipmentInfoDTO {
 
     private String equipmentId;
-    private String workPlaceId;
+
+    private String workplaceId;
+
     private String equipmentName;
-    private String equipmentCode;
+
     private String modelName;
+
     private String manufacturer;
-    private String installationDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private String installDate;
+
     private String equipmentStatus;
-    private String createdAt;
-    private String updatedAt;
+
+    private String equipmentImage;
+
+    private String equipmentEtc;
+
+    private String workplaceName;
+
+    private String workplaceType;
+
 }

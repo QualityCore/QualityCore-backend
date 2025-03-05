@@ -2,7 +2,6 @@ package com.org.qualitycore.work.model.entity;
 
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
