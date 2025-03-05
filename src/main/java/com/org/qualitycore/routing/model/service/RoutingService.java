@@ -1,6 +1,7 @@
 package com.org.qualitycore.routing.model.service;
 
 import com.org.qualitycore.routing.model.dto.ProcessTrackingDTO;
+import com.org.qualitycore.routing.model.dto.WortVolumeDTO;
 import com.org.qualitycore.routing.model.entity.*;
 import com.org.qualitycore.routing.model.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -231,5 +233,65 @@ public class RoutingService {
         ProcessTrackingDTO dto = modelMapper.map(tracking, ProcessTrackingDTO.class);
         enrichProcessTrackingDTO(dto);
         return dto;
+    }
+    public List<WortVolumeDTO> findWortVolumes(String lotNo) {
+        List<WortVolumeDTO> result = new ArrayList<>();
+
+        // 1. 여과 공정 데이터 조회
+        List<FiltrationProcess> filtrationProcesses;
+        if (StringUtils.hasText(lotNo)) {
+            filtrationProcesses = routingFiltrationProcessRepository.findByLotNoContaining(lotNo);
+        } else {
+            filtrationProcesses = routingFiltrationProcessRepository.findAll();
+        }
+
+        // 여과 공정 데이터를 DTO로 변환
+        for (FiltrationProcess process : filtrationProcesses) {
+            WortVolumeDTO dto = new WortVolumeDTO();
+            dto.setLotNo(process.getLotNo());
+            dto.setProcessName("여과");
+            // 여과는 초기 워트량이 없으므로 null 또는 0으로 설정
+            dto.setInitialWortVolume(0.0);
+            dto.setCurrentWortVolume(process.getRecoveredWortVolume());
+            dto.setLossVolume(process.getLossVolume());
+            dto.setRecordTime(process.getActualEndTime() != null ?
+                    process.getActualEndTime() : process.getStartTime());
+            dto.setProcessStatus(process.getProcessStatus());
+
+            // 제품 정보 추가 (필요시)
+            result.add(dto);
+        }
+
+        // 2. 끓임 공정 데이터 조회
+        List<BoilingProcess> boilingProcesses;
+        if (StringUtils.hasText(lotNo)) {
+            boilingProcesses = routingBoilingProcessRepository.findByLotNoContaining(lotNo);
+        } else {
+            boilingProcesses = routingBoilingProcessRepository.findAll();
+        }
+
+        // 끓임 공정 데이터를 DTO로 변환
+        for (BoilingProcess process : boilingProcesses) {
+            WortVolumeDTO dto = new WortVolumeDTO();
+            dto.setLotNo(process.getLotNo());
+            dto.setProcessName("끓임");
+            dto.setInitialWortVolume(process.getInitialWortVolume());
+            dto.setCurrentWortVolume(process.getPostBoilWortVolume());
+            dto.setLossVolume(process.getBoilLossVolume());
+            dto.setRecordTime(process.getActualEndTime() != null ?
+                    process.getActualEndTime() : process.getStartTime());
+            dto.setProcessStatus(process.getProcessStatus());
+
+            // 효율 계산 (있는 경우)
+            if (process.getInitialWortVolume() != null && process.getInitialWortVolume() > 0
+                    && process.getPostBoilWortVolume() != null) {
+                double efficiency = (process.getPostBoilWortVolume() / process.getInitialWortVolume()) * 100;
+                dto.setTotalEfficiency(Math.round(efficiency * 100.0) / 100.0); // 소수점 2자리로 반올림
+            }
+
+            result.add(dto);
+        }
+
+        return result;
     }
 }

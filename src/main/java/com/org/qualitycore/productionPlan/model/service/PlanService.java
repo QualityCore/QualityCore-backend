@@ -709,9 +709,12 @@ public class PlanService {
 
             if (startDate == null) continue; // 시작일이 없으면 건너뜀
 
-            LocalDateTime currentTime = startDate.atTime(8, 0); // 기본 시작 시간 8:00 AM
+            LocalDateTime currentTime = startDate.atStartOfDay().plusHours(8);
 
-            // 1. 분쇄 (40분)
+            // 로그 추가
+            System.out.println("🔍 생산 공정 시작: " + line.getProductId() + ", 시작일: " + startDate + ", 시작시간: " + currentTime);
+
+            // 1. 분쇄 (40분) - 실제 계획 시작일에 시작
             steps.add(createProcessStep(line, "분쇄", currentTime, currentTime.plusMinutes(40)));
             currentTime = currentTime.plusMinutes(40);
 
