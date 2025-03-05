@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@ToString
+
 @Entity
 @Table(name = "PROCESS_TRACKING")
 public class processTracking {
@@ -41,6 +41,18 @@ public class processTracking {
         if (this.processName == null) {
             this.processName = "분쇄 및 원재료투입";  // ✅ 기본값 예: '공정 미정'
         }
+    }
+
+
+    // 남규 ToString WorkOrders 제거함
+    @Override
+    public String toString() {
+        return "processTracking{" +
+                "trackingId=" + trackingId +
+                ", statusCode='" + statusCode + '\'' +
+                ", processStatus='" + processStatus + '\'' +
+                ", processName='" + processName + '\'' +
+                '}';
     }
 }
 
