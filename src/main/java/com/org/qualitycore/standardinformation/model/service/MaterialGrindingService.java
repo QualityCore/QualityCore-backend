@@ -1,12 +1,16 @@
 package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.common.Message;
+import com.org.qualitycore.work.model.entity.WorkOrders;
+import com.org.qualitycore.work.model.entity.processTracking;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
+import com.org.qualitycore.standardinformation.model.dto.ProcessTrackingDTONam;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import com.org.qualitycore.work.model.repository.LineMaterialRepository;
 import com.org.qualitycore.standardinformation.model.repository.MaterialGrindingRepository;
+import com.org.qualitycore.work.model.repository.ProcessTrackingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -27,6 +31,7 @@ public class MaterialGrindingService {
 
         private final MaterialGrindingRepository materialGrindingRepository;
         private final LineMaterialRepository lineMaterialRepository;
+        private final ProcessTrackingRepository processTrackingRepository;
         private final ModelMapper modelMapper;
 
 
@@ -67,35 +72,66 @@ public class MaterialGrindingService {
     // 분쇄 공정 등록
         @Transactional
         public Message createMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
+
             try {
                 log.info("서비스 : 분쇄공정 등록 시작 DTO {}", materialGrindingDTO);
+
+                // ✅ DTO 가 null 인지 체크
+                if (materialGrindingDTO == null) {
+                    return new Message(HttpStatus.BAD_REQUEST.value(),
+                            "MaterialGrindingDTO 가 null 입니다.", new HashMap<>());
+                }
 
                 // ID 자동 생성
                 String generatedId = generateNextGrindingId();
                 log.info("자동으로 생성되는 ID {}", generatedId);
 
+
                 // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
-                List<LineMaterial> lineMaterials = lineMaterialRepository.findByWorkOrders_LotNo(materialGrindingDTO.getLotNo());
+                List<LineMaterial> lineMaterials = lineMaterialRepository
+                        .findByWorkOrders_LotNo(materialGrindingDTO.getLotNo());
                 if (lineMaterials.isEmpty()) {
-                    return new Message(HttpStatus.BAD_REQUEST.value(), "LOT_NO가 존재하지 않습니다.", null);
+                    return new Message(HttpStatus.BAD_REQUEST.value()
+                            , "LOT_NO가 존재하지 않습니다.", null);
                 }
 
                 // ✅ ModelMapper 를 사용하여 DTO -> Entity 변환
-                MaterialGrinding materialGrinding = modelMapper.map(materialGrindingDTO, MaterialGrinding.class);
+                MaterialGrinding materialGrinding = modelMapper
+                        .map(materialGrindingDTO, MaterialGrinding.class);
 
-                // ✅ ID 자동 생성
+                // ✅ ID 자동 생성 적용
                 materialGrinding.setGrindingId(generatedId);
 
                 // ✅ 관련 엔티티 매핑 (LOT_NO 기반으로 LineMaterial 리스트 설정)
                 materialGrinding.setLineMaterials(lineMaterials);
 
-                // ✅ 기본값 설정
-                if (materialGrinding.getProcessStatus() == null) {
-                    materialGrinding.setProcessStatus("대기중");
+
+                // ✅ WorkOrders 가져오기
+                WorkOrders workOrders = lineMaterials.get(0).getWorkOrders();
+
+                // ✅ LOT_NO를 기반으로 기존 ProcessTracking 조회
+                processTracking processTracking = processTrackingRepository.
+                        findByLotNo(materialGrindingDTO.getLotNo());
+                if (processTracking == null) {
+                    processTracking = new processTracking();
                 }
-                if (materialGrinding.getStatusCode() == null) {
-                    materialGrinding.setStatusCode("SC001");
-                }
+
+
+                // ✅ `processTracking`에 `WorkOrders` 설정
+                processTracking.setWorkOrders(workOrders);  // ✅ LOT_NO와 연결
+
+                // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
+                processTracking.setStatusCode("SC001");
+                processTracking.setProcessStatus("대기중");
+                processTracking.setProcessName("분쇄 및 원재료투입");
+
+
+                // ✅ ProcessTracking 저장
+                processTracking = processTrackingRepository.save(processTracking);
+
+                // ✅ `processTracking`을 `materialGrinding`에 설정
+                materialGrinding.setProcessTracking(processTracking);
+
 
                 // ✅ 시작 시간 설정 (DTO 값이 있으면 사용, 없으면 현재 시간)
                 if (materialGrinding.getStartTime() == null) {
@@ -107,6 +143,8 @@ public class MaterialGrindingService {
                     materialGrinding.setExpectedEndTime(materialGrinding.getStartTime().plusMinutes(materialGrinding.getGrindDuration()));
                 }
 
+
+
                 log.info("ModelMapper 변환 완료 !! {}", materialGrinding);
 
                 // ✅  DB 저장
@@ -116,6 +154,15 @@ public class MaterialGrindingService {
 
                 // ✅ DTO 변환 후 반환
                 MaterialGrindingDTO responseDTO = modelMapper.map(savedMaterialGrinding, MaterialGrindingDTO.class);
+
+                // ✅ lotNo가 누락되지 않도록 직접 설정
+                if (savedMaterialGrinding.getProcessTracking() != null
+                        && savedMaterialGrinding.getProcessTracking().getWorkOrders() != null) {
+                    responseDTO.getProcessTracking().setLotNo(
+                            savedMaterialGrinding.getProcessTracking().getWorkOrders().getLotNo()
+                    );
+                }
+
                 Map<String, Object> result = new HashMap<>();
                 result.put("savedMaterialGrinding", responseDTO);
                 return new Message(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!", result);
@@ -151,34 +198,71 @@ public class MaterialGrindingService {
         }
 
 
-    // 🔹 공정 시작 (대기중 → 진행중)
-    public MaterialGrindingDTO startGrindingProcess(String grindingId) {
-        MaterialGrinding materialGrinding = materialGrindingRepository.findById(grindingId)
-                .orElseThrow(() -> new RuntimeException("❌ 분쇄 ID가 존재하지 않습니다."));
 
-        materialGrinding.setProcessStatus("진행중");
-        materialGrinding.setStartTime(LocalDateTime.now());
-        materialGrinding.setExpectedEndTime(materialGrinding.getStartTime().plusMinutes(materialGrinding.getGrindDuration()));
+    @Transactional
+    public Message updateMaterialGrinding(MaterialGrindingDTO materialGrindingDTO) {
+        try {
+            log.info("서비스 : 분쇄공정 업데이트 시작 DTO {}", materialGrindingDTO);
 
-        MaterialGrinding updatedGrinding = materialGrindingRepository.save(materialGrinding);
-        return modelMapper.map(updatedGrinding, MaterialGrindingDTO.class);
-    }
+            // ✅ LOT_NO를 기반으로 기존 ProcessTracking 조회
+            processTracking processTracking =
+                    processTrackingRepository.findByLotNo(materialGrindingDTO.getLotNo());
 
-    // 🔹 공정 완료 (진행중 → 완료)
-    public MaterialGrindingDTO completeGrindingProcess(String grindingId) {
-        MaterialGrinding materialGrinding = materialGrindingRepository.findById(grindingId)
-                .orElseThrow(() -> new RuntimeException("❌ 분쇄 ID가 존재하지 않습니다."));
 
-        if (!"진행중".equals(materialGrinding.getProcessStatus())) {
-            throw new RuntimeException("❌ 진행중 상태가 아닌 공정을 완료할 수 없습니다.");
+            // ✅ DTO 가 null 인지 체크
+            if (materialGrindingDTO == null || materialGrindingDTO.getLotNo() == null) {
+                return new Message(HttpStatus.BAD_REQUEST.value(),
+                        "MaterialGrindingDTO 또는 LOT_NO가 null 입니다.", new HashMap<>());
+            }
+
+
+            // ✅ trackingId가 없으면 업데이트 불가
+            if (processTracking.getTrackingId() == null) {
+                return new Message(HttpStatus.BAD_REQUEST.value(),
+                        "ProcessTracking 의 ID가 없습니다.", new HashMap<>());
+            }
+
+
+            // ✅ DTO 에서 ProcessTracking 정보를 가져와서 업데이트
+            if (materialGrindingDTO.getProcessTracking() != null) {
+                ProcessTrackingDTONam trackingDTO = materialGrindingDTO.getProcessTracking();
+
+                if (trackingDTO.getStatusCode() != null) {
+                    processTracking.setStatusCode(trackingDTO.getStatusCode());
+                }
+
+                if (trackingDTO.getProcessStatus() != null) {
+                    processTracking.setProcessStatus(trackingDTO.getProcessStatus());
+                }
+
+                if (trackingDTO.getProcessName() != null) {
+                    processTracking.setProcessName(trackingDTO.getProcessName());
+                }
+                log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",
+                        trackingDTO.getStatusCode(), trackingDTO.getProcessStatus(), trackingDTO.getProcessName());
+
+            }
+
+            log.info("업데이트된 ProcessTracking: {}", processTracking);
+
+
+            // ✅ 기존 데이터를 업데이트 (UPDATE 수행)
+            processTrackingRepository.save(processTracking);
+            processTrackingRepository.flush(); // 변경 사항 즉시 반영
+
+            // ✅ Hibernate Proxy 를 제거한 DTO 변환 후 반환
+            ProcessTrackingDTONam responseDTO = modelMapper.map(processTracking, ProcessTrackingDTONam.class);
+            return new Message(HttpStatus.OK.value(),
+                    "공정 상태 업데이트 완료!", Map.of("updatedProcessTracking", responseDTO));
+
+        } catch (Exception e) {
+            log.error("서비스 : 공정 상태 업데이트 중 오류 발생 {}", e.getMessage(), e);
+            return new Message(HttpStatus.BAD_REQUEST.value(),
+                    "공정 상태 업데이트 실패: " + e.getMessage(), new HashMap<>());
         }
-
-        materialGrinding.setProcessStatus("완료");
-        materialGrinding.setActualEndTime(LocalDateTime.now());
-
-        MaterialGrinding updatedGrinding = materialGrindingRepository.save(materialGrinding);
-        return modelMapper.map(updatedGrinding, MaterialGrindingDTO.class);
     }
+
+
 }
 
 

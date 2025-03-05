@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
+import com.org.qualitycore.routing.model.dto.ProcessTrackingDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -19,9 +20,6 @@ public class MaterialGrindingDTO {
 
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
     private String lotNo;
-
-    @Schema(description = "상태 코드 ID", example = "SC001")
-    private String statusCode;
 
     @Schema(description = "주원료" , example ="쌀")
     private String mainMaterial;
@@ -44,12 +42,6 @@ public class MaterialGrindingDTO {
     @Schema(description = "소요시간" , example = "40")
     private Integer grindDuration;
 
-    @Schema(description = "공정 상태", example = "대기중")
-    private String processStatus;
-
-    @Schema(description = "공정 이름", example = "분쇄")
-    private String processName;
-
     @Schema(description = "메모사항" , example = "작업자 : 강동원 작업완료")
     private String notes;
 
@@ -61,4 +53,9 @@ public class MaterialGrindingDTO {
 
     @Schema(description = "실제 종료 시간" , example = "2025-02-12T11:00:30")
     private LocalDateTime actualEndTime;
+
+    @Schema(description = "공정 추적 DTO" )
+    private ProcessTrackingDTONam processTracking;
+
+
 }
