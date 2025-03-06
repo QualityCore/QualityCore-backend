@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.service;
 
+import com.org.qualitycore.common.CloudinaryService;
 import com.org.qualitycore.standardinformation.model.dto.EquipmentInfoDTO;
 import com.org.qualitycore.standardinformation.model.entity.EquipmentInfo;
 import com.org.qualitycore.standardinformation.model.entity.QEquipmentInfo;
@@ -13,7 +14,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 @Service
@@ -24,6 +33,7 @@ public class EquipmentInfoService {
     private final ModelMapper modelMapper;
     private final EquipmentInfoRepository equipmentInfoRepository;
     private final WorkplaceRepository workplaceRepository;
+    private final CloudinaryService cloudinaryService;
 
     // 전체조회
     public List<EquipmentInfoDTO> findEquipmentAll() {
@@ -76,26 +86,30 @@ public class EquipmentInfoService {
 
     // 설비등록
     @Transactional
-    public void createEquipment(EquipmentInfoDTO equipment) {
-
+    public void createEquipment(EquipmentInfoDTO equipmentDTO) {
         // 최대 equipmentId 조회
         String maxEquipmentId = equipmentInfoRepository.findMaxEquipmentId();
-
-        // 새로운 equipmentId 생성
         String newEquipmentId = generateNewEquipmentId(maxEquipmentId);
 
-        // EquipmentInfo DTO를 Entity로 변환
-        EquipmentInfo equipmentInfo = modelMapper.map(equipment, EquipmentInfo.class);
-
-        // 새로 생성된 equipmentId를 설정
+        // EquipmentInfo Entity 생성 및 데이터 설정
+        EquipmentInfo equipmentInfo = new EquipmentInfo();
         equipmentInfo.setEquipmentId(newEquipmentId);
+        equipmentInfo.setEquipmentName(equipmentDTO.getEquipmentName());
+        equipmentInfo.setModelName(equipmentDTO.getModelName());
+        equipmentInfo.setManufacturer(equipmentDTO.getManufacturer());
+        equipmentInfo.setInstallDate(equipmentDTO.getInstallDate());
+        equipmentInfo.setEquipmentStatus(equipmentDTO.getEquipmentStatus());
+        equipmentInfo.setEquipmentEtc(equipmentDTO.getEquipmentEtc());
 
-        // workplace 찾기
-        Workplace workplace = workplaceRepository.findById(equipment.getWorkplaceId())
+        // Workplace 찾기
+        Workplace workplace = workplaceRepository.findById(equipmentDTO.getWorkplaceId())
                 .orElseThrow(() -> new IllegalArgumentException("Workplace not found"));
-
-        // workplace 설정
         equipmentInfo.setWorkplace(workplace);
+
+        // 이미 업로드된 이미지 URL을 바로 사용
+        if (equipmentDTO.getEquipmentImage() != null && !equipmentDTO.getEquipmentImage().isEmpty()) {
+            equipmentInfo.setEquipmentImage(equipmentDTO.getEquipmentImage());  // 업로드된 이미지 URL을 EquipmentInfo에 설정
+        }
 
         // 데이터 저장
         equipmentInfoRepository.save(equipmentInfo);
@@ -124,7 +138,6 @@ public class EquipmentInfoService {
         EquipmentInfo equipmentInfo = equipmentInfoDTO.
                                       toBuilder().
                                       equipmentStatus(equipment.getEquipmentStatus()).
-                                      equipmentImage(equipment.getEquipmentImage()).
                                       equipmentEtc(equipment.getEquipmentEtc()).
                                       build();
 

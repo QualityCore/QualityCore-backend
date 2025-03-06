@@ -13,3 +13,8 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
+
+cloudinary:
+  cloud-name: dob4ueqsf
+  api-key: 329995789126366
+  api-secret: LUAZLDPArj1E_iqkJm5qoSYZ_T4
