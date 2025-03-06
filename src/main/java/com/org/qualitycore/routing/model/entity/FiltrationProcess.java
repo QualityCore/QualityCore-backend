@@ -8,7 +8,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-
 @Entity(name = "FiltrationProcessEntity")
 @Table(name = "FILTRATION_PROCESS")
 @Setter
@@ -17,8 +16,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FiltrationProcess {
-
-    // 여과작업
 
     @Id
     @Column(name = "FILTRATION_ID")
@@ -30,10 +27,30 @@ public class FiltrationProcess {
     @Column(name = "STATUS_CODE")
     private String statusCode;
 
+    @Column(name = "FILTRATION_TIME")
+    private Double filtrationTime;
+
+    @Column(name = "GRAIN_ABSORPTION")
+    private Double grainAbsorption;
+
+    @Column(name = "RECOVERED_WORT_VOLUME")
+    private Double recoveredWortVolume;
+
+    @Column(name = "LOSS_VOLUME")
+    private Double lossVolume;
+
     @Column(name = "START_TIME")
     private LocalDateTime startTime;
 
     @Column(name = "EXPECTED_END_TIME")
     private LocalDateTime expectedEndTime;
 
+    @Column(name = "ACTUAL_END_TIME")
+    private LocalDateTime actualEndTime;
+
+    @Column(name = "PROCESS_STATUS")
+    private String processStatus;
+
+    @Column(name = "NOTES")
+    private String notes;
 }

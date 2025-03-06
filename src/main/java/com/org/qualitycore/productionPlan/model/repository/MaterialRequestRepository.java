@@ -12,6 +12,6 @@ public interface MaterialRequestRepository extends JpaRepository<MaterialRequest
     @Query("SELECT MAX(m.requestId) FROM MaterialRequest m")
     String findMaxRequestId();
 
-    @Query("SELECT r FROM MaterialRequest r ORDER BY r.requestDate DESC")
+    @Query("SELECT mr FROM MaterialRequest mr LEFT JOIN FETCH mr.planMaterial pm ORDER BY mr.requestDate DESC")
     List<MaterialRequest> findAllRequestsOrderByRequestDateDesc();
 }
