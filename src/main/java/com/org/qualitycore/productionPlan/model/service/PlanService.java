@@ -709,9 +709,12 @@ public class PlanService {
 
             if (startDate == null) continue; // 시작일이 없으면 건너뜀
 
-            LocalDateTime currentTime = startDate.atTime(8, 0); // 기본 시작 시간 8:00 AM
+            LocalDateTime currentTime = startDate.atStartOfDay().plusHours(8);
 
-            // 1. 분쇄 (40분)
+            // 로그 추가
+            System.out.println("🔍 생산 공정 시작: " + line.getProductId() + ", 시작일: " + startDate + ", 시작시간: " + currentTime);
+
+            // 1. 분쇄 (40분) - 실제 계획 시작일에 시작
             steps.add(createProcessStep(line, "분쇄", currentTime, currentTime.plusMinutes(40)));
             currentTime = currentTime.plusMinutes(40);
 
@@ -772,4 +775,80 @@ public class PlanService {
         planMst.setStatus(status);
         planMstRepository.save(planMst);
     }
+
+
+    // 자재 재고 현황 조회
+    public List<MaterialWarehouse> getStockStatus() {
+        return materialWarehouseRepository.findAllStockStatus();
+    }
+
+
+    // 자재구매신청
+    @Transactional
+    public MaterialRequest requestMaterial(MaterialRequestDTO requestDTO) {
+        MaterialRequest materialRequest = new MaterialRequest();
+
+        PlanMaterial planMaterial = planMaterialRepository.findById(requestDTO.getPlanMaterialId())
+                .orElseThrow(() -> new ResourceNotFoundException("PlanMaterial을 찾을 수 없습니다: " + requestDTO.getPlanMaterialId()));
+        materialRequest.setPlanMaterial(planMaterial);
+
+        materialRequest.setRequestId(generateNewMaterialRequestId());
+        materialRequest.setRequestQty(requestDTO.getRequestQty());
+        materialRequest.setDeliveryDate(requestDTO.getDeliveryDate());
+        materialRequest.setReason(requestDTO.getReason());
+        materialRequest.setNote(requestDTO.getNote());
+        materialRequest.setRequestDate(LocalDate.now());
+        materialRequest.setMaterialId(requestDTO.getMaterialId());
+        materialRequest.setStatus("미발주");
+
+        return materialRequestRepository.save(materialRequest);
+    }
+
+
+
+
+
+
+
+
+
+    public List<MaterialRequestDTO> getMaterialRequests() {
+        List<MaterialRequest> requests = materialRequestRepository.findAllRequestsOrderByRequestDateDesc();
+
+        // 📌 요청 개수 로그 출력
+        System.out.println("📌 [DEBUG] 요청 개수: " + requests.size());
+
+        return requests.stream()
+                .map(request -> {
+                    // ✅ fromEntity() 호출 로그 추가
+                    System.out.println("📌 [DEBUG] fromEntity() 호출 전 - 요청 ID: " + request.getRequestId());
+
+                    // ✅ fromEntity()를 사용하여 변환
+                    MaterialRequestDTO dto = MaterialRequestDTO.fromEntity(request);
+
+                    // ✅ 변환된 DTO 로그 출력
+                    System.out.println("📌 변환 완료된 DTO: " + dto);
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    public boolean updateMaterialRequestStatus(String requestId, String status) {
+        // 요청 조회
+        Optional<MaterialRequest> optionalRequest = materialRequestRepository.findById(requestId);
+
+        if (optionalRequest.isPresent()) {
+            MaterialRequest request = optionalRequest.get();
+            request.setStatus(status);
+            materialRequestRepository.save(request);
+            return true;
+        }
+
+        return false; // 요청을 찾을 수 없는 경우
+    }
+
 }

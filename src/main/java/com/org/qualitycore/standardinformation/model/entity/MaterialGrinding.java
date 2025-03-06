@@ -1,7 +1,7 @@
 package com.org.qualitycore.standardinformation.model.entity;
 
+import com.org.qualitycore.work.model.entity.processTracking;
 import com.org.qualitycore.work.model.entity.LineMaterial;
-import com.org.qualitycore.work.model.entity.WorkOrders;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,9 +34,9 @@ public class MaterialGrinding {
     @Schema(description = "작업지시 ID" , example ="LOT2025021301")
     private List<LineMaterial> lineMaterials;
 
-    @Column(name ="STATUS_CODE" , nullable = false , updatable = false )
-    @Schema(description = "상태 코드 ID", example = "SC001")
-    private String statusCode;
+    @ManyToOne(fetch = FetchType.LAZY )
+    @Schema(description = "공정상태 체크" )
+    private processTracking processTracking;
 
     @Column(name ="MAIN_MATERIAL" , nullable = false )
     @Schema(description = "주원료" , example ="쌀")
@@ -67,9 +67,6 @@ public class MaterialGrinding {
     @Schema(description = "소요시간 " , example = "40" )
     private Integer grindDuration;
 
-    @Column(name = "PROCESS_STATUS", nullable = false)
-    @Schema(description = "공정 상태", example = "대기중")
-    private String processStatus;
 
     @Column(name = "NOTES")
     @Schema(description = "메모사항" , example = "작업자 : 강동원  작업완료" )
@@ -110,15 +107,7 @@ public class MaterialGrinding {
             expectedEndTime = startTime.plusMinutes(grindDuration);
         }
 
-        // 공정 상태 기본값 설정
-        if (processStatus == null) {
-            processStatus = "대기중";
-        }
 
-        // 상태 코드 기본값 설정
-        if (statusCode == null) {
-            statusCode = "SC001";
-        }
     }
 
     @Override
@@ -127,7 +116,6 @@ public class MaterialGrinding {
                 "grindingId='" + grindingId + '\'' +
                 ", lotNo='" + lotNo + '\'' +
                 ", lineMaterials=" + lineMaterials +
-                ", statusCode='" + statusCode + '\'' +
                 ", mainMaterial='" + mainMaterial + '\'' +
                 ", mainMaterialInputVolume=" + mainMaterialInputVolume +
                 ", maltType='" + maltType + '\'' +
@@ -135,7 +123,6 @@ public class MaterialGrinding {
                 ", grindIntervalSetting=" + grindIntervalSetting +
                 ", grindSpeedSetting=" + grindSpeedSetting +
                 ", grindDuration=" + grindDuration +
-                ", processStatus='" + processStatus + '\'' +
                 ", notes='" + notes + '\'' +
                 ", startTime=" + startTime +
                 ", expectedEndTime=" + expectedEndTime +

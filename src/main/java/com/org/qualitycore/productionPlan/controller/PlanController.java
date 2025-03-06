@@ -3,6 +3,8 @@ package com.org.qualitycore.productionPlan.controller;
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.exception.ResourceNotFoundException;
 import com.org.qualitycore.productionPlan.model.dto.*;
+import com.org.qualitycore.productionPlan.model.entity.MaterialRequest;
+import com.org.qualitycore.productionPlan.model.entity.MaterialWarehouse;
 import com.org.qualitycore.productionPlan.model.entity.PlanProduct;
 import com.org.qualitycore.productionPlan.model.service.PlanService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -286,7 +288,93 @@ public class PlanController {
         }
     }
 
+    // 자재 재고 현황 조회
+    @GetMapping("/materials")
+    @Operation(summary = "자재 재고 현황 조회", description = "모든 자재의 현재 재고 현황을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "자재 재고 현황 조회 성공")
+    public ResponseEntity<Message> getStockStatus() {
+        List<MaterialWarehouse> stockStatus = planService.getStockStatus();
+        return ResponseEntity.ok(new Message(200, "자재 재고 현황 조회 성공", Map.of("stockStatus", stockStatus)));
+    }
 
+
+    // 자재 구매 신청 내역 조회
+    @GetMapping("/materials/requests")
+    @Operation(summary = "자재 구매 신청 내역 조회 (순환 참조 방지)", description = "순환 참조 없는 자재 구매 신청 내역을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "자재 구매 신청 내역 조회 성공")
+    public ResponseEntity<Message> getMaterialRequests() {
+        List<MaterialRequestDTO> requests = planService.getMaterialRequests();
+
+        // ✅ 디버깅 로그 추가
+        for (MaterialRequestDTO request : requests) {
+            System.out.println("📌 요청 ID: " + request.getRequestId() + ", 자재명: " + request.getMaterialName());
+        }
+
+
+        return ResponseEntity.ok(new Message(200, "자재 구매 신청 내역 조회 성공", Map.of("requests", requests)));
+    }
+
+
+    // 자재 구매 신청
+    @PostMapping("/materials/request")
+    @Operation(summary = "자재 구매 신청", description = "자재 구매를 신청합니다.")
+    @ApiResponse(responseCode = "201", description = "자재 구매 신청 성공")
+    public ResponseEntity<Message> requestMaterial(@RequestBody MaterialRequestDTO requestDTO) {
+        System.out.println("📌 [자재 구매 신청] 요청 데이터: " + requestDTO);
+
+        MaterialRequest savedRequest = planService.requestMaterial(requestDTO);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new Message(201, "자재 구매 신청 성공", Map.of("request", savedRequest)));
+    }
+
+
+    @PutMapping("/materials/request/{requestId}/status")
+    @Operation(summary = "자재 구매 신청 상태 변경", description = "자재 구매 신청 상태를 변경합니다.",
+            parameters = {
+                    @Parameter(name = "requestId", description = "자재 구매 신청 ID", required = true),
+                    @Parameter(name = "status", description = "변경할 상태 (발주완료)", required = true)
+            })
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",description = "자재 구매 신청 상태 변경 성공!"),
+            @ApiResponse(responseCode = "404",description = "해당 요청을 찾을수 없음"),
+            @ApiResponse(responseCode = "400",description = "잘못된 상태값"),
+            @ApiResponse(responseCode = "500",description = "서버 오류")
+    })
+    public ResponseEntity<Message> updateMaterialRequestStatus(
+            @PathVariable String requestId,
+            @RequestParam String status) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        try {
+            // 유효한 상태 값인지 검증 (현재는 '발주완료'만 가능)
+            if (!"발주완료".equals(status)) {
+                return ResponseEntity.badRequest()
+                        .headers(headers)
+                        .body(new Message(400, "유효하지 않은 상태 값입니다. ('발주완료'만 허용)", null));
+            }
+
+            // 서비스 호출
+            boolean updated = planService.updateMaterialRequestStatus(requestId, status);
+
+            if (!updated) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .headers(headers)
+                        .body(new Message(404, "해당 자재 구매 신청을 찾을 수 없습니다.", null));
+            }
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new Message(200, "자재 구매 신청 상태가 '발주완료'로 변경되었습니다.", null));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .headers(headers)
+                    .body(new Message(500, "자재 구매 신청 상태 변경 중 서버 오류 발생: " + e.getMessage(), null));
+        }
+    }
 
 
 

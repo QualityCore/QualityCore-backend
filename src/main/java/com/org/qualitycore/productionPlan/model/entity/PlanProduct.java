@@ -1,5 +1,6 @@
 package com.org.qualitycore.productionPlan.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
