@@ -1,9 +1,10 @@
 package com.org.qualitycore.standardinformation.controller;
 
 import com.org.qualitycore.common.Message;
+import com.org.qualitycore.standardinformation.model.dto.FiltrationProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.MashingProcessDTO;
-import com.org.qualitycore.standardinformation.model.service.MashingProcessService;
+import com.org.qualitycore.standardinformation.model.service.FiltrationProcessService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,21 +16,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/mashingprocess")
+@RequestMapping("/filtrationproess")
 @CrossOrigin(origins ="http://localhost:3000" )
 @RequiredArgsConstructor
-@Tag(name="MashingProcess" , description = "당화 공정 API")
+@Tag(name="MashingProcess" , description = "여과 공정 API")
 @Slf4j
-public class MashingProcessController {
+public class FiltrationProcessController {
 
-    private final MashingProcessService mashingProcessService;
-
-
+    private final FiltrationProcessService filtrationProcessService;
 
 
     // ✅ 작업지시 ID 목록 조회
@@ -41,7 +42,7 @@ public class MashingProcessController {
     @GetMapping("/linematerial")
     public ResponseEntity<Message> getLineMaterial() {
         log.info("컨트롤러: 작업지시 ID 목록 조회 요청");
-        List<LineMaterialNDTO> lineMaterials = mashingProcessService.getLineMaterial();
+        List<LineMaterialNDTO> lineMaterials = filtrationProcessService.getLineMaterial();
 
         Message response = new Message(200, "작업지시 ID 목록 조회 성공", new HashMap<>());
         response.getResult().put("lineMaterials", lineMaterials);
@@ -58,8 +59,8 @@ public class MashingProcessController {
     })
     @GetMapping("/{lotNo}")
     public ResponseEntity<Message> getMaterialsByLotNo(@PathVariable String lotNo) {
-        log.info ("컨트롤러: LOT_NO={}에 대한 자재 정보 요청", lotNo);
-        List<LineMaterialNDTO> materials = mashingProcessService.getMaterialsByLotNo(lotNo);
+        log.info ("컨트롤러: 자재정보 LOT_NO={}에 대한 자재 정보 요청", lotNo);
+        List<LineMaterialNDTO> materials = filtrationProcessService.getMaterialsByLotNo(lotNo);
         Message response;
         if (materials.isEmpty()) {
             response = new Message(404, "데이터 없음", new HashMap<>());
@@ -73,71 +74,89 @@ public class MashingProcessController {
 
 
 
-
-    //당화공정 등록
-    @Operation(summary = "당화공정" , description = "당화공정 작업을 등록합니다")
+    //여과공정 등록
+    @Operation(summary = "여과공정" , description = "여과공정 작업을 등록합니다")
     @ApiResponses(value= {
             @ApiResponse(responseCode = "201" , description = "등록에 성공!!"),
             @ApiResponse(responseCode = "400" , description = "잘못된 요청입니다.")
     })
     @PostMapping("/register")
-    public ResponseEntity<Message> createMashingProcess(
+    public ResponseEntity<Message> createFiltrationProcess(
             @RequestBody @Parameter(description = "등록할 당화 정보", required = true)
-                MashingProcessDTO mashingProcessDTO) {
-        log.info("컨트롤러 : 당화공정 등록 요청 {}", mashingProcessDTO);
-        Message response = mashingProcessService.createMashingProcess(mashingProcessDTO);
+            FiltrationProcessDTO filtrationProcessDTO) {
+        log.info("컨트롤러 : 여과공정 등록 요청 {}", filtrationProcessDTO);
+        Message response = filtrationProcessService.createFiltrationProcess(filtrationProcessDTO);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
 
 
+    // 여과 공정 회수된 워트량 , 손실량 , 실제종료시간 수정 구문
 
-
-    // 당화공정 pH 값 및 실제종료시간 업데이트
     @Operation(
-            summary = "당화 공정 완료",
-            description = "주어진 ID의 당화 공정을 완료하고 pH 값을 업데이트합니다."
+            summary = "여과 공정 업데이트",
+            description = "주어진 ID의 여과 공정에서 회수된 워트량, 손실량 및 실제 종료 시간을 업데이트합니다."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "성공적으로 공정이 완료됨",
+            @ApiResponse(responseCode = "200", description = "성공적으로 업데이트됨",
                     content = @Content(schema = @Schema(implementation = Message.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터입니다")})
-    @PutMapping("/update/{mashingId}")
-    public ResponseEntity<Message> completeMashingProcess(
-            @PathVariable @Parameter(description = "완료할 당화 공정의 ID", required = true) String mashingId,
-            @RequestBody @Parameter(description = "수정할 당화 공정 정보 (pH 값 포함)", required = true)
+    @PutMapping("/update/{filtrationId}")
+    public ResponseEntity<Message> updateFiltrationProcess(
+            @PathVariable @Parameter(description = "업데이트할 여과 공정의 ID", required = true) String filtrationId,
+            @RequestBody @Parameter(description = "수정할 여과 공정 정보", required = true)
             Map<String, Object> requestBody) {
-        log.info("컨트롤러 : 당화 공정 완료 요청 - ID {} , 요청 데이터 {} ", mashingId, requestBody);
+        log.info("컨트롤러 : 여과 공정 업데이트 요청 - ID {}, 요청 데이터 {}", filtrationId, requestBody);
 
-        Object phValueObj = requestBody.get("phValue");
-        Double phValue = (phValueObj instanceof Number number)
+        Object recoveredWortVolumeObj = requestBody.get("recoveredWortVolume");
+        Double recoveredWortVolume = (recoveredWortVolumeObj instanceof Number number)
                 ? number.doubleValue()
-                :null;
+                : null;
 
-        Message response = mashingProcessService.completeMashingProcess(mashingId, phValue);
+        Object lossVolumeObj = requestBody.get("lossVolume");
+        Double lossVolume = (lossVolumeObj instanceof Number number)
+                ? number.doubleValue()
+                : null;
+
+        Object actualEndTimeObj = requestBody.get("actualEndTime");
+        LocalDateTime actualEndTime = (actualEndTimeObj instanceof String str)
+                ? LocalDateTime.parse(str)
+                : null;
+
+        Message response = filtrationProcessService.updateFiltrationProcess(filtrationId, recoveredWortVolume, lossVolume, actualEndTime);
         return ResponseEntity.status(response.getCode()).body(response);
+
     }
 
 
 
-
-    // ✅ 특정 LOT_NO에 대한 분쇄 공정 상태 업데이트
-    @Operation(summary = "LOT_NO에 따른 공정 상태 업데이트", description = "LOT_NO를 기준으로 공정 상태를 업데이트합니다.")
+    // ✅ 특정 LOT_NO에 대한 여과 공정 상태 업데이트
+    @Operation(summary = "LOT_NO에 따른 여과 공정 상태 업데이트", description = "LOT_NO를 기준으로 공정 상태를 업데이트합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "업데이트 성공"),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
             @ApiResponse(responseCode = "404", description = "해당 LOT_NO 없음")
     })
     @PutMapping("/update")
-    public ResponseEntity<Message> updateMashingProcess
-            (@RequestBody MashingProcessDTO mashingProcessDTO) {
+    public ResponseEntity<Message> updateFiltrationProcessStatus
+    (@RequestBody FiltrationProcessDTO filtrationProcessDTO) {
 
-        log.info("컨트롤러: LOT_NO={} 공정 상태 업데이트 요청 - 데이터: {}",
-                            mashingProcessDTO.getLotNo(), mashingProcessDTO);
+        log.info("컨트롤러: LOT_NO={} 여과 공정 상태 업데이트 요청 - 데이터: {}",
+                filtrationProcessDTO.getLotNo(), filtrationProcessDTO);
 
-        Message response = mashingProcessService.updateMashingProcess(mashingProcessDTO);
+        Message response = filtrationProcessService.updateFiltrationProcessStatus(filtrationProcessDTO);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
 
+
+
+
+
 }
+
+
+
+
+
+

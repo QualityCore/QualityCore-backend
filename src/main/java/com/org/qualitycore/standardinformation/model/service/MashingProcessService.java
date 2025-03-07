@@ -40,10 +40,10 @@ public class MashingProcessService {
     // ✅ 작업지시 ID 목록 조회
     @Transactional
     public List<LineMaterialNDTO> getLineMaterial() {
-        log.info("서비스: 작업지시 ID 목록 조회 시작");
+        log.info("서비스: 당화 작업지시 ID 목록 조회 시작");
 
         List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
-        log.info("서비스: 조회된 작업지시 ID 목록 {}", lineMaterialList);
+        log.info("서비스: 당화 조회된 작업지시 ID 목록 {}", lineMaterialList);
         return lineMaterialList.stream()
                 .map(material -> {
                     LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
@@ -55,9 +55,9 @@ public class MashingProcessService {
 
 
     // ✅ 특정 LOT_NO에 대한 자재 정보 조회
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Transactional
     public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
-        log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
+        log.info("서비스: 당화 LOT_NO={}에 대한 자재 정보 조회", lotNo);
         List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
 
         return materials.stream()
@@ -76,7 +76,7 @@ public class MashingProcessService {
     @Transactional
     public Message createMashingProcess(MashingProcessDTO mashingProcessDTO) {
         try {
-            log.info("서비스 : 당화공정 등록 시작 DTO {}", mashingProcessDTO);
+            log.info("서비스 :당화 등록 시작 DTO {}", mashingProcessDTO);
 
             // DTO 가 null 인지 체크
             if(mashingProcessDTO == null){
@@ -175,7 +175,7 @@ public class MashingProcessService {
     }
 
 
-    // 가장 큰 "grindingId" 조회 후 다음 ID 생성 하룻 있는 코드!
+    // 가장 큰 "MashingId" 조회 후 다음 ID 생성 하룻 있는 코드!
     public String generateNextMashingId(){
         Integer maxId = mashingProcessRepository.findMaxMashingId();
         int nextId = (maxId != null) ? maxId + 1 : 1;
@@ -230,24 +230,13 @@ public class MashingProcessService {
 
 
             // ✅ DTO 에서 ProcessTracking 정보를 가져와서 업데이트
-            if (mashingProcessDTO.getProcessTracking() != null) {
-                ProcessTrackingDTONam trackingDTO = mashingProcessDTO.getProcessTracking();
+            processTracking.setStatusCode("SC002"); // ✅ 상태 코드 설정
+            processTracking.setProcessStatus("작업 중"); // ✅ 공정 상태 설정
+            processTracking.setProcessName("당화"); // ✅ 공정 이름 설정
 
-                if (trackingDTO.getStatusCode() != null) {
-                    processTracking.setStatusCode(trackingDTO.getStatusCode());
-                }
+            log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",
+                    processTracking.getStatusCode(), processTracking.getProcessStatus(), processTracking.getProcessName());
 
-                if (trackingDTO.getProcessStatus() != null) {
-                    processTracking.setProcessStatus(trackingDTO.getProcessStatus());
-                }
-
-                if (trackingDTO.getProcessName() != null) {
-                    processTracking.setProcessName(trackingDTO.getProcessName());
-                }
-                log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",
-                        trackingDTO.getStatusCode(), trackingDTO.getProcessStatus(), trackingDTO.getProcessName());
-
-            }
 
             log.info("업데이트된 ProcessTracking: {}", processTracking);
 

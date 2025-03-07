@@ -1,5 +1,6 @@
 package com.org.qualitycore.work.model.entity;
 
+import com.org.qualitycore.standardinformation.model.entity.FiltrationProcess;
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import jakarta.persistence.*;
@@ -53,6 +54,11 @@ public class LineMaterial {
     @ManyToOne
     @JoinColumn(name = "GRINDING_ID")  // 외래키 설정
     private MaterialGrinding materialGrinding;  // <-- 이 필드명을 사용해야 함
+
+ // 남규 분쇄 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "FILTRATION_ID")  // 외래키 설정
+    private FiltrationProcess filtrationProcess;// <-- 이 필드명을 사용해야 함
 
 }
 

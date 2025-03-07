@@ -7,7 +7,6 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-
 @Entity
 @Table(name = "PROCESS_TRACKING")
 public class processTracking {
@@ -29,6 +28,7 @@ public class processTracking {
 
     @Column(name = "PROCESS_NAME")
     private String processName = "분쇄 및 원재료투입";
+
 
     @PrePersist
     public void prePersist() {
