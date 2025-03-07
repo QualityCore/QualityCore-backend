@@ -1,5 +1,7 @@
 package com.org.qualitycore.standardinformation.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.LabelInfoDTO;
 import com.org.qualitycore.standardinformation.model.service.LabelInfoService;
@@ -9,8 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,10 +59,31 @@ public class LabelInfoController {
     }
 
     // 등록
-    @PostMapping("/labelInfo")
-    public ResponseEntity<?> createLabelInfo(@RequestBody LabelInfoDTO labelInfo) {
+    @PostMapping(value = "/labelInfo", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<?> createLabelInfo(
+            @RequestPart("labelData") String labelDataJson,
+            @RequestPart(value = "labelImage", required = false) MultipartFile labelImage,
+            @RequestPart(value = "beerImage", required = false) MultipartFile beerImage) {
 
-        labelInfoService.createLabelInfo(labelInfo);
+        // JSON 문자열을 DTO로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        LabelInfoDTO labelInfo;
+        try {
+            labelInfo = objectMapper.readValue(labelDataJson, LabelInfoDTO.class);
+
+            // DTO의 각 필드 디코딩
+            try {
+                labelInfo.setBeerSupplier(URLDecoder.decode(labelInfo.getBeerSupplier(), StandardCharsets.UTF_8.name()));
+            } catch (UnsupportedEncodingException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("디코딩 실패");
+            }
+
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid JSON format");
+        }
+
+        // 서비스 호출
+        labelInfoService.createLabelInfo(labelInfo, labelImage, beerImage);
 
         Map<String, Object> res = new HashMap<>();
         res.put("code", 201);
@@ -85,7 +112,7 @@ public class LabelInfoController {
         labelInfoService.deleteLabelInfo(labelId);
 
         Map<String, Object> res = new HashMap<>();
-        res.put("code", 201);
+        res.put("code", 200);
         res.put("message", "삭제성공");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);

@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.entity;
 
+import com.org.qualitycore.productionPlan.model.entity.ProductBom;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,16 +21,16 @@ public class LabelInfo {
 
     @ManyToOne
     @JoinColumn(name = "PRODUCT_ID")
-    private ProductBom2 productBom;
-
-    @Column(name = "BRAND_NAME")
-    private String brandName;
+    private ProductBom productBom;
 
     @Column(name = "PRODUCTION_DATE")
     private Date productionDate;
 
     @Column(name = "LABEL_IMAGE")
     private String labelImage;
+
+    @Column(name = "BEER_IMAGE")
+    private String beerImage;
 
     @Column(name = "BEER_SUPPLIER")
     private String beerSupplier;
