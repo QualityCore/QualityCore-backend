@@ -101,13 +101,16 @@ public class MashingProcessController {
             @ApiResponse(responseCode = "200", description = "성공적으로 공정이 완료됨",
                     content = @Content(schema = @Schema(implementation = Message.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터입니다")})
-    @PutMapping("/register/{mashingId}")
+    @PutMapping("/update/{mashingId}")
     public ResponseEntity<Message> completeMashingProcess(
             @PathVariable @Parameter(description = "완료할 당화 공정의 ID", required = true) String mashingId,
             @RequestBody @Parameter(description = "수정할 당화 공정 정보 (pH 값 포함)", required = true)
-            Map<String, Double> requestBody) {
+            Map<String, Object> requestBody) {
         log.info("컨트롤러 : 당화 공정 완료 요청 - ID {} , 요청 데이터 {} ", mashingId, requestBody);
-        Double phValue = requestBody.get("phValue"); // 요청에서 pH 값 추출
+
+        Object phValueObj = requestBody.get("phValue");
+        Double phValue = phValueObj instanceof Number ? ((Number) phValueObj).doubleValue() : null;
+
         Message response = mashingProcessService.completeMashingProcess(mashingId, phValue);
         return ResponseEntity.status(response.getCode()).body(response);
     }
@@ -120,8 +123,12 @@ public class MashingProcessController {
             @ApiResponse(responseCode = "404", description = "해당 LOT_NO 없음")
     })
     @PutMapping("/update")
-    public ResponseEntity<Message> updateMashingProcess(@RequestBody MashingProcessDTO mashingProcessDTO) {
-        log.info("컨트롤러: LOT_NO={} 공정 상태 업데이트 요청", mashingProcessDTO.getLotNo());
+    public ResponseEntity<Message> updateMashingProcess
+            (@RequestBody MashingProcessDTO mashingProcessDTO) {
+
+        log.info("컨트롤러: LOT_NO={} 공정 상태 업데이트 요청 - 데이터: {}",
+                            mashingProcessDTO.getLotNo(), mashingProcessDTO);
+
         Message response = mashingProcessService.updateMashingProcess(mashingProcessDTO);
         return ResponseEntity.status(response.getCode()).body(response);
     }
