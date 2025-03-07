@@ -7,6 +7,9 @@ import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.EquipmentInfoDTO;
 import com.org.qualitycore.standardinformation.model.service.EquipmentInfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,12 +35,14 @@ public class EquipmentInfoController {
 
     // 설비 전체조회
     @GetMapping("/equipment")
-    public ResponseEntity<Message> findEquipmentAll(){
+    public ResponseEntity<Message> findEquipmentAll(@PageableDefault Pageable pageable,
+                                                    @RequestParam(required = false) String searchType,
+                                                    @RequestParam(required = false) String searchKeyword) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        List<EquipmentInfoDTO> equipment = equipmentInfoService.findEquipmentAll();
+        Page<EquipmentInfoDTO> equipment = equipmentInfoService.findEquipmentAll(pageable, searchType, searchKeyword);
 
         Map<String, Object> res = new HashMap<>();
         res.put("equipment", equipment);
@@ -106,7 +111,6 @@ public class EquipmentInfoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-
     // 설비수정
     @PutMapping("/equipment")
     public ResponseEntity<?> updateEquipment(@RequestBody EquipmentInfoDTO equipment) {
@@ -123,7 +127,7 @@ public class EquipmentInfoController {
     }
 
     // 설비삭제
-    @DeleteMapping("/equipment")
+    @DeleteMapping("/equipment/{equipmentId}")
     public ResponseEntity<?> deleteEquipment(@PathVariable("equipmentId") String equipmentId) {
 
         equipmentInfoService.deleteEquipment(equipmentId);

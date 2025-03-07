@@ -8,12 +8,17 @@ import com.org.qualitycore.standardinformation.model.entity.QWorkplace;
 import com.org.qualitycore.standardinformation.model.entity.Workplace;
 import com.org.qualitycore.standardinformation.model.repository.EquipmentInfoRepository;
 import com.org.qualitycore.standardinformation.model.repository.WorkplaceRepository;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +29,7 @@ import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +39,42 @@ public class EquipmentInfoService {
     private final ModelMapper modelMapper;
     private final EquipmentInfoRepository equipmentInfoRepository;
     private final WorkplaceRepository workplaceRepository;
-    private final CloudinaryService cloudinaryService;
 
     // 전체조회
-    public List<EquipmentInfoDTO> findEquipmentAll() {
-        QEquipmentInfo eq = QEquipmentInfo.equipmentInfo; // EQUIPMENT_INFO 테이블의 QueryDSL 객체
-        QWorkplace wp = QWorkplace.workplace; // WORKPLACE 테이블의 QueryDSL 객체
+    // 전체조회
+    public Page<EquipmentInfoDTO> findEquipmentAll(Pageable pageable, String searchType, String searchKeyword) {
+        QEquipmentInfo eq = QEquipmentInfo.equipmentInfo;
+        QWorkplace wp = QWorkplace.workplace;
+        BooleanBuilder where = new BooleanBuilder();
 
-        return queryFactory
+        // 검색 조건 추가
+        if (StringUtils.hasText(searchKeyword)) {
+            if ("workplaceName".equals(searchType)) {
+                where.and(wp.workplaceName.containsIgnoreCase(searchKeyword));
+            } else if ("workplaceType".equals(searchType)) {
+                where.and(wp.workplaceType.containsIgnoreCase(searchKeyword));
+            } else if ("equipmentName".equals(searchType)) {
+                where.and(eq.equipmentName.containsIgnoreCase(searchKeyword));
+            } else {
+                // 검색 타입이 지정되지 않은 경우 모든 필드에서 검색
+                where.and(eq.equipmentName.containsIgnoreCase(searchKeyword)
+                        .or(wp.workplaceName.containsIgnoreCase(searchKeyword))
+                        .or(wp.workplaceType.containsIgnoreCase(searchKeyword))
+                        .or(eq.equipmentStatus.containsIgnoreCase(searchKeyword)));
+            }
+        }
+
+        // 전체 데이터 개수 조회 (필터링 적용)
+        long totalCount = Optional.ofNullable(queryFactory
+                        .select(eq.count())
+                        .from(eq)
+                        .join(eq.workplace, wp)
+                        .where(where)
+                        .fetchOne())
+                .orElse(0L);
+
+        // 페이지네이션을 적용하여 데이터 조회 (필터링 적용)
+        List<EquipmentInfoDTO> equipmentList = queryFactory
                 .select(Projections.fields(EquipmentInfoDTO.class,
                         eq.equipmentId.as("equipmentId"),
                         eq.equipmentName.as("equipmentName"),
@@ -54,9 +88,15 @@ public class EquipmentInfoService {
                         wp.workplaceName.as("workplaceName"),
                         wp.workplaceType.as("workplaceType")
                 ))
-                .from(eq)  // EquipmentInfo 엔티티에서 시작
-                .join(eq.workplace, wp)  // fetch join
-                .fetch();  // 여러 개의 장비 정보를 반환
+                .from(eq)
+                .join(eq.workplace, wp)
+                .where(where)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // Page 객체로 변환하여 반환
+        return new PageImpl<>(equipmentList, pageable, totalCount);
     }
 
     // 상세조회
