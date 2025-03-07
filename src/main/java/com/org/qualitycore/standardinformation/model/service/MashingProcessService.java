@@ -1,7 +1,6 @@
 package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.common.Message;
-import com.org.qualitycore.standardinformation.model.dto.MaterialGrindingDTO;
 import com.org.qualitycore.standardinformation.model.dto.ProcessTrackingDTONam;
 import com.org.qualitycore.work.model.entity.WorkOrders;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
@@ -124,7 +123,7 @@ public class MashingProcessService {
 
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
             processTrackingA.setStatusCode("SC002");
-            processTrackingA.setProcessStatus("대기 중");
+            processTrackingA.setProcessStatus("작업 중");
             processTrackingA.setProcessName("당화");
 
             // ✅ ProcessTracking 저장
@@ -162,7 +161,7 @@ public class MashingProcessService {
 
             Map<String, Object> result = new HashMap<>();
             result.put("savedMashingProcess", responseDTO);
-            return new Message(HttpStatus.CREATED.value(), "분쇄공정 등록 완료!", result);
+            return new Message(HttpStatus.CREATED.value(), "당화공정 등록 완료!", result);
 
 
         } catch(IllegalArgumentException e){
@@ -208,7 +207,8 @@ public class MashingProcessService {
     @Transactional
     public Message updateMashingProcess(MashingProcessDTO mashingProcessDTO) {
         try {
-            log.info("서비스 : 분쇄공정 업데이트 시작 DTO {}", mashingProcessDTO);
+            log.info("📌 서비스: 업데이트할 processStatus={}",
+                            mashingProcessDTO.getProcessTracking().getProcessStatus());
 
             // ✅ LOT_NO를 기반으로 기존 ProcessTracking 조회
             processTracking processTracking =
