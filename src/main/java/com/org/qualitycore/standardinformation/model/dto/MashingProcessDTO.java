@@ -32,10 +32,10 @@ public class MashingProcessDTO {
     private Double phValue;
 
     @Schema(description = "곡물 비율", example = "1")
-    private Integer grainRatio;
+    private Double grainRatio;
 
     @Schema(description = "물 비율" , example = "4")
-    private Integer waterRatio;
+    private Double waterRatio;
 
     @Schema(description = "물 투입량", example = "3200")
     private Integer waterInputVolume;
