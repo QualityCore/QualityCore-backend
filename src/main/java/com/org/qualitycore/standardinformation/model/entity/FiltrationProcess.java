@@ -73,7 +73,6 @@ public class FiltrationProcess {
         }
     }
 
-
     @UpdateTimestamp
     @Column(name = "ACTUAL_END_TIME")
     @Schema(description = "실제 종료 시간", example = "2025-02-12T12:05:30")

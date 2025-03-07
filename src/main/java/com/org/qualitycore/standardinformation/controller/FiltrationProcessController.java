@@ -26,7 +26,7 @@ import java.util.Map;
 @RequestMapping("/filtrationproess")
 @CrossOrigin(origins ="http://localhost:3000" )
 @RequiredArgsConstructor
-@Tag(name="MashingProcess" , description = "여과 공정 API")
+@Tag(name= "FiltrationProcess" , description = "여과 공정 API")
 @Slf4j
 public class FiltrationProcessController {
 
@@ -82,7 +82,7 @@ public class FiltrationProcessController {
     })
     @PostMapping("/register")
     public ResponseEntity<Message> createFiltrationProcess(
-            @RequestBody @Parameter(description = "등록할 당화 정보", required = true)
+            @RequestBody @Parameter(description = "등록할 여과 정보", required = true)
             FiltrationProcessDTO filtrationProcessDTO) {
         log.info("컨트롤러 : 여과공정 등록 요청 {}", filtrationProcessDTO);
         Message response = filtrationProcessService.createFiltrationProcess(filtrationProcessDTO);

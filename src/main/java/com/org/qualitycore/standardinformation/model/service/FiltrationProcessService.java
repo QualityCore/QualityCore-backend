@@ -76,7 +76,7 @@ public class FiltrationProcessService {
     @Transactional
     public Message createFiltrationProcess (FiltrationProcessDTO filtrationProcessDTO){
         try {
-            log.info("서비스 :당화 등록 시작 DTO {}", filtrationProcessDTO);
+            log.info("서비스 :여과 등록 시작 DTO {}", filtrationProcessDTO);
 
             // DTO 가 null 인지 체크
             if (filtrationProcessDTO == null) {
@@ -144,7 +144,7 @@ public class FiltrationProcessService {
 
             // ✅ DB 저장
             FiltrationProcess saveFiltrationProcess = filtrationProcessRepository.save(filtrationProcess);
-            log.info("서비스 당화 공정 등록 완료 ! {}", saveFiltrationProcess);
+            log.info("서비스 여과 공정 등록 완료 ! {}", saveFiltrationProcess);
 
             // ✅ DTO 변환 후 반환
             FiltrationProcessDTO responseDTO = modelMapper.map(saveFiltrationProcess, FiltrationProcessDTO.class);
