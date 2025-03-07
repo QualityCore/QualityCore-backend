@@ -36,9 +36,9 @@ public class CloudinaryService {
                 throw new IOException("Image URL is null after upload");
             }
 
-            return imageUrl;  // 업로드된 이미지 URL 반환
+            return imageUrl;
         } catch (IOException e) {
-            // 예외 처리: 클라우드너리에서 이미지를 업로드하는 중에 오류가 발생한 경우
+
             throw new IOException("Cloudinary image upload failed: " + e.getMessage(), e);
         }
     }
