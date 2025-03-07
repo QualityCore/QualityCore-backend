@@ -41,7 +41,6 @@ public class EquipmentInfoService {
     private final WorkplaceRepository workplaceRepository;
 
     // 전체조회
-    // 전체조회
     public Page<EquipmentInfoDTO> findEquipmentAll(Pageable pageable, String searchType, String searchKeyword) {
         QEquipmentInfo eq = QEquipmentInfo.equipmentInfo;
         QWorkplace wp = QWorkplace.workplace;
