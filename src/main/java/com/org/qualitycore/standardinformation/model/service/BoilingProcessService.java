@@ -57,7 +57,6 @@ public class BoilingProcessService {
 
     // ✅ 특정 LOT_NO에 대한 자재 정보 조회
     @Transactional
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
         log.info("서비스:끓임 LOT_NO={}에 대한 자재 정보 조회", lotNo);
         List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
@@ -73,7 +72,7 @@ public class BoilingProcessService {
 
 
 
-    // ✅ 여과공정 등록
+    // ✅ 끓임공정 등록
     @Transactional
     public Message createBoilingProcess (BoilingProcessDTO boilingProcessDTO){
         try {
@@ -145,7 +144,7 @@ public class BoilingProcessService {
 
             // ✅ DB 저장
             BoilingProcess saveBoilingProcess = boilingProcessRepository.save(boilingProcess);
-            log.info("서비스 당화 공정 등록 완료 ! {}", saveBoilingProcess);
+            log.info("서비스 끓임 공정 등록 완료 ! {}", saveBoilingProcess);
 
             // ✅ DTO 변환 후 반환
             BoilingProcessDTO responseDTO = modelMapper.map(saveBoilingProcess, BoilingProcessDTO.class);
@@ -169,7 +168,7 @@ public class BoilingProcessService {
 
 
         } catch(Exception e) {
-            log.error("서비스 : 여과공정 등록중 오류 발생 {}", e.getMessage(), e);
+            log.error("서비스 : 끓임 공정 등록중 오류 발생 {}", e.getMessage(), e);
             return new Message(HttpStatus.BAD_REQUEST.value(), "끓임 공정 등록 실패: " + e.getMessage(), new HashMap<>());
         }
 
@@ -224,6 +223,7 @@ public class BoilingProcessService {
     }
 
 
+    // 홉이름 및 홉투입량 업데이트 구문
     public Message updateHopInfo(String boilingId, String firstHopName, Double firstHopAmount,
                                  String secondHopName, Double secondHopAmount) {
         Optional<BoilingProcess> boilingProcessOpt = boilingProcessRepository.findById(boilingId);
@@ -260,7 +260,7 @@ public class BoilingProcessService {
 
 
 
-    // 공정 상태 코드 추적 ( SC003 , 진행 중 , 끓임공정 업데이트)
+    // 공정 상태 코드 추적 ( SC004 , 진행 중 , 끓임공정 업데이트)
     @Transactional
     public Message updateBoilingProcessStatus(BoilingProcessDTO boilingProcessDTO) {
         try {
@@ -285,7 +285,7 @@ public class BoilingProcessService {
 
                 // ✅ DTO 에서 ProcessTracking 정보를 가져와서 업데이트
                 processTracking.setStatusCode("SC004");
-                processTracking.setProcessStatus("작업 중");
+                processTracking.setProcessStatus("진행 중");
                 processTracking.setProcessName("끓임");
 
                 log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",

@@ -54,7 +54,7 @@ public class MaterialGrindingService {
 
 
     // ✅ 특정 LOT_NO에 대한 자재 정보 조회
-    @Transactional(readOnly = true)
+    @Transactional
     public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
         log.info("서비스: LOT_NO={}에 대한 자재 정보 조회", lotNo);
         List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
