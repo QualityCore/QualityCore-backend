@@ -56,7 +56,6 @@ public class FiltrationProcessService {
 
     // ✅ 특정 LOT_NO에 대한 자재 정보 조회
     @Transactional
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
         log.info("서비스:여과 LOT_NO={}에 대한 자재 정보 조회", lotNo);
         List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
@@ -122,7 +121,7 @@ public class FiltrationProcessService {
 
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
             processTracking.setStatusCode("SC003");
-            processTracking.setProcessStatus("작업 중");
+            processTracking.setProcessStatus("진행 중");
             processTracking.setProcessName("여과");
 
             // ✅ `processTracking`을 `mashingProcess`에 설정

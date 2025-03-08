@@ -123,7 +123,7 @@ public class MashingProcessService {
 
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
             processTrackingA.setStatusCode("SC002");
-            processTrackingA.setProcessStatus("작업 중");
+            processTrackingA.setProcessStatus("진행 중");
             processTrackingA.setProcessName("당화");
 
             // ✅ ProcessTracking 저장
