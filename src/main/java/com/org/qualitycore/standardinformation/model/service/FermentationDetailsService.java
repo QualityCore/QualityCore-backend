@@ -1,20 +1,22 @@
 package com.org.qualitycore.standardinformation.model.service;
-
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.*;
-import com.org.qualitycore.standardinformation.model.entity.CoolingProcess;
-import com.org.qualitycore.standardinformation.model.repository.CoolingProcessRepository;
+import com.org.qualitycore.standardinformation.model.entity.FermentationDetails;
+import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
+import com.org.qualitycore.standardinformation.model.repository.FermentationDetailsRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.work.model.entity.WorkOrders;
 import com.org.qualitycore.work.model.entity.processTracking;
 import com.org.qualitycore.work.model.repository.LineMaterialRepository;
 import com.org.qualitycore.work.model.repository.ProcessTrackingRepository;
+import io.swagger.v3.oas.annotations.servers.Server;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -24,21 +26,22 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CoolingProcessService {
+public class FermentationDetailsService {
 
-    private final CoolingProcessRepository coolingProcessRepository;
+    private final FermentationDetailsRepository fermentationDetailsRepository;
     private final LineMaterialRepository lineMaterialRepository;
     private final ProcessTrackingRepository processTrackingRepository;
     private final ModelMapper modelMapper;
 
 
+
     // ✅ 작업지시 ID 목록 조회
     @Transactional
     public List<LineMaterialNDTO> getLineMaterial() {
-        log.info("서비스:냉각 작업지시 ID 목록 조회 시작");
+        log.info("서비스:발효 상세 공정 작업지시 ID 목록 조회 시작");
 
         List<LineMaterial> lineMaterialList = lineMaterialRepository.findAllLineMaterial();
-        log.info("서비스: 냉각 조회된 작업지시 ID 목록 {}", lineMaterialList);
+        log.info("서비스: 발효 상세 공정 조회된 작업지시 ID 목록 {}", lineMaterialList);
         return lineMaterialList.stream()
                 .map(material -> {
                     LineMaterialNDTO dto = modelMapper.map(material, LineMaterialNDTO.class);
@@ -52,7 +55,7 @@ public class CoolingProcessService {
     // ✅ 특정 LOT_NO에 대한 자재 정보 조회
     @Transactional
     public List<LineMaterialNDTO> getMaterialsByLotNo(String lotNo) {
-        log.info("서비스:냉각 LOT_NO={}에 대한 자재 정보 조회", lotNo);
+        log.info("서비스:발효 상세 공정 LOT_NO={}에 대한 자재 정보 조회", lotNo);
         List<LineMaterial> materials = lineMaterialRepository.findByWorkOrders_LotNo(lotNo);
 
         return materials.stream()
@@ -64,48 +67,47 @@ public class CoolingProcessService {
                 .collect(Collectors.toList());
     }
 
-
-    // ✅ 냉각공정 등록
+    // ✅ 발효 상세 공정 등록
     @Transactional
-    public Message createCoolingProcess(CoolingProcessDTO coolingProcessDTO) {
+    public Message createFermentationDetails(FermentationDetailsDTO fermentationDetailsDTO) {
         try {
-            log.info("서비스 :냉각 등록 시작 DTO {}", coolingProcessDTO);
+            log.info("서비스 :발효 상세 공정 등록 시작 DTO {}", fermentationDetailsDTO);
 
             // DTO 가 null 인지 체크
-            if (coolingProcessDTO == null) {
+            if (fermentationDetailsDTO == null) {
                 return new Message(HttpStatus.BAD_REQUEST.value(),
-                        "coolingProcessDTO 가 null 임", new HashMap<>());
+                        "fermentationDetailsDTO 가 null 임", new HashMap<>());
             }
 
             // ID 자동 생성
-            String generatedId = generateNextCoolingId();
+            String generatedId = generateNextFermentationId();
             log.info("자동으로 생성되는 ID {}", generatedId);
 
 
             // ✅ 특정 LOT_NO에 대한 자재 정보 가져오기
             List<LineMaterial> lineMaterials = lineMaterialRepository.
-                    findByWorkOrders_LotNo(coolingProcessDTO.getLotNo());
+                    findByWorkOrders_LotNo(fermentationDetailsDTO.getLotNo());
             if (lineMaterials.isEmpty()) {
                 return new Message(HttpStatus.BAD_REQUEST.value(),
                         "LOT_NO가 존재하지 않습니다.", new HashMap<>());
             }
 
             // ✅ ModelMapper 를 사용하여 DTO -> Entity 변환
-            CoolingProcess coolingProcess = modelMapper
-                    .map(coolingProcessDTO, CoolingProcess.class);
+            FermentationDetails fermentationDetails = modelMapper
+                    .map(fermentationDetailsDTO, FermentationDetails.class);
 
             // ✅ ID 자동 생성
-            coolingProcess.setCoolingId(generatedId);
+            fermentationDetails.setFermentationId(generatedId);
 
             // ✅ 관련 엔티티 매핑 (LOT_NO 기반으로 LineMaterial 리스트 설정)
-            coolingProcess.setLineMaterials(lineMaterials);
+            fermentationDetails.setLineMaterials(lineMaterials);
 
             // ✅ WorkOrders 가져오기
             WorkOrders workOrders = lineMaterials.get(0).getWorkOrders();
 
             // LOT_NO를 기반으로 기존 ProcessTracking 조회
             processTracking processTracking = processTrackingRepository
-                    .findByLotNo(coolingProcessDTO.getLotNo());
+                    .findByLotNo(fermentationDetailsDTO.getLotNo());
             if (processTracking == null) {
                 processTracking = new processTracking();
             }
@@ -114,45 +116,45 @@ public class CoolingProcessService {
             processTracking.setWorkOrders(workOrders); // ✅ LOT_NO와 연결
 
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
-            processTracking.setStatusCode("SC005");
+            processTracking.setStatusCode("SC006");
             processTracking.setProcessStatus("작업 중");
-            processTracking.setProcessName("냉각");
+            processTracking.setProcessName("발효 상세");
 
             // ✅ `processTracking`을 `mashingProcess`에 설정
-            coolingProcess.setProcessTracking(processTracking);
+            fermentationDetails.setProcessTracking(processTracking);
 
             // ✅ 시작 시간 설정 (DTO 값이 있으면 사용, 없으면 현재 시간)
-            if (coolingProcess.getStartTime() == null) {
-                coolingProcess.setStartTime(LocalDateTime.now());
+            if (fermentationDetails.getStartTime() == null) {
+                fermentationDetails.setStartTime(LocalDateTime.now());
             }
 
             // ✅ 예상 종료 시간 자동 계산
-            if (coolingProcess.getExpectedEndTime() == null
-                    && coolingProcess.getCoolingTime() != null) {
-                coolingProcess.setExpectedEndTime(coolingProcess.getStartTime()
-                        .plusMinutes(coolingProcess.getCoolingTime()));
+            if (fermentationDetails.getExpectedEndTime() == null
+                    && fermentationDetails.getFermentationTime() != null) {
+                fermentationDetails.setExpectedEndTime(fermentationDetails.getStartTime()
+                        .plusMinutes(fermentationDetails.getFermentationTime()));
             }
 
-            log.info("ModelMapper 변환 완료 !! {}", coolingProcess);
+            log.info("ModelMapper 변환 완료 !! {}", fermentationDetails);
 
             // ✅ DB 저장
-            CoolingProcess saveCoolingProcess = coolingProcessRepository.save(coolingProcess);
-            log.info("서비스 냉각 공정 등록 완료 ! {}", saveCoolingProcess);
+            FermentationDetails saveFermentationDetails = fermentationDetailsRepository.save(fermentationDetails);
+            log.info("서비스 발효 상세 공정 등록 완료 ! {}", saveFermentationDetails);
 
             // ✅ DTO 변환 후 반환
-            CoolingProcessDTO responseDTO = modelMapper.map(saveCoolingProcess, CoolingProcessDTO.class);
+            FermentationDetailsDTO responseDTO = modelMapper.map(saveFermentationDetails, FermentationDetailsDTO.class);
 
             // ✅ lotNo가 누락되지 않도록 직접 설정
-            if (saveCoolingProcess.getProcessTracking() != null
-                    && saveCoolingProcess.getProcessTracking().getWorkOrders() != null) {
+            if (saveFermentationDetails.getProcessTracking() != null
+                    && saveFermentationDetails.getProcessTracking().getWorkOrders() != null) {
                 responseDTO.getProcessTracking().setLotNo(
-                        saveCoolingProcess.getProcessTracking().getWorkOrders().getLotNo()
+                        saveFermentationDetails.getProcessTracking().getWorkOrders().getLotNo()
                 );
             }
 
             Map<String, Object> result = new HashMap<>();
-            result.put("saveCoolingProcess", responseDTO);
-            return new Message(HttpStatus.CREATED.value(), "냉각공정 등록 완료!", result);
+            result.put("saveFermentationDetails", responseDTO);
+            return new Message(HttpStatus.CREATED.value(), "발효 상세 공정 등록 완료!", result);
 
 
         } catch (IllegalArgumentException e) {
@@ -161,45 +163,57 @@ public class CoolingProcessService {
 
 
         } catch (Exception e) {
-            log.error("서비스 : 냉각 공정 등록중 오류 발생 {}", e.getMessage(), e);
-            return new Message(HttpStatus.BAD_REQUEST.value(), "냉각 공정 등록 실패: " + e.getMessage(), new HashMap<>());
+            log.error("서비스 : 발효 상세 공정 등록중 오류 발생 {}", e.getMessage(), e);
+            return new Message(HttpStatus.BAD_REQUEST.value(), "발효 상세 공정 등록 실패: " + e.getMessage(), new HashMap<>());
         }
 
     }
 
-    // 가장 큰 "coolingId" 조회 후 다음 ID 생성 하룻 있는 코드!
-    public String generateNextCoolingId() {
-        Integer maxId = coolingProcessRepository.findMaxCoolingId();
+    // 가장 큰 "FermentationId" 조회 후 다음 ID 생성 하룻 있는 코드!
+    public String generateNextFermentationId() {
+        Integer maxId = fermentationDetailsRepository.findMaxFermentationId();
         int nextId = (maxId != null) ? maxId + 1 : 1;
-        return String.format("CO%03d", nextId); // "CO001"형식!
+        return String.format("FER%03d", nextId); // "FER001"형식!
     }
 
 
-    // 실제 종료시간 업데이트
-    public CoolingProcessDTO completeEndTime(String coolingId) {
-        CoolingProcess coolingProcess = coolingProcessRepository.findById(coolingId)
-                .orElseThrow(() -> new RuntimeException("냉각 ID가 존재하지 않습니다."));
-        coolingProcess.setActualEndTime(LocalDateTime.now());
-        CoolingProcess updatedCooling = coolingProcessRepository.save(coolingProcess);
-        return modelMapper.map(updatedCooling, CoolingProcessDTO.class);
+
+    // 발효 상세 공정 최종당도 ,실제 종료 시간 업데이트
+    public Message completeFermentationDetails(String fermentationId , Double finalSugarContent) {
+        FermentationDetails fermentationDetails = fermentationDetailsRepository.findById(fermentationId)
+                .orElseThrow(() -> new RuntimeException("분쇄 ID가 존재하지 않습니다."));
+
+        // pH 값을 업데이트
+        if(finalSugarContent != null) {
+            fermentationDetails.setInitialSugarContent(finalSugarContent);
+        }
+
+        fermentationDetails.setActualEndTime(LocalDateTime.now());
+        FermentationDetails updatedFermentation = fermentationDetailsRepository.save(fermentationDetails);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("updatedFermentation", modelMapper.map(updatedFermentation, FermentationDetailsDTO.class));
+
+        return new Message(HttpStatus.OK.value(), "발효 상세 공정 완료", result);
     }
 
 
-    // 공정 상태 코드 추적 ( SC005 , 진행 중 , 냉각공정 업데이트)
+
+    // 공정 상태 코드 추적 ( SC006 , 진행 중 , 발효 상세 공정 업데이트)
     @Transactional
-    public Message updateCoolingProcessStatus(CoolingProcessDTO coolingProcessDTO) {
+    public Message updateFermentationDetailsStatus(FermentationDetailsDTO fermentationDetailsDTO) {
         try {
             log.info("📌 서비스: 업데이트할 processStatus={}",
-                    coolingProcessDTO.getProcessTracking().getProcessStatus());
+                    fermentationDetailsDTO.getProcessTracking().getProcessStatus());
 
             // ✅ LOT_NO를 기반으로 기존 ProcessTracking 조회
             processTracking processTracking =
-                    processTrackingRepository.findByLotNo(coolingProcessDTO.getLotNo());
+                    processTrackingRepository.findByLotNo(fermentationDetailsDTO.getLotNo());
 
             // ✅ DTO 가 null 인지 체크
-            if (coolingProcessDTO == null || coolingProcessDTO.getLotNo() == null) {
+            if (fermentationDetailsDTO == null || fermentationDetailsDTO.getLotNo() == null) {
                 return new Message(HttpStatus.BAD_REQUEST.value(),
-                        "coolingProcessDTO 또는 LOT_NO가 null 입니다.", new HashMap<>());
+                        "fermentationDetailsDTO 또는 LOT_NO가 null 입니다.", new HashMap<>());
             }
 
             // ✅ trackingId가 없으면 업데이트 불가
@@ -209,9 +223,9 @@ public class CoolingProcessService {
             }
 
             // ✅ DTO 에서 ProcessTracking 정보를 가져와서 업데이트
-            processTracking.setStatusCode("SC005");
+            processTracking.setStatusCode("SC006");
             processTracking.setProcessStatus("진행 중");
-            processTracking.setProcessName("냉각");
+            processTracking.setProcessName("발효 상세");
 
             log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",
                     processTracking.getStatusCode(), processTracking.getProcessStatus(), processTracking.getProcessName());
@@ -225,16 +239,15 @@ public class CoolingProcessService {
             // ✅ Hibernate Proxy 를 제거한 DTO 변환 후 반환
             ProcessTrackingDTONam responseDTO = modelMapper.map(processTracking, ProcessTrackingDTONam.class);
             return new Message(HttpStatus.OK.value(),
-                    "냉각 공정 상태 업데이트 완료!", Map.of("updatedProcessTracking", responseDTO));
+                    "발효 상세 공정 상태 업데이트 완료!", Map.of("updatedProcessTracking", responseDTO));
 
         } catch (Exception e) {
-            log.error("서비스 : 냉각 공정 상태 업데이트 중 오류 발생 {}", e.getMessage(), e);
+            log.error("서비스 : 숙성 상세 공정 상태 업데이트 중 오류 발생 {}", e.getMessage(), e);
             return new Message(HttpStatus.BAD_REQUEST.value(),
-                    "냉각 공정 상태 업데이트 실패: " + e.getMessage(), new HashMap<>());
-
+                    "발효 상세 공정 상태 업데이트 실패: " + e.getMessage(), new HashMap<>());
         }
 
-
     }
+
 
 }

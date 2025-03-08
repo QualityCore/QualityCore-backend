@@ -72,7 +72,7 @@ public class BoilingProcessService {
 
 
 
-    // ✅ 여과공정 등록
+    // ✅ 끓임공정 등록
     @Transactional
     public Message createBoilingProcess (BoilingProcessDTO boilingProcessDTO){
         try {
@@ -168,7 +168,7 @@ public class BoilingProcessService {
 
 
         } catch(Exception e) {
-            log.error("서비스 : 여과공정 등록중 오류 발생 {}", e.getMessage(), e);
+            log.error("서비스 : 끓임 공정 등록중 오류 발생 {}", e.getMessage(), e);
             return new Message(HttpStatus.BAD_REQUEST.value(), "끓임 공정 등록 실패: " + e.getMessage(), new HashMap<>());
         }
 

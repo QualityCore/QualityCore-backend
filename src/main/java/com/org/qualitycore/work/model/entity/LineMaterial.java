@@ -60,15 +60,20 @@ public class LineMaterial {
     @JoinColumn(name = "FILTRATION_ID")  // 외래키 설정
     private FiltrationProcess filtrationProcess;
 
-    // 남규 여과 공정 추가함 fk 추가
+    // 남규 끓임 공정 추가함 fk 추가
     @ManyToOne
     @JoinColumn(name = "BOILING_ID")  // 외래키 설정
     private BoilingProcess boilingProcess;
 
-    // 남규 여과 공정 추가함 fk 추가
+    // 남규 냉각 공정 추가함 fk 추가
     @ManyToOne
     @JoinColumn(name = "COOLING_ID")  // 외래키 설정
     private CoolingProcess coolingProcess;
+
+    // 남규 발효 상세 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "FERMENTATION_ID")  // 외래키 설정
+    private FermentationDetails fermentationDetails;
 
 }
 
