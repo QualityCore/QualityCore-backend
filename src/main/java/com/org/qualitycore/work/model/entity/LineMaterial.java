@@ -1,5 +1,7 @@
 package com.org.qualitycore.work.model.entity;
 
+import com.org.qualitycore.standardinformation.model.entity.BoilingProcess;
+import com.org.qualitycore.standardinformation.model.entity.FiltrationProcess;
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
 import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import jakarta.persistence.*;
@@ -39,7 +41,7 @@ public class LineMaterial {
     @Column(name = "PROCESS_STEP")
     private String processStep;
 
-    //남규 @JoinColumn(referencedColumnName = "LOT_NO") 추가입력함.
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "LOT_NO")
     private WorkOrders workOrders;
@@ -47,12 +49,22 @@ public class LineMaterial {
     // 남규  당화 공정 추가함 fk 추가
     @ManyToOne
     @JoinColumn(name = "MASHING_ID")  // 외래키 설정
-    private MashingProcess mashingProcess;  // <-- 이 필드명을 사용해야 함
+    private MashingProcess mashingProcess;
 
     // 남규 분쇄 공정 추가함 fk 추가
     @ManyToOne
     @JoinColumn(name = "GRINDING_ID")  // 외래키 설정
-    private MaterialGrinding materialGrinding;  // <-- 이 필드명을 사용해야 함
+    private MaterialGrinding materialGrinding;
+ // 남규 여과 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "FILTRATION_ID")  // 외래키 설정
+    private FiltrationProcess filtrationProcess;
+
+
+    // 남규 여과 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "BOILING_ID")  // 외래키 설정
+    private BoilingProcess boilingProcess;
 
 }
 
