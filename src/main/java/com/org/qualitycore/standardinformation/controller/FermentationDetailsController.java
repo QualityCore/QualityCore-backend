@@ -1,6 +1,7 @@
 package com.org.qualitycore.standardinformation.controller;
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.FermentationDetailsDTO;
+import com.org.qualitycore.standardinformation.model.dto.FermentationTimedLogDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.service.FermentationDetailsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -133,5 +134,39 @@ public class FermentationDetailsController {
                 .updateFermentationDetailsStatus(fermentationDetailsDTO);
         return ResponseEntity.status(response.getCode()).body(response);
     }
+
+
+    // ✅  발효 시간대별 전체 조회
+    @Operation(summary = "발효 시간대별 전체 데이터 조회", description = "fermentationId가 없으면 전체 데이터를 조회하고, 있으면 해당 ID의 데이터를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @GetMapping("/timed-logs")
+    public ResponseEntity<Message> getAllTimedLogs(@RequestParam(name = "fermentationId", required = false) String fermentationId) {
+        log.info("요청 받은 fermentationId: {}", fermentationId);
+
+        List<FermentationTimedLogDTO> logs;
+
+        if (fermentationId == null || fermentationId.isEmpty()) {
+            // ✅ `fermentationId`가 없으면 전체 데이터 조회
+            logs = fermentationDetailsService.getAllTimedLogsWithoutId();
+        } else {
+            // ✅ `fermentationId`가 있으면 특정 발효 ID 데이터 조회
+            logs = fermentationDetailsService.getAllTimedLogsById(fermentationId);
+        }
+
+        Message response = new Message(200, "발효 시간대별 전체 데이터 조회 성공", new HashMap<>());
+        response.getResult().put("logs", logs);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
+
+
 
 }
