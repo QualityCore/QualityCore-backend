@@ -50,9 +50,12 @@ public class FermentationTimedLogController {
 
 
 
-
-
-    // ✅ 발효 시간별  등록
+    // ✅ 발효 시간별 등록
+    @Operation(summary = "발효 공정 로그 등록", description = "발효 공정의 시간대별 데이터를 기록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "발효 공정 로그 등록 성공"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청")
+    })
     @PostMapping("/log")
     public ResponseEntity<Message> logFermentationData(@RequestBody FermentationTimedLogDTO request) {
         log.info("컨트롤러: 발효 공정 로그 등록 요청 - {}", request);
