@@ -3,7 +3,6 @@ package com.org.qualitycore.standardinformation.controller;
 
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.BoilingProcessDTO;
-import com.org.qualitycore.standardinformation.model.dto.FiltrationProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.service.BoilingProcessService;
 import io.swagger.v3.oas.annotations.Operation;

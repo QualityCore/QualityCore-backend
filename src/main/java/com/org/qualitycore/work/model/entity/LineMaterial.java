@@ -84,5 +84,10 @@ public class LineMaterial {
     @ManyToOne
     @JoinColumn(name = "MFILTRATION_ID")  // 외래키 설정
     private PostMaturationFiltration postMaturationFiltration;
+
+    // 남규 탄산 조정  공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "CARBONATION_ID")  // 외래키 설정
+    private CarbonationProcess carbonationProcess;
 }
 
