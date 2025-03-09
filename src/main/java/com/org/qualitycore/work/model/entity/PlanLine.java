@@ -3,7 +3,6 @@ package com.org.qualitycore.work.model.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
-
 import java.util.Date;
 
 @NoArgsConstructor

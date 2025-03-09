@@ -1,6 +1,5 @@
 package com.org.qualitycore.standardinformation.model.service;
 
-import com.org.qualitycore.common.CloudinaryService;
 import com.org.qualitycore.standardinformation.model.dto.EquipmentInfoDTO;
 import com.org.qualitycore.standardinformation.model.entity.EquipmentInfo;
 import com.org.qualitycore.standardinformation.model.entity.QEquipmentInfo;
@@ -19,15 +18,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,6 +80,7 @@ public class EquipmentInfoService {
                 .from(eq)
                 .join(eq.workplace, wp)
                 .where(where)
+                .orderBy(eq.equipmentId.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

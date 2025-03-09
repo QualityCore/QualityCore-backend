@@ -6,19 +6,20 @@ import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.LabelInfoDTO;
 import com.org.qualitycore.standardinformation.model.service.LabelInfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,12 +31,13 @@ public class LabelInfoController {
 
     // 라벨전체조회
     @GetMapping("/labelInfo")
-    public ResponseEntity<Message> findAllLabelInfo() {
+    public ResponseEntity<Message> findAllLabelInfo(@PageableDefault Pageable pageable,
+                                                    @RequestParam (value = "search", required = false, defaultValue = "") String search) {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
 
-        List<LabelInfoDTO> labelInfo = labelInfoService.findAllLabelInfo();
+        Page<LabelInfoDTO> labelInfo = labelInfoService.findAllLabelInfo(pageable, search);
 
         Map<String, Object> res = new HashMap<>();
         res.put("labelInfo", labelInfo);
@@ -88,19 +90,6 @@ public class LabelInfoController {
         Map<String, Object> res = new HashMap<>();
         res.put("code", 201);
         res.put("message", "등록성공");
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
-    }
-
-    // 수정
-    @PutMapping("/labelInfo")
-    public ResponseEntity<?> updateLabelInfo(@RequestBody LabelInfoDTO labelInfo) {
-
-        labelInfoService.updateLabelInfo(labelInfo);
-
-        Map<String, Object> res = new HashMap<>();
-        res.put("code", 201);
-        res.put("message", "수정성공");
 
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }

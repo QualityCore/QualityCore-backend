@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -19,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.nio.charset.Charset;
 import java.util.Date;
@@ -33,6 +33,7 @@ import java.util.Map;
 public class WorkController {
 
     private final WorkService workService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 작업지시서 전체 조회
     @GetMapping("/work")
@@ -112,6 +113,11 @@ public class WorkController {
         try {
 
             workService.createWorkOrder(work);
+
+            Map<String, Object> notification = new HashMap<>();
+            notification.put("type", "WORK_ORDER");
+            notification.put("message", "새 작업지시서가 등록되었습니다.");
+            messagingTemplate.convertAndSend("/topic/workOrders", notification);
 
             Map<String, Object> res = new HashMap<>();
             res.put("status", 201);

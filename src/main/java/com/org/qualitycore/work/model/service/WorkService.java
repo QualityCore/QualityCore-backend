@@ -5,7 +5,6 @@ import com.org.qualitycore.work.model.entity.*;
 import com.org.qualitycore.work.model.repository.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.transaction.Transactional;
@@ -16,8 +15,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -91,6 +88,7 @@ public class WorkService {
                         pt.processName.as("processName"),
                         pt.statusCode.as("statusCode"),
                         e.empId.as("empId"),
+                        e.empName.as("empName"),
                         e.workTeam.as("workTeam"),
                         pl.planLineId.as("planLineId"),
                         pl.lineNo.as("lineNo"),
@@ -152,6 +150,7 @@ public class WorkService {
                         pt.processName.as("processName"),
                         pt.statusCode.as("statusCode"),
                         e.empId.as("empId"),
+                        e.empName.as("empName"),
                         e.workTeam.as("workTeam"),
                         pl.planLineId.as("planLineId"),
                         pl.lineNo.as("lineNo"),

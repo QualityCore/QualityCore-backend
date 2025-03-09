@@ -24,6 +24,9 @@ public class WorkFindAllDTO {
     @Schema(description = "특이사항")
     private String workEtc;
 
+    @Schema(description = "직원이름")
+    private String empName;
+
     @Schema(description = "작업조")
     private String workTeam;
 
