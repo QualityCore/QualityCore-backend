@@ -70,6 +70,9 @@ public class FermentationDetailsService {
                 .collect(Collectors.toList());
     }
 
+
+
+
     // ✅ 발효 상세 공정 등록
     @Transactional
     public Message createFermentationDetails(FermentationDetailsDTO fermentationDetailsDTO) {
@@ -182,16 +185,20 @@ public class FermentationDetailsService {
 
 
     // 발효 상세 공정 최종당도 ,실제 종료 시간 업데이트
-    public Message completeFermentationDetails(String fermentationId , Double finalSugarContent) {
+    public Message completeFermentationDetails(String fermentationId , Double finalSugarContent, LocalDateTime actualEndTime) {
         FermentationDetails fermentationDetails = fermentationDetailsRepository.findById(fermentationId)
                 .orElseThrow(() -> new RuntimeException("발효 상세 ID가 존재하지 않습니다."));
 
-        // pH 값을 업데이트
+
         if(finalSugarContent != null) {
-            fermentationDetails.setInitialSugarContent(finalSugarContent);
+            fermentationDetails.setFinalSugarContent(finalSugarContent);
+        }
+        if (actualEndTime != null) {
+            fermentationDetails.setActualEndTime(actualEndTime);
         }
 
         fermentationDetails.setActualEndTime(LocalDateTime.now());
+
         FermentationDetails updatedFermentation = fermentationDetailsRepository.save(fermentationDetails);
 
         Map<String, Object> result = new HashMap<>();
