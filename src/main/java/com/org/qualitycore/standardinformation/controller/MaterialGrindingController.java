@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -72,6 +73,39 @@ public class MaterialGrindingController {
     }
 
 
+    // ✅ 분쇄공정에 등록된 LOT_NO 조회
+    @Operation(summary = "분쇄공정 조회", description = "분쇄공정에 등록된 작업지시 ID를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "등록된 데이터 없음")
+    })
+    @GetMapping("/materialgrinding/{lotNo}")
+    public ResponseEntity<Message> getMaterialGrindingByLotNo(
+            @PathVariable("lotNo") String lotNo) {
+        log.info("컨트롤러: 분쇄공정 조회 요청 - lotNo: {}", lotNo);
+
+        Message response = materialGrindingService.getMaterialGrindingByLotNo(lotNo);
+
+        if (response.getResult() == null || response.getResult().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+     //✅ 모든 분쇄공정 데이터 조회 (추가된 기능)
+    @GetMapping("/materialgrinding")
+    public ResponseEntity<Message> getAllMaterialGrinding() {
+        log.info("컨트롤러: 모든 분쇄공정 데이터 조회 요청");
+
+        Message response = materialGrindingService.getAllMaterialGrinding();
+
+        if (response.getResult() == null || response.getResult().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+
+        return ResponseEntity.ok(response);
+    }
 
 
 
