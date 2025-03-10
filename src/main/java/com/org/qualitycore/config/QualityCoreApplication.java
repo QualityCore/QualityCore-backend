@@ -15,5 +15,4 @@ public class QualityCoreApplication {
     public static void main(String[] args) {
         SpringApplication.run(QualityCoreApplication.class, args);
     }
-
 }
