@@ -5,21 +5,27 @@ import com.cloudinary.utils.ObjectUtils;
 import com.org.qualitycore.productionPlan.model.entity.ProductBom;
 import com.org.qualitycore.productionPlan.model.entity.QProductBom;
 import com.org.qualitycore.productionPlan.model.repository.ProductBomRepository;
+import com.org.qualitycore.standardinformation.model.dto.EquipmentInfoDTO;
 import com.org.qualitycore.standardinformation.model.dto.LabelInfoDTO;
 import com.org.qualitycore.standardinformation.model.entity.LabelInfo;
 import com.org.qualitycore.standardinformation.model.entity.QLabelInfo;
 import com.org.qualitycore.standardinformation.model.repository.LabelInfoRepository;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,29 +38,47 @@ public class LabelInfoService {
     private final Cloudinary cloudinary;
 
     // 전체조회
-    public List<LabelInfoDTO> findAllLabelInfo() {
+    public Page<LabelInfoDTO> findAllLabelInfo(Pageable pageable, String search) {
         QLabelInfo labelInfo = QLabelInfo.labelInfo;
         QProductBom productBomEntity = QProductBom.productBom;
+        BooleanBuilder where = new BooleanBuilder();
+
+        if (StringUtils.hasText(search)) {
+            where.and(productBomEntity.productName.containsIgnoreCase(search));
+        }
+
+        long totalCount = Optional.ofNullable(queryFactory
+                        .select(labelInfo.count())
+                        .from(labelInfo)
+                        .join(labelInfo.productBom, productBomEntity)
+                        .where(where)
+                        .fetchOne())
+                .orElse(0L);
 
         List<LabelInfoDTO> labelInfoList = queryFactory
                 .select(Projections.fields(LabelInfoDTO.class,
                         labelInfo.labelId.as("labelId"),
                         labelInfo.productionDate.as("productionDate"),
                         labelInfo.labelImage.as("labelImage"),
+                        labelInfo.beerImage.as("beerImage"),
                         labelInfo.beerSupplier.as("beerSupplier"),
                         productBomEntity.productId.as("productId"),
                         productBomEntity.productName.as("productName"),
                         productBomEntity.sizeSpec.as("sizeSpec"),
                         productBomEntity.alcPercent.floatValue().as("alcPercent")
-
                 ))
                 .from(labelInfo)
-                .join(productBomEntity)
-                .on(labelInfo.productBom.productId.eq(productBomEntity.productId))
+                .join(labelInfo.productBom, productBomEntity)
+                .where(where)
+                .orderBy(labelInfo.labelId.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
 
-        return labelInfoList;
+        return new PageImpl<>(labelInfoList, pageable, totalCount);
     }
+
+
 
     // 상세조회
     public LabelInfoDTO findByIdLabelInfo(String labelId) {
@@ -66,6 +90,7 @@ public class LabelInfoService {
                         labelInfo.labelId.as("labelId"),
                         labelInfo.productionDate.as("productionDate"),
                         labelInfo.labelImage.as("labelImage"),
+                        labelInfo.beerImage.as("beerImage"),
                         labelInfo.beerSupplier.as("beerSupplier"),
                         productBomEntity.productId.as("productId"),
                         productBomEntity.productName.as("productName"),
@@ -82,7 +107,6 @@ public class LabelInfoService {
         return labelInfoDTO;
     }
 
-    // 라벨정보 등록
     // 라벨정보 등록
     @Transactional
     public void createLabelInfo(LabelInfoDTO labelInfoDTO, MultipartFile labelImage, MultipartFile beerImage) {
@@ -120,7 +144,6 @@ public class LabelInfoService {
         }
     }
 
-
     // auto increment 방식
     public String generateNewLabelId(String maxLabelId) {
         if (maxLabelId == null) {
@@ -135,7 +158,6 @@ public class LabelInfoService {
         return String.format("LA%03d", newId);
     }
 
-
     // 이미지 업로더
     private String uploadImageToCloudinary(MultipartFile image) throws IOException {
         Map<String, Object> uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
@@ -148,10 +170,12 @@ public class LabelInfoService {
         return imageUrl;
     }
 
-
-    public void updateLabelInfo(LabelInfoDTO labelInfo) {
-    }
-
+    // 라벨삭제
+    @Transactional
     public void deleteLabelInfo(String labelId) {
+
+        labelInfoRepository.deleteById(labelId);
+
+        modelMapper.map(labelId, EquipmentInfoDTO.class);
     }
 }

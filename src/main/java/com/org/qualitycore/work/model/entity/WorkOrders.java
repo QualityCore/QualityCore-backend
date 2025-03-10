@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 
-import static com.org.qualitycore.work.model.entity.QWorkOrders.workOrders;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

@@ -43,4 +43,14 @@ public class CloudinaryService {
         }
     }
 
+    // 파일 업로드
+    public String uploadFile(MultipartFile file) throws IOException {
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String fileUrl = (String) uploadResult.get("secure_url");
+
+        if (fileUrl == null) {
+            throw new IOException("Failed to upload file to Cloudinary");
+        }
+        return fileUrl;
+    }
 }
