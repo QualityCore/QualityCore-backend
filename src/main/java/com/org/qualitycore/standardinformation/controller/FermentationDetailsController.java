@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,8 +110,12 @@ public class FermentationDetailsController {
         Double finalSugarContent = (finalSugarContentObj instanceof Number number)
                 ? number.doubleValue()
                 :null;
+        Object actualEndTimeObj = requestBody.get("actualEndTime");
+        LocalDateTime actualEndTime = (actualEndTimeObj instanceof String str)
+                ? LocalDateTime.parse(str)
+                : null;
 
-        Message response = fermentationDetailsService.completeFermentationDetails(fermentationId, finalSugarContent);
+        Message response = fermentationDetailsService.completeFermentationDetails(fermentationId, finalSugarContent,actualEndTime);
         return ResponseEntity.status(response.getCode()).body(response);
     }
 

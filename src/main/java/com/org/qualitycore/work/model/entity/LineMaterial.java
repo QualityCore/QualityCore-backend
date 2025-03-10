@@ -78,5 +78,9 @@ public class LineMaterial {
     @JoinColumn(name = "MATURATION_ID")  // 외래키 설정
     private MaturationDetails maturationDetails;
 
+    // 남규 숙성 후 여과  공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "MFILTRATION_ID")  // 외래키 설정
+    private PostMaturationFiltration postMaturationFiltration;
 }
 
