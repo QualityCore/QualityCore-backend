@@ -1,6 +1,7 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
 import com.org.qualitycore.routing.model.dto.ProcessTrackingDTO;
+import com.org.qualitycore.standardinformation.model.entity.MaterialGrinding;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -57,5 +58,23 @@ public class MaterialGrindingDTO {
     @Schema(description = "공정 추적 DTO" )
     private ProcessTrackingDTONam processTracking;
 
+
+    public static MaterialGrindingDTO fromEntity(MaterialGrinding entity) {
+        return MaterialGrindingDTO.builder()
+                .grindingId(entity.getGrindingId())
+                .lotNo(entity.getLotNo())
+                .mainMaterial(entity.getMainMaterial())
+                .mainMaterialInputVolume(entity.getMainMaterialInputVolume())
+                .maltType(entity.getMaltType())
+                .maltInputVolume(entity.getMaltInputVolume())
+                .grindIntervalSetting(entity.getGrindIntervalSetting())
+                .grindSpeedSetting(entity.getGrindSpeedSetting())
+                .grindDuration(entity.getGrindDuration())
+                .notes(entity.getNotes())
+                .startTime(entity.getStartTime())
+                .expectedEndTime(entity.getExpectedEndTime())
+                .actualEndTime(entity.getActualEndTime())
+                .build();
+    }
 
 }
