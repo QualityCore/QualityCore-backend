@@ -2,11 +2,9 @@ package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.BoilingProcessDTO;
-import com.org.qualitycore.standardinformation.model.dto.FiltrationProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.ProcessTrackingDTONam;
 import com.org.qualitycore.standardinformation.model.entity.BoilingProcess;
-import com.org.qualitycore.standardinformation.model.entity.FiltrationProcess;
 import com.org.qualitycore.standardinformation.model.repository.BoilingProcessRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.work.model.entity.WorkOrders;
