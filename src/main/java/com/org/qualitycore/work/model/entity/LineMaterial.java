@@ -87,5 +87,10 @@ public class LineMaterial {
     @ManyToOne
     @JoinColumn(name = "CARBONATION_ID")  // 외래키 설정
     private CarbonationProcess carbonationProcess;
+
+    // 남규 패키징 및 출하  공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "PACKAGING_ID")  // 외래키 설정
+    private PackagingAndShipment packagingAndShipment;
 }
 

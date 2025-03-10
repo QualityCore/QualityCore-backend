@@ -228,10 +228,6 @@ public class PostMaturationFiltrationService {
                         "ProcessTracking 의 ID가 없습니다.", new HashMap<>());
             }
 
-            // ✅ DTO 에서 ProcessTracking 정보를 가져와서 업데이트
-            processTracking.setStatusCode("SC008");
-            processTracking.setProcessStatus("진행 중");
-            processTracking.setProcessName("숙성 후 여과");
 
             log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",
                     processTracking.getStatusCode(), processTracking.getProcessStatus(), processTracking.getProcessName());

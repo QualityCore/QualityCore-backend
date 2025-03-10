@@ -35,4 +35,7 @@ public class MaturationTimedLogDTO {
 
     @Schema(description = "메모 사항", example = "산소량 조절 필요")
     private String notes;
+
+    @Schema(description = "공정 추적 DTO" )
+    private ProcessTrackingDTONam processTracking;
 }
