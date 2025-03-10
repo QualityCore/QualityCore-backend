@@ -1,10 +1,8 @@
 package com.org.qualitycore.standardinformation.controller;
 
 import com.org.qualitycore.common.Message;
-import com.org.qualitycore.standardinformation.model.dto.BoilingProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.PackagingAndShipmentDTO;
-import com.org.qualitycore.standardinformation.model.repository.PackagingAndShipmentRepository;
 import com.org.qualitycore.standardinformation.model.service.PackagingAndShipmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
