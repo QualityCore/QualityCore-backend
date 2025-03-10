@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity(name = "PackagingProcessEntity")
@@ -27,5 +28,23 @@ public class PackagingAndShipment {
     @Column(name = "STATUS_CODE")
     private String statusCode;
 
+
+    @Column(name = "FILLING_STATUS")
+    private String fillingStatus;
+
+    @Column(name = "SEALING_STATUS")
+    private String sealingStatus;
+
+    @Column(name = "PACKAGING_STATUS")
+    private String packagingStatus;
+
+    @Column(name = "SHIPMENT_DATE")
+    private LocalDate shipmentDate;
+
+    @Column(name = "PRODUCT_NAME")
+    private String productName;
+
+    @Column(name = "SHIPMENT_QUANTITY")
+    private Integer shipmentQuantity;
 
 }
