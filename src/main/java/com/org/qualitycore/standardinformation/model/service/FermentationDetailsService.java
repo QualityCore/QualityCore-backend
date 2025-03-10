@@ -2,8 +2,10 @@ package com.org.qualitycore.standardinformation.model.service;
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.*;
 import com.org.qualitycore.standardinformation.model.entity.FermentationDetails;
+import com.org.qualitycore.standardinformation.model.entity.FermentationTimedLog;
 import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
 import com.org.qualitycore.standardinformation.model.repository.FermentationDetailsRepository;
+import com.org.qualitycore.standardinformation.model.repository.FermentationTimedLogRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.work.model.entity.WorkOrders;
 import com.org.qualitycore.work.model.entity.processTracking;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 public class FermentationDetailsService {
 
     private final FermentationDetailsRepository fermentationDetailsRepository;
+    private final FermentationTimedLogRepository fermentationTimedLogRepository;
     private final LineMaterialRepository lineMaterialRepository;
     private final ProcessTrackingRepository processTrackingRepository;
     private final ModelMapper modelMapper;
@@ -250,4 +253,27 @@ public class FermentationDetailsService {
     }
 
 
+    // 발효 시간별 전체 조회
+
+    // ✅ `fermentationId` 없이 전체 조회
+    public List<FermentationTimedLogDTO> getAllTimedLogsWithoutId() {
+        log.info("전체 발효 시간대별 데이터 조회");
+        List<FermentationTimedLog> logs = fermentationTimedLogRepository.findAll();
+        return logs.stream()
+                .map(log -> modelMapper.map(log, FermentationTimedLogDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    // ✅ `fermentationId` 기준으로 조회
+    public List<FermentationTimedLogDTO> getAllTimedLogsById(String fermentationId) {
+        log.info("특정 발효 ID({})의 시간대별 데이터 조회", fermentationId);
+        List<FermentationTimedLog> logs = fermentationTimedLogRepository.findAllByFermentationDetails_FermentationId(fermentationId);
+        return logs.stream()
+                .map(log -> modelMapper.map(log, FermentationTimedLogDTO.class))
+                .collect(Collectors.toList());
+    }
 }
+
+
+
+
