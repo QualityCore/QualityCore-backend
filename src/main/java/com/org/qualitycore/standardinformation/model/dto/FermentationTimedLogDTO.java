@@ -40,7 +40,6 @@ public class FermentationTimedLogDTO {
     @Schema(description = "알코올 농도 (%)", example = "4.5")
     private Double alcoholConcentration;
 
-
     @Schema(description = "메모 사항", example = "pH 안정적, 발효 진행 중")
     private String notes;
 }

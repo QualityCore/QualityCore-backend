@@ -184,7 +184,7 @@ public class FermentationDetailsService {
     // 발효 상세 공정 최종당도 ,실제 종료 시간 업데이트
     public Message completeFermentationDetails(String fermentationId , Double finalSugarContent) {
         FermentationDetails fermentationDetails = fermentationDetailsRepository.findById(fermentationId)
-                .orElseThrow(() -> new RuntimeException("분쇄 ID가 존재하지 않습니다."));
+                .orElseThrow(() -> new RuntimeException("발효 상세 ID가 존재하지 않습니다."));
 
         // pH 값을 업데이트
         if(finalSugarContent != null) {
@@ -245,7 +245,7 @@ public class FermentationDetailsService {
                     "발효 상세 공정 상태 업데이트 완료!", Map.of("updatedProcessTracking", responseDTO));
 
         } catch (Exception e) {
-            log.error("서비스 : 숙성 상세 공정 상태 업데이트 중 오류 발생 {}", e.getMessage(), e);
+            log.error("서비스 : 발효 상세 공정 상태 업데이트 중 오류 발생 {}", e.getMessage(), e);
             return new Message(HttpStatus.BAD_REQUEST.value(),
                     "발효 상세 공정 상태 업데이트 실패: " + e.getMessage(), new HashMap<>());
         }
@@ -272,6 +272,7 @@ public class FermentationDetailsService {
                 .map(log -> modelMapper.map(log, FermentationTimedLogDTO.class))
                 .collect(Collectors.toList());
     }
+
 }
 
 

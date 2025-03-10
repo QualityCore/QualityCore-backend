@@ -56,8 +56,8 @@ public class FermentationTimedLogService {
         FermentationTimedLog fermentationTimedLog = fermentationTimedLogRepository.findById(flogId)
                 .orElseThrow(() -> new RuntimeException("발효 시간별 등록  ID가 존재하지 않습니다."));
         fermentationTimedLog.setActualEndTime(LocalDateTime.now());
-        FermentationTimedLog updatedfermentationTimedLog = fermentationTimedLogRepository.save(fermentationTimedLog);
-        return modelMapper.map(updatedfermentationTimedLog, FermentationTimedLogDTO.class);
+        FermentationTimedLog updatedFermentationTimedLog = fermentationTimedLogRepository.save(fermentationTimedLog);
+        return modelMapper.map(updatedFermentationTimedLog, FermentationTimedLogDTO.class);
     }
 
 

@@ -73,5 +73,10 @@ public class LineMaterial {
     @JoinColumn(name = "FERMENTATION_ID")  // 외래키 설정
     private FermentationDetails fermentationDetails;
 
+    // 남규 숙성 상세 공정 추가함 fk 추가
+    @ManyToOne
+    @JoinColumn(name = "MATURATION_ID")  // 외래키 설정
+    private MaturationDetails maturationDetails;
+
 }
 
