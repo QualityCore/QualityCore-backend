@@ -1,13 +1,11 @@
 package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.common.Message;
-import com.org.qualitycore.standardinformation.model.dto.CarbonationProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.PackagingAndShipmentDTO;
 import com.org.qualitycore.standardinformation.model.dto.ProcessTrackingDTONam;
-import com.org.qualitycore.standardinformation.model.entity.CarbonationProcess;
 import com.org.qualitycore.standardinformation.model.entity.PackagingAndShipment;
-import com.org.qualitycore.standardinformation.model.repository.PackagingAndShipmentRepository;
+import com.org.qualitycore.standardinformation.model.repository.PPackagingAndShipmentRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.work.model.entity.WorkOrders;
 import com.org.qualitycore.work.model.entity.processTracking;
@@ -20,7 +18,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +29,7 @@ import java.util.stream.Collectors;
 public class PackagingAndShipmentService {
 
 
-    private final PackagingAndShipmentRepository packagingAndShipmentRepository;
+    private final PPackagingAndShipmentRepository PPackagingAndShipmentRepository;
     private final LineMaterialRepository lineMaterialRepository;
     private final ProcessTrackingRepository processTrackingRepository;
     private final ModelMapper modelMapper;
@@ -115,7 +112,7 @@ public class PackagingAndShipmentService {
             log.info("ModelMapper 변환 완료 !! {}", packagingAndShipment);
 
             // ✅ DB 저장
-            PackagingAndShipment savePackagingAndShipment = packagingAndShipmentRepository.save(packagingAndShipment);
+            PackagingAndShipment savePackagingAndShipment = PPackagingAndShipmentRepository.save(packagingAndShipment);
             log.info("서비스 패키징 및 출하 공정 등록 완료 ! {}", savePackagingAndShipment);
 
             // ✅ DTO 변환 후 반환
@@ -148,7 +145,7 @@ public class PackagingAndShipmentService {
 
     // 가장 큰 "coolingId" 조회 후 다음 ID 생성 하룻 있는 코드!
     public String generateNextPackagingId() {
-        Integer maxId = packagingAndShipmentRepository.findMaxPackagingId();
+        Integer maxId = PPackagingAndShipmentRepository.findMaxPackagingId();
         int nextId = (maxId != null) ? maxId + 1 : 1;
         return String.format("PA%03d", nextId); // "PA001"형식!
     }
