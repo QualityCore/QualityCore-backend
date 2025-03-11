@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,6 +65,50 @@ public class MaterialGrindingService {
                 })
                 .collect(Collectors.toList());
     }
+
+    // ✅ 분쇄 공정 등록 작업지시ID 조회
+    public Message getMaterialGrindingByLotNo(String lotNo) {
+        List<MaterialGrinding> grindingData = materialGrindingRepository.findByLotNo(lotNo);
+
+        if (grindingData.isEmpty()) {
+            return new Message(404, "등록된 분쇄공정 데이터 없음", Collections.emptyMap());
+        }
+
+        // ✅ ModelMapper 를 사용하지 않고 DTO 변환 (직렬화 문제 방지)
+        List<MaterialGrindingDTO> grindingDTOs = grindingData.stream()
+                .map(MaterialGrindingDTO::fromEntity) // DTO 변환 메서드 사용
+                .collect(Collectors.toList());
+
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("data", grindingDTOs);
+
+        return new Message(200, "조회 성공", responseMap);
+    }
+
+
+
+    // ✅ 분쇄 공정 등록 전체 조회
+    public Message getAllMaterialGrinding() {
+        List<MaterialGrinding> grindingData = materialGrindingRepository.findAll();
+
+        if (grindingData.isEmpty()) {
+            return new Message(404, "등록된 분쇄공정 데이터 없음", Collections.emptyMap());
+        }
+
+        // DTO 변환 후 Map으로 반환
+        List<MaterialGrindingDTO> grindingDTOs = grindingData.stream()
+                .map(MaterialGrindingDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("data", grindingDTOs);
+
+        return new Message(200, "조회 성공", responseMap);
+    }
+
+
+
 
 
 
@@ -120,8 +165,8 @@ public class MaterialGrindingService {
 
                 // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
                 processTracking.setStatusCode("SC001");
-                processTracking.setProcessStatus("대기 중");
-                processTracking.setProcessName("분쇄 및 원재료투입");
+                processTracking.setProcessStatus("작업 중");
+                processTracking.setProcessName("분쇄");
 
 
                 // ✅ ProcessTracking 저장

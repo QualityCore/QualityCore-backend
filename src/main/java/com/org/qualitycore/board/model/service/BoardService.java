@@ -97,6 +97,68 @@ public class BoardService {
         return new PageImpl<>(results, pageable, total);
     }
 
+    // 메인화면 중요, 공지 전체조회
+    public Page<BoardDTO> findAllBoardMain(Pageable pageable, String searchType, String searchKeyword) {
+        QBoard board = QBoard.board;
+        QEmployee employee = QEmployee.employee;
+
+        // 검색 조건 생성
+        BooleanBuilder where = new BooleanBuilder();
+        if (StringUtils.hasText(searchKeyword)) {
+            if ("boardTitle".equals(searchType)) {
+                where.and(board.boardTitle.containsIgnoreCase(searchKeyword));
+            } else if ("empName".equals(searchType)) {
+                where.and(employee.empName.containsIgnoreCase(searchKeyword));
+            } else if ("boardContents".equals(searchType)) {
+                where.and(board.boardContents.containsIgnoreCase(searchKeyword));
+            } else {
+                // 전체 검색 (제목+작성자+내용)
+                where.and(
+                        board.boardTitle.containsIgnoreCase(searchKeyword)
+                                .or(employee.empName.containsIgnoreCase(searchKeyword))
+                                .or(board.boardContents.containsIgnoreCase(searchKeyword))
+                );
+            }
+        }
+
+        // 전체 개수 조회 (검색 조건 적용)
+        long total = Optional.ofNullable(
+                queryFactory
+                        .select(board.count())
+                        .from(board)
+                        .join(board.employee, employee)
+                        .where(where.and(board.boardCategory.eq("중요").or(board.boardCategory.eq("공지")))) // 중요 및 공지 카테고리 필터링
+                        .fetchOne()
+        ).orElse(0L);
+
+
+        // 데이터 조회 (페이징 적용)
+        List<BoardDTO> results = queryFactory
+                .select(Projections.fields(BoardDTO.class,
+                        board.boardId.as("boardId"),
+                        board.boardContents.as("boardContents"),
+                        board.boardTitle.as("boardTitle"),
+                        board.boardDate.as("boardDate"),
+                        board.boardCategory.as("boardCategory"),
+                        board.fileName.as("fileName"),
+                        board.fileUrl.as("fileUrl"),
+                        employee.empId.as("empId"),
+                        employee.empName.as("empName")
+                ))
+                .from(board)
+                .join(board.employee, employee)
+                .where(board.boardCategory.eq("중요").or(board.boardCategory.eq("공지")))
+                .orderBy(
+                        board.boardCategory.desc(),
+                        board.boardId.desc()
+                )
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
     // 게시판 상세조회
     public BoardDTO findByIdBoard(String boardId) {
         QBoard board = QBoard.board;
@@ -174,19 +236,21 @@ public class BoardService {
     }
 
     // 게시글수정
+    // 게시판 수정
     @Transactional
     public void updateBoard(BoardDTO board) {
 
         Board board1 = boardRepository.findById(board.getBoardId()).orElseThrow(IllegalArgumentException::new);
 
-        Board updateBoard = board1.toBuilder().
-                boardTitle(board1.getBoardTitle()).
-                boardContents(board1.getBoardContents()).
-                boardCategory(board1.getBoardCategory()).build();
+        Board updateBoard = board1.toBuilder()
+                .boardTitle(board.getBoardTitle())
+                .boardContents(board.getBoardContents())
+                .boardCategory(board.getBoardCategory())
+                .build();
 
         boardRepository.save(updateBoard);
-
     }
+
 
     // 게시글 삭제
     @Transactional
@@ -196,4 +260,6 @@ public class BoardService {
 
         modelMapper.map(boardId, Board.class);
     }
+
+
 }

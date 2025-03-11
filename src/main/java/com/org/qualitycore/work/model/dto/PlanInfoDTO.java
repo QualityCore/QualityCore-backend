@@ -33,11 +33,11 @@ public class PlanInfoDTO {
     @Schema(description = "라인 생산수량")
     private Integer planQty;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     @Schema(description = "생산시작일")
     private Date startDate;
-    
-    @JsonFormat(pattern = "yyyy-MM-dd")
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     @Schema(description = "생산종료일")
     private Date endDate;
 

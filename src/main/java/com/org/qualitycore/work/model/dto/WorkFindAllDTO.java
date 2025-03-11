@@ -45,12 +45,10 @@ public class WorkFindAllDTO {
     @Schema(description = "해당 라인 배정수량")
     private Integer planQty;
 
-    @Schema(description = "생산시작일")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private Date startDate;
 
-    @Schema(description = "생산종료일")
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private Date endDate;
 
     @Schema(description = "자재 목록")
