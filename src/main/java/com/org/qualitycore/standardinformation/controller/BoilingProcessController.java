@@ -127,6 +127,27 @@ public class BoilingProcessController {
     }
 
 
+    // ✅ LOT_NO 기반으로 끓임 공정 데이터 조회 엔드포인트 추가
+    @Operation(summary = "LOT_NO로 끓임 공정 조회", description = "LOT_NO를 기반으로 끓임 공정 데이터를 조회합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공"),
+            @ApiResponse(responseCode = "404", description = "해당 LOT_NO의 끓임 공정 데이터 없음")
+    })
+    @GetMapping("/lot/{lotNo}")
+    public ResponseEntity<Message> getBoilingProcessByLotNo(@PathVariable String lotNo) {
+        log.info("컨트롤러: LOT_NO={} 끓임 공정 조회 요청", lotNo);
+
+        List<BoilingProcessDTO> boilingProcesses = boilingProcessService.getBoilingProcessByLotNo(lotNo);
+
+        if (boilingProcesses.isEmpty()) {
+            return ResponseEntity.status(404).body(new Message(404, "해당 LOT_NO에 대한 끓임 공정 데이터를 찾을 수 없습니다.", Map.of()));
+        } else {
+            return ResponseEntity.ok(new Message(200, "끓임 공정 조회 성공", Map.of("boilingProcesses", boilingProcesses)));
+        }
+    }
+
+
+
 
     // 홉 투입 업데이트 구문
     @Operation(

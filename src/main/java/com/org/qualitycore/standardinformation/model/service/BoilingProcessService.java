@@ -221,6 +221,15 @@ public class BoilingProcessService {
     }
 
 
+    // ✅ LOT_NO로 여러 개의 끓임 공정 조회 (리스트 반환)
+    public List<BoilingProcessDTO> getBoilingProcessByLotNo(String lotNo) {
+        List<BoilingProcess> boilingProcesses = boilingProcessRepository.findAllByLotNo(lotNo);
+
+        return boilingProcesses.stream()
+                .map(bp -> modelMapper.map(bp, BoilingProcessDTO.class))
+                .collect(Collectors.toList());
+    }
+
     // 홉이름 및 홉투입량 업데이트 구문
     public Message updateHopInfo(String boilingId, String firstHopName, Double firstHopAmount,
                                  String secondHopName, Double secondHopAmount) {

@@ -14,10 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,33 @@ import java.util.Map;
 public class FiltrationProcessController {
 
     private final FiltrationProcessService filtrationProcessService;
+
+
+
+    // 여과 공정 전체 조회
+    @GetMapping("/all")
+    @Operation(summary = "전체 여과 공정 조회", description = "모든 여과 공정 데이터를 조회합니다.")
+    public ResponseEntity<Message> getAllFiltrationProcesses() {
+        List<FiltrationProcessDTO> filtrationProcesses = filtrationProcessService.getAllFiltrationProcesses();
+        Message response = new Message(200, "전체 여과 공정 조회 성공", Map.of("data", filtrationProcesses));
+        return ResponseEntity.ok(response);
+    }
+
+
+    // 여과공정 상세 조회
+    @GetMapping("/filtration/{lotNo}")
+    @Operation(summary = "여과 공정 상세 조회", description = "특정 여과 공정 데이터를 lotNo를 기반으로 조회합니다.")
+    public ResponseEntity<Message> getFiltrationProcessesByLotNo(@PathVariable String lotNo) {
+        List<FiltrationProcessDTO> filtrationProcesses = filtrationProcessService.getFiltrationProcessesByLotNo(lotNo);
+        if (!filtrationProcesses.isEmpty()) {
+            Message response = new Message(200, "여과 공정 상세 조회 성공", Map.of("data", filtrationProcesses));
+            return ResponseEntity.ok(response);
+        } else {
+            Message response = new Message(404, "해당 LotNo에 대한 여과 공정 데이터를 찾을 수 없습니다.", Map.of());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
 
 
     // ✅ 작업지시 ID 목록 조회

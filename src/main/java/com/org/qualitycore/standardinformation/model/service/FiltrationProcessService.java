@@ -36,6 +36,24 @@ public class FiltrationProcessService {
     private final ModelMapper modelMapper;
 
 
+    // 여과 공정 전체 조회
+    public List<FiltrationProcessDTO> getAllFiltrationProcesses() {
+        List<FiltrationProcess> filtrationProcesses = filtrationProcessRepository.findAll();
+        return filtrationProcesses.stream()
+                .map(process -> modelMapper.map(process, FiltrationProcessDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
+    // 여과 공정 상세 조회
+    public List<FiltrationProcessDTO> getFiltrationProcessesByLotNo(String lotNo) {
+        List<FiltrationProcess> filtrationProcesses = filtrationProcessRepository.findAllByLotNo(lotNo);
+        return filtrationProcesses.stream()
+                .map(process -> modelMapper.map(process, FiltrationProcessDTO.class))
+                .collect(Collectors.toList());
+    }
+
+
 
     // ✅ 작업지시 ID 목록 조회
     @Transactional
