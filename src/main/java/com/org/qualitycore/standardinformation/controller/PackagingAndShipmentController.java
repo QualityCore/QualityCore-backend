@@ -48,8 +48,6 @@ public class PackagingAndShipmentController {
         return ResponseEntity.ok(response);
     }
 
-
-
     //패키징 및 출하공정 등록
     @Operation(summary = "패키징 및 출하공정" , description = "패키징 및 출하공정 작업을 등록합니다")
     @ApiResponses(value= {
@@ -64,9 +62,6 @@ public class PackagingAndShipmentController {
         Message response = packagingAndShipmentService.createPackagingAndShipment(packagingAndShipmentDTO);
         return ResponseEntity.status(response.getCode()).body(response);
     }
-
-
-
 
     // ✅ 특정 LOT_NO에 대한 패키징 및 출하 공정 상태 업데이트
     @Operation(summary = "LOT_NO에 따른 패키징 및 출하 공정 상태 업데이트", description = "LOT_NO를 기준으로 공정 상태를 업데이트합니다.")

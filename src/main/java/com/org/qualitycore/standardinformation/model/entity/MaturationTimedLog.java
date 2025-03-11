@@ -58,12 +58,8 @@ public class MaturationTimedLog {
     @Schema(description = "작업 시작 시간", example = "2025-03-09T10:00:00")
     private LocalDateTime startTime;
 
-    @Column(name = "EXPECTED_END_TIME", nullable = false)
-    @Schema(description = "예상 종료 시간", example = "2025-03-19T10:00:00")
-    private LocalDateTime expectedEndTime;
-
     @UpdateTimestamp
-    @Column(name = "ACTUAL_END_TIME")
+    @Column(name = "END_TIME")
     @Schema(description = "실제 종료 시간", example = "2025-03-19T11:00:00")
     private LocalDateTime actualEndTime;
 
@@ -71,9 +67,6 @@ public class MaturationTimedLog {
     public void prePersist() {
         if (startTime == null) {
             startTime = LocalDateTime.now();
-        }
-        if (expectedEndTime == null && recordTime != null) {
-            expectedEndTime = startTime.plusMinutes(recordTime.longValue());
         }
     }
 

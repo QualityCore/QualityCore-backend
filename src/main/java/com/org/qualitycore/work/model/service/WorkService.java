@@ -33,6 +33,7 @@ public class WorkService {
     private final ProcessTrackingRepository processTrackingRepository;
     private final WorkPlanMstRepository workPlanMstRepository;
     private final ModelMapper modelMapper;
+    private final LotSequenceRepository lotSequenceRepository;
 
     // 작업지시서 전체 조회
     public Page<WorkFindAllDTO> findAllWorkOrders(Pageable pageable, String workTeam, String productName, String lotNo, String lineNo, Date startDate, Date endDate) {
@@ -218,10 +219,7 @@ public class WorkService {
         workOrder.setEmployee(employee);
 
         // 가장 최신 작업지시서 LOT 번호 조회 및 새 LOT 번호 생성
-        String maxWorkOrderId = workRepository.findTopByOrderByLotNoDesc()
-                .map(WorkOrders::getLotNo)
-                .orElse(null);
-        String newWorkOrderId = generateNewWorkOrderId(maxWorkOrderId);
+        String newWorkOrderId = generateNewWorkOrderId();
         workOrder.setLotNo(newWorkOrderId);  // 새 LOT 번호 설정
 
         List<LineMaterial> lineMaterials = work.getLineMaterials().stream()
@@ -246,32 +244,23 @@ public class WorkService {
 
         // 진행상태가 설정된 후 작업지시서를 업데이트 (두 번째 저장은 불필요)
         workOrder.setProcessTracking(processTracking);  // 작업지시서에 진행상태 연결
-//        workRepository.save(workOrder);  // 작업지시서와 진행상태 연결 후 저장
     }
 
 
     // auto increment 방식으로 작업지시서 번호 생성
-    private String generateNewWorkOrderId(String maxWorkOrderId) {
-        // 현재 날짜를 YYYYMMDD 형식으로 추출
-        String currentDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    private String generateNewWorkOrderId() {
+        LocalDate currentDate = LocalDate.now();
+        String formattedDate = currentDate.format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
 
-        if (maxWorkOrderId == null) {
-            // 첫 번째 작업지시서 번호는 "LOT" + 오늘 날짜 + "01"
-            return "LOT" + currentDate + "01";
-        }
+        // 시퀀스 조회/생성 (락으로 동시 접근 차단)
+        LotSequence sequence = lotSequenceRepository.findBySequenceDate(currentDate)
+                .orElseGet(() -> lotSequenceRepository.save(new LotSequence(currentDate)));
 
-        // 기존 작업지시서 번호에서 날짜 부분과 순번을 추출
-        String existingDate = maxWorkOrderId.substring(3, 11);  // "LOT20250225"에서 날짜 부분만 추출
-        String existingSequence = maxWorkOrderId.substring(11);  // 순번 부분 ("01", "02" 등)
+        int newSequence = sequence.getCurrentSequence();
+        sequence.incrementSequence();
+        lotSequenceRepository.save(sequence);
 
-        if (existingDate.equals(currentDate)) {
-            // 같은 날짜의 경우 순번을 증가
-            int newSequence = Integer.parseInt(existingSequence) + 1;
-            return "LOT" + currentDate + String.format("%02d", newSequence);  // 두 자리 숫자로 포맷
-        } else {
-            // 날짜가 다르면 첫 번째 작업지시서로 설정
-            return "LOT" + currentDate + "01";
-        }
+        return "LOT" + formattedDate + String.format("%02d", newSequence);
     }
 
     // 작업지시서 삭제

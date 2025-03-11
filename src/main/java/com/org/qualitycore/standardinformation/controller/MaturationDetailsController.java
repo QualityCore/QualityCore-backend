@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -73,9 +74,6 @@ public class MaturationDetailsController {
         return ResponseEntity.ok(updatedMaturationId);
     }
 
-
-
-
     // ✅ 특정 LOT_NO에 대한 숙성 상세 공정 상태 업데이트
     @Operation(summary = "LOT_NO에 따른 숙성 상세 공정 상태 업데이트", description = "LOT_NO를 기준으로 공정 상태를 업데이트합니다.")
     @ApiResponses(value = {
@@ -95,8 +93,7 @@ public class MaturationDetailsController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-
-    // ✅  숙성 시간대별 전체 조회
+    // ✅  ** 숙성 시간대별 전체 조회 ** 평균 할때 필요한거
     @Operation(summary = "숙성 시간대별 전체 데이터 조회", description = "maturationId가 없으면 전체 데이터를 조회하고, 있으면 해당 ID의 데이터를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -123,7 +120,28 @@ public class MaturationDetailsController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/maturation")
+    public ResponseEntity<Message> findAllMaturation() {
 
+        List<MaturationDetailsDTO> maturationDetail = maturationDetailsService.findAllMaturation();
 
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("maturationDetail", maturationDetail);
+
+        return ResponseEntity.ok().body(new Message(200, "전체조회", res));
+    }
+
+    @GetMapping("/maturation/{maturationId}")
+    public ResponseEntity<Message> findByCodeMaturation(@PathVariable("maturationId") String maturationId) {
+
+        MaturationDetailsDTO maturationDetail = maturationDetailsService.findByMaturationId(maturationId);
+
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("maturationDetail", maturationDetail);
+
+        return ResponseEntity.ok().body(new Message(200, "상세조회", res));
+    }
 
 }

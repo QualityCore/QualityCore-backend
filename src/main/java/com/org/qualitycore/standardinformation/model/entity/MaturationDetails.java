@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Entity
+@ToString
 @Table(name = "MATURATION_DETAILS")
 @Schema(description = "숙성 상세 공정 엔티티")
 public class MaturationDetails {
@@ -51,40 +52,41 @@ public class MaturationDetails {
     @Schema(description = "작업 시작 시간", example = "2025-02-12T16:00:00")
     private LocalDateTime startTime;
 
-    @Column(name = "EXPECTED_END_TIME", nullable = false)
-    @Schema(description = "예상 종료 시간", example = "2025-02-19T16:00:00")
-    private LocalDateTime expectedEndTime;
-
     @UpdateTimestamp
-    @Column(name = "ACTUAL_END_TIME")
+    @Column(name = "END_TIME")
     @Schema(description = "실제 종료 시간", example = "2025-02-19T18:00:00")
-    private LocalDateTime actualEndTime;
+    private LocalDateTime endTime;
 
     @Column(name = "NOTES")
     @Schema(description = "메모 사항", example = "숙성 완료, 향미 안정적")
     private String notes;
 
+    @Column(name = "AVG_TEMPERATURE")
+    private Double avgTemperature;
+
+    @Column(name = "AVG_PRESSURE")
+    private Double avgPressure;
+
+    @Column(name = "AVG_CO2_PERCENT")
+    private Double avgCo2Percent;
+
+    @Column(name = "AVG_DISSOLVED_OXYGEN")
+    private Double avgDissolvedOxygen;
+
     @PrePersist
     public void prePersist() {
+        // 시작 온도 랜덤 생성 (0.0 ~ 3.0)
+        if (startTemperature == null) {
+            this.startTemperature = Math.round((Math.random() * 3) * 100.0) / 100.0; // 0.00 ~ 3.00
+        }
+
+        if (maturationTime == null) {
+            maturationTime = 30;
+        }
         if (startTime == null) {
             startTime = LocalDateTime.now();
         }
-        if (expectedEndTime == null && maturationTime != null) {
-            expectedEndTime = startTime.plusMinutes(maturationTime.longValue());
-        }
     }
 
-    @Override
-    public String toString() {
-        return "MaturationDetails{" +
-                "maturationId='" + maturationId + '\'' +
-                ", lotNo='" + lotNo + '\'' +
-                ", maturationTime=" + maturationTime +
-                ", startTemperature=" + startTemperature +
-                ", startTime=" + startTime +
-                ", expectedEndTime=" + expectedEndTime +
-                ", actualEndTime=" + actualEndTime +
-                ", notes='" + notes + '\'' +
-                '}';
-    }
+
 }
