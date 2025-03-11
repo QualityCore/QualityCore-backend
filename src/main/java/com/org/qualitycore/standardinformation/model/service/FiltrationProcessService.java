@@ -5,6 +5,7 @@ import com.org.qualitycore.standardinformation.model.dto.FiltrationProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.ProcessTrackingDTONam;
 import com.org.qualitycore.standardinformation.model.entity.FiltrationProcess;
+import com.org.qualitycore.standardinformation.model.entity.MashingProcess;
 import com.org.qualitycore.standardinformation.model.repository.FiltrationProcessRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.work.model.entity.WorkOrders;
@@ -184,10 +185,10 @@ public class FiltrationProcessService {
     // 여과 공정 업데이트  회수된 워트량 , 손실량 , 실제 종료시간
     @Transactional
     public Message updateFiltrationProcess
-            (String filtrationId, Double recoveredWortVolume, Double lossVolume, LocalDateTime actualEndTime) {
+            (String filtrationId, Double recoveredWortVolume, Double lossVolume) {
 
         log.info("서비스 : 여과 공정 업데이트 - ID {}, 회수된 워트량 {}, 손실량 {}, 실제 종료시간 {}",
-                filtrationId, recoveredWortVolume, lossVolume, actualEndTime);
+                filtrationId, recoveredWortVolume, lossVolume);
 
 
         Optional<FiltrationProcess> filtrationProcessOptional = filtrationProcessRepository.findById(filtrationId);
@@ -204,17 +205,15 @@ public class FiltrationProcessService {
         if (lossVolume != null) {
             filtrationProcess.setLossVolume(lossVolume);
         }
-        if (actualEndTime != null) {
-            filtrationProcess.setActualEndTime(actualEndTime);
-        }
 
-        filtrationProcessRepository.save(filtrationProcess);
+
+        filtrationProcess.setActualEndTime(LocalDateTime.now());
+        FiltrationProcess updatedFiltration = filtrationProcessRepository.save(filtrationProcess);
+
 
         Map<String, Object> result = new HashMap<>();
-        result.put("filtrationId", filtrationId);
-        result.put("recoveredWortVolume", filtrationProcess.getRecoveredWortVolume());
-        result.put("lossVolume", filtrationProcess.getLossVolume());
-        result.put("actualEndTime", filtrationProcess.getActualEndTime());
+        result.put("updatedFiltration", modelMapper.map(updatedFiltration,FiltrationProcessDTO.class));
+
 
         log.info("여과 공정 업데이트 완료 - ID {}, 결과: {}", filtrationId, result);
 

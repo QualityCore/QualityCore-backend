@@ -119,12 +119,9 @@ public class BoilingProcessController {
                 ? number.doubleValue()
                 : null;
 
-        Object actualEndTimeObj = requestBody.get("actualEndTime");
-        LocalDateTime actualEndTime = (actualEndTimeObj instanceof String str)
-                ? LocalDateTime.parse(str)
-                : null;
 
-        Message response = boilingProcessService.updateBoilingProcess(boilingId, postBoilWortVolume, boilLossVolume, actualEndTime);
+
+        Message response = boilingProcessService.updateBoilingProcess(boilingId, postBoilWortVolume, boilLossVolume);
         return ResponseEntity.status(response.getCode()).body(response);
 
     }

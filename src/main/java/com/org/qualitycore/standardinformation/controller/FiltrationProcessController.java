@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/filtrationproess")
+@RequestMapping("/filtrationprocess")
 @CrossOrigin(origins ="http://localhost:3000" )
 @RequiredArgsConstructor
 @Tag(name= "FiltrationProcess" , description = "여과 공정 API")
@@ -118,12 +118,9 @@ public class FiltrationProcessController {
                 ? number.doubleValue()
                 : null;
 
-        Object actualEndTimeObj = requestBody.get("actualEndTime");
-        LocalDateTime actualEndTime = (actualEndTimeObj instanceof String str)
-                ? LocalDateTime.parse(str)
-                : null;
 
-        Message response = filtrationProcessService.updateFiltrationProcess(filtrationId, recoveredWortVolume, lossVolume, actualEndTime);
+
+        Message response = filtrationProcessService.updateFiltrationProcess(filtrationId, recoveredWortVolume, lossVolume);
         return ResponseEntity.status(response.getCode()).body(response);
 
     }
