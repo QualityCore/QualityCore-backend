@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/maturationtimedlog")
@@ -51,9 +52,6 @@ public class MaturationTimedLogController {
 
         return ResponseEntity.ok(response);
     }
-
-
-
 
     // ✅ 숙성 시간별 등록
     @Operation(summary = "숙성 공정 로그 등록", description = "숙성 공정의 시간대별 데이터를 기록합니다.")

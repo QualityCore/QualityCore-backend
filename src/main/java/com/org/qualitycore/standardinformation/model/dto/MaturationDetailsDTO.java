@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -30,13 +31,20 @@ public class MaturationDetailsDTO {
     private String notes;
 
     @Schema(description = "시작시간" , example = "2025-02-12T10:15:30")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime startTime;
 
-    @Schema(description = "예상 종료 시간" , example = "2025-02-12T10:55:30")
-    private LocalDateTime expectedEndTime;
-
     @Schema(description = "실제 종료 시간" , example = "2025-02-12T11:00:30")
-    private LocalDateTime actualEndTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime endTime;
+
+    private double avgTemperature;
+
+    private double avgPressure;
+
+    private double avgCo2Percent;
+
+    private double avgDissolvedOxygen;
 
     @Schema(description = "공정 추적 DTO" )
     private ProcessTrackingDTONam processTracking;

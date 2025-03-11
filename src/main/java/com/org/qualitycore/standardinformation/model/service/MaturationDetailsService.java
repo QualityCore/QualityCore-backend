@@ -2,10 +2,7 @@ package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.*;
-import com.org.qualitycore.standardinformation.model.entity.FermentationDetails;
-import com.org.qualitycore.standardinformation.model.entity.FermentationTimedLog;
-import com.org.qualitycore.standardinformation.model.entity.MaturationDetails;
-import com.org.qualitycore.standardinformation.model.entity.MaturationTimedLog;
+import com.org.qualitycore.standardinformation.model.entity.*;
 import com.org.qualitycore.standardinformation.model.repository.MaturationDetailsRepository;
 import com.org.qualitycore.standardinformation.model.repository.MaturationTimedLogRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
@@ -13,6 +10,8 @@ import com.org.qualitycore.work.model.entity.WorkOrders;
 import com.org.qualitycore.work.model.entity.processTracking;
 import com.org.qualitycore.work.model.repository.LineMaterialRepository;
 import com.org.qualitycore.work.model.repository.ProcessTrackingRepository;
+import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +36,7 @@ public class MaturationDetailsService {
     private final LineMaterialRepository lineMaterialRepository;
     private final ProcessTrackingRepository processTrackingRepository;
     private final ModelMapper modelMapper;
-
+    private final JPAQueryFactory queryFactory;
 
 
     // ✅ 작업지시 ID 목록 조회
@@ -120,13 +119,6 @@ public class MaturationDetailsService {
                 maturationDetails.setStartTime(LocalDateTime.now());
             }
 
-            // ✅ 예상 종료 시간 자동 계산
-            if (maturationDetails.getExpectedEndTime() == null
-                    && maturationDetails.getMaturationTime() != null) {
-                maturationDetails.setExpectedEndTime(maturationDetails.getStartTime()
-                        .plusMinutes(maturationDetails.getMaturationTime()));
-            }
-
             log.info("ModelMapper 변환 완료 !! {}", maturationDetails);
 
             // ✅ DB 저장
@@ -174,12 +166,10 @@ public class MaturationDetailsService {
     public MaturationDetailsDTO completeEndTime(String maturationId) {
         MaturationDetails maturationDetails = maturationDetailsRepository.findById(maturationId)
                 .orElseThrow(() -> new RuntimeException("숙성 시간별 등록  ID가 존재하지 않습니다."));
-        maturationDetails.setActualEndTime(LocalDateTime.now());
+        maturationDetails.setEndTime(LocalDateTime.now());
         MaturationDetails updatedMaturationDetails = maturationDetailsRepository.save(maturationDetails);
         return modelMapper.map(updatedMaturationDetails, MaturationDetailsDTO.class);
     }
-
-
 
     // 공정 상태 코드 추적 ( SC007 , 진행 중 , 숙성 상세 공정 업데이트)
     @Transactional
@@ -252,5 +242,51 @@ public class MaturationDetailsService {
                 .collect(Collectors.toList());
     }
 
+    // 숙성 전체조회
+    public List<MaturationDetailsDTO> findAllMaturation() {
+        QMaturationDetails maturation = QMaturationDetails.maturationDetails;
 
-}
+        return queryFactory
+                .select(Projections.fields(MaturationDetailsDTO.class,
+                        maturation.maturationId.as("maturationId"),
+                        maturation.lotNo.as("lotNo"),
+                        maturation.maturationTime.as("maturationTime"),
+                        maturation.startTemperature.as("startTemperature"),
+                        maturation.startTime.as("startTime"),
+                        maturation.endTime.as("endTime"),
+                        maturation.notes.as("notes"),
+                        maturation.avgTemperature.as("avgTemperature"),
+                        maturation.avgPressure.as("avgPressure"),
+                        maturation.avgCo2Percent.as("avgCo2Percent"),
+                        maturation.avgDissolvedOxygen.as("avgDissolvedOxygen")
+                ))
+                .from(maturation)
+                .fetch();
+    }
+
+    // 숙성 상세조회
+    public MaturationDetailsDTO findByMaturationId(String maturationId) {
+
+            QMaturationDetails maturation = QMaturationDetails.maturationDetails;
+
+            return queryFactory
+                    .select(Projections.fields(MaturationDetailsDTO.class,
+                            maturation.maturationId.as("maturationId"),
+                            maturation.lotNo.as("lotNo"),
+                            maturation.maturationTime.as("maturationTime"),
+                            maturation.startTemperature.as("startTemperature"),
+                            maturation.startTime.as("startTime"),
+                            maturation.endTime.as("endTime"),
+                            maturation.notes.as("notes"),
+                            maturation.avgTemperature.as("avgTemperature"),
+                            maturation.avgPressure.as("avgPressure"),
+                            maturation.avgCo2Percent.as("avgCo2Percent"),
+                            maturation.avgDissolvedOxygen.as("avgDissolvedOxygen")
+                    ))
+                    .from(maturation)
+                    .where(maturation.maturationId.eq(maturationId))
+                    .fetchOne();
+        }
+
+    }
+
