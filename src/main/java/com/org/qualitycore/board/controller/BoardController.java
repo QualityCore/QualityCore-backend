@@ -48,6 +48,23 @@ public class BoardController {
         return ResponseEntity.ok().headers(headers).body(new Message(200, "조회성공", res));
     }
 
+    // 메인화면 게시판
+    @GetMapping("/boardMain")
+    public ResponseEntity<Message> findAllBoardMain(@PageableDefault Pageable pageable,
+                                                @RequestParam(required = false) String searchType,
+                                                @RequestParam(required = false) String searchKeyword) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("Application", "json", Charset.forName("UTF-8")));
+
+        Page<BoardDTO> board = boardService.findAllBoardMain(pageable, searchType, searchKeyword);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("board", board);
+
+        return ResponseEntity.ok().headers(headers).body(new Message(200, "조회성공", res));
+    }
+
     // 상세조회
     @GetMapping("/board/{boardId}")
     public ResponseEntity<Message> findByIdBoard(@PathVariable("boardId") String boardId) {
