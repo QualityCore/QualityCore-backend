@@ -281,6 +281,7 @@ public class RoutingService {
             dto.setRecordTime(process.getActualEndTime() != null ?
                     process.getActualEndTime() : process.getStartTime());
             dto.setProcessStatus(process.getProcessStatus());
+            dto.setProcessStatus(process.getProcessStatus());
 
             // 효율 계산 (있는 경우)
             if (process.getInitialWortVolume() != null && process.getInitialWortVolume() > 0
