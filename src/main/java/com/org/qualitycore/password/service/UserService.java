@@ -17,7 +17,7 @@ public class UserService {
         userEmails.put("admin", "answjdgus72@gmail.com");
         userEmails.put("plan", "answjdgus72@gmail.com");
         userEmails.put("work", "answjdgus72@gmail.com");
-        userEmails.put("emp001", "answjdgus72@gmail.com");
+        userEmails.put("EMP001", "answjdgus72@gmail.com");
         userEmails.put("iu", "answjdgus72@gmail.com");
     }
 
