@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import lombok.*;
@@ -23,18 +24,21 @@ public class PostMaturationFiltrationDTO {
     private String lotNo;
 
     @Schema(description = "여과 소요 시간 (분)", example = "120")
-    private Integer filtrationTime;
+    private Double filtrationTime;
 
     @Schema(description = "탁도 (NTU 단위)", example = "1.5")
     private Double turbidity;
 
     @Schema(description = "작업 시작 시간", example = "2025-03-08T10:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startTime;
 
     @Schema(description = "예상 종료 시간", example = "2025-03-08T12:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime expectedEndTime;
 
     @Schema(description = "실제 종료 시간", example = "2025-03-08T12:30:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime actualEndTime;
 
     @Schema(description = "메모 사항", example = "여과 완료, 품질 점검 필요")
