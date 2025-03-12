@@ -66,10 +66,10 @@ public class MaturationTimedLogService {
         // 3-3. MATURATION_DETAILS 업데이트
         MaturationDetails details = maturationDetailsRepository.findByMaturationId(maturationId)
                 .orElseThrow(() -> new RuntimeException("숙성 공정 없음"));
-        details.setAvgTemperature(avgTemp);
-        details.setAvgPressure(avgPressure);
-        details.setAvgCo2Percent(avgCo2);
-        details.setAvgDissolvedOxygen(avgOxygen);
+        details.setTemperature(avgTemp);
+        details.setPressure(avgPressure);
+        details.setCo2Percent(avgCo2);
+        details.setDissolvedOxygen(avgOxygen);
         maturationDetailsRepository.save(details);
     }
 
