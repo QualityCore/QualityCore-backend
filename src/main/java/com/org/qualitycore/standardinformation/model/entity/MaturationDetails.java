@@ -61,17 +61,17 @@ public class MaturationDetails {
     @Schema(description = "메모 사항", example = "숙성 완료, 향미 안정적")
     private String notes;
 
-    @Column(name = "AVG_TEMPERATURE")
-    private Double avgTemperature;
+    @Column(name = "TEMPERATURE")
+    private Double temperature;
 
-    @Column(name = "AVG_PRESSURE")
-    private Double avgPressure;
+    @Column(name = "PRESSURE")
+    private Double pressure;
 
-    @Column(name = "AVG_CO2_PERCENT")
-    private Double avgCo2Percent;
+    @Column(name = "CO2_PERCENT")
+    private Double co2Percent;
 
-    @Column(name = "AVG_DISSOLVED_OXYGEN")
-    private Double avgDissolvedOxygen;
+    @Column(name = "DISSOLVED_OXYGEN")
+    private Double dissolvedOxygen;
 
     @PrePersist
     public void prePersist() {

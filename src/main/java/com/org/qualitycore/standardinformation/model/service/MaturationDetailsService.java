@@ -55,9 +55,6 @@ public class MaturationDetailsService {
                 .collect(Collectors.toList());
     }
 
-
-
-
     // ✅ 숙성 상세 공정 등록
     @Transactional
     public Message createMaturationDetails(MaturationDetailsDTO maturationDetailsDTO) {
@@ -108,7 +105,7 @@ public class MaturationDetailsService {
 
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
             processTracking.setStatusCode("SC007");
-            processTracking.setProcessStatus("작업 중");
+            processTracking.setProcessStatus("진행 중");
             processTracking.setProcessName("숙성 상세");
 
             // ✅ `processTracking`을 `mashingProcess`에 설정
@@ -255,10 +252,10 @@ public class MaturationDetailsService {
                         maturation.startTime.as("startTime"),
                         maturation.endTime.as("endTime"),
                         maturation.notes.as("notes"),
-                        maturation.avgTemperature.as("avgTemperature"),
-                        maturation.avgPressure.as("avgPressure"),
-                        maturation.avgCo2Percent.as("avgCo2Percent"),
-                        maturation.avgDissolvedOxygen.as("avgDissolvedOxygen")
+                        maturation.temperature.as("temperature"),
+                        maturation.pressure.as("pressure"),
+                        maturation.co2Percent.as("co2Percent"),
+                        maturation.dissolvedOxygen.as("dissolvedOxygen")
                 ))
                 .from(maturation)
                 .fetch();
@@ -278,10 +275,10 @@ public class MaturationDetailsService {
                             maturation.startTime.as("startTime"),
                             maturation.endTime.as("endTime"),
                             maturation.notes.as("notes"),
-                            maturation.avgTemperature.as("avgTemperature"),
-                            maturation.avgPressure.as("avgPressure"),
-                            maturation.avgCo2Percent.as("avgCo2Percent"),
-                            maturation.avgDissolvedOxygen.as("avgDissolvedOxygen")
+                            maturation.temperature.as("temperature"),
+                            maturation.pressure.as("pressure"),
+                            maturation.co2Percent.as("co2Percent"),
+                            maturation.dissolvedOxygen.as("dissolvedOxygen")
                     ))
                     .from(maturation)
                     .where(maturation.maturationId.eq(maturationId))
