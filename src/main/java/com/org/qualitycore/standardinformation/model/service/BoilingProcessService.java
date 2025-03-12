@@ -2,9 +2,11 @@ package com.org.qualitycore.standardinformation.model.service;
 
 import com.org.qualitycore.common.Message;
 import com.org.qualitycore.standardinformation.model.dto.BoilingProcessDTO;
+import com.org.qualitycore.standardinformation.model.dto.FiltrationProcessDTO;
 import com.org.qualitycore.standardinformation.model.dto.LineMaterialNDTO;
 import com.org.qualitycore.standardinformation.model.dto.ProcessTrackingDTONam;
 import com.org.qualitycore.standardinformation.model.entity.BoilingProcess;
+import com.org.qualitycore.standardinformation.model.entity.FiltrationProcess;
 import com.org.qualitycore.standardinformation.model.repository.BoilingProcessRepository;
 import com.org.qualitycore.work.model.entity.LineMaterial;
 import com.org.qualitycore.work.model.entity.WorkOrders;
@@ -183,10 +185,10 @@ public class BoilingProcessService {
     // 끓임 공정 업데이트  끓임 후 워트량 , 끓임손실량 , 실제 종료시간
     @Transactional
     public Message updateBoilingProcess
-    (String boilingId, Double postBoilWortVolume, Double boilLossVolume, LocalDateTime actualEndTime) {
+    (String boilingId, Double postBoilWortVolume, Double boilLossVolume) {
 
-        log.info("서비스 : 끓임 공정 업데이트 - ID {}, 끓임 후 워트량 {}, 끓임 손실량 {}, 실제 종료시간 {}",
-                boilingId, postBoilWortVolume, boilLossVolume, actualEndTime);
+        log.info("서비스 : 끓임 공정 업데이트 - ID {}, 끓임 후 워트량 {}, 끓임 손실량 {}",
+                boilingId, postBoilWortVolume, boilLossVolume);
 
 
         Optional<BoilingProcess> boilingProcessOptional = boilingProcessRepository.findById(boilingId);
@@ -203,23 +205,30 @@ public class BoilingProcessService {
         if (boilLossVolume != null) {
             boilingProcess.setBoilLossVolume(boilLossVolume);
         }
-        if (actualEndTime != null) {
-            boilingProcess.setActualEndTime(actualEndTime);
-        }
 
-        boilingProcessRepository.save(boilingProcess);
+
+        boilingProcess.setActualEndTime(LocalDateTime.now());
+        BoilingProcess updatedBoilingProcess = boilingProcessRepository.save(boilingProcess);
+
 
         Map<String, Object> result = new HashMap<>();
-        result.put("boilingId", boilingId);
-        result.put("postBoilWortVolume", boilingProcess.getPostBoilWortVolume());
-        result.put("boilLossVolume", boilingProcess.getBoilLossVolume());
-        result.put("actualEndTime", boilingProcess.getActualEndTime());
+        result.put("updatedBoilingProcess", modelMapper.map(updatedBoilingProcess, BoilingProcessDTO.class));
+
 
         log.info("끓임 공정 업데이트 완료 - ID {}, 결과: {}", boilingId, result);
 
         return new Message(200, "끓임 공정이 성공적으로 업데이트되었습니다.", result);
     }
 
+
+    // ✅ LOT_NO로 여러 개의 끓임 공정 조회 (리스트 반환)
+    public List<BoilingProcessDTO> getBoilingProcessByLotNo(String lotNo) {
+        List<BoilingProcess> boilingProcesses = boilingProcessRepository.findAllByLotNo(lotNo);
+
+        return boilingProcesses.stream()
+                .map(bp -> modelMapper.map(bp, BoilingProcessDTO.class))
+                .collect(Collectors.toList());
+    }
 
     // 홉이름 및 홉투입량 업데이트 구문
     public Message updateHopInfo(String boilingId, String firstHopName, Double firstHopAmount,
