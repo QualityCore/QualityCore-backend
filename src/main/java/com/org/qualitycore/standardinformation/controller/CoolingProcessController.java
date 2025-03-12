@@ -116,13 +116,4 @@ public class CoolingProcessController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
-
-
-
-
-
-
-
-
-
 }

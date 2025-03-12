@@ -119,8 +119,8 @@ public class BoilingProcessController {
                 ? number.doubleValue()
                 : null;
 
-
-
+        log.info("📌 postBoilWortVolumeObj={}, boilLossVolumeObj={}", postBoilWortVolumeObj, boilLossVolumeObj);
+        log.info("📌 변환된 값 - postBoilWortVolume={}, boilLossVolume={}", postBoilWortVolume, boilLossVolume);
         Message response = boilingProcessService.updateBoilingProcess(boilingId, postBoilWortVolume, boilLossVolume);
         return ResponseEntity.status(response.getCode()).body(response);
 
