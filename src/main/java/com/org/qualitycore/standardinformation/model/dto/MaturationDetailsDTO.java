@@ -38,13 +38,17 @@ public class MaturationDetailsDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
-    private double avgTemperature;
+    @Schema(description = "숙성 온도 (°C)", example = "15.0")
+    private Double temperature;
 
-    private double avgPressure;
+    @Schema(description = "압력 (bar)", example = "1.0")
+    private Double pressure;
 
-    private double avgCo2Percent;
+    @Schema(description = "CO2 농도 (%)", example = "0.5")
+    private Double co2Percent;
 
-    private double avgDissolvedOxygen;
+    @Schema(description = "용존 산소량 (ppm)", example = "0.8")
+    private Double dissolvedOxygen;
 
     @Schema(description = "공정 추적 DTO" )
     private ProcessTrackingDTONam processTracking;
