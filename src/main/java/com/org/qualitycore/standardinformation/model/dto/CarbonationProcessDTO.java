@@ -1,5 +1,6 @@
 package com.org.qualitycore.standardinformation.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -33,12 +34,15 @@ public class CarbonationProcessDTO {
     private Double processPressure;
 
     @Schema(description = "작업 시작 시간", example = "2025-03-08T10:00:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime startTime;
 
     @Schema(description = "예상 종료 시간", example = "2025-03-08T10:30:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime expectedEndTime;
 
     @Schema(description = "실제 종료 시간", example = "2025-03-08T10:35:00")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime actualEndTime;
 
     @Schema(description = "메모 사항", example = "탄산 조정 완료, 추가 검사 필요")
