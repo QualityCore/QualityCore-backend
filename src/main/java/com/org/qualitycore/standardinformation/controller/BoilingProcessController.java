@@ -59,7 +59,7 @@ public class BoilingProcessController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "데이터 없음")
     })
-    @GetMapping("/{lotNo}")
+    @GetMapping("/boiling/{lotNo}")
     public ResponseEntity<Message> getMaterialsByLotNo(@PathVariable String lotNo) {
         log.info ("컨트롤러: 끓임 자재정보 LOT_NO={}에 대한 자재 정보 요청", lotNo);
         List<LineMaterialNDTO> materials = boilingProcessService.getMaterialsByLotNo(lotNo);
