@@ -104,6 +104,11 @@ public class PackagingAndShipmentService {
             // ✅ `processTracking`에 `WorkOrders` 설정
             processTracking.setWorkOrders(workOrders); // ✅ LOT_NO와 연결
 
+            // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
+            processTracking.setStatusCode("SC010");
+            processTracking.setProcessStatus("완료");
+            processTracking.setProcessName("패키징 및 출하");
+
 
             // ✅ `processTracking`을 `mashingProcess`에 설정
             packagingAndShipment.setProcessTracking(processTracking);
