@@ -21,6 +21,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -303,13 +304,25 @@ public class WorkService {
                 .leftJoin(mw).on(br.material.materialId.eq(mw.materialId))
                 .fetch();
 
-        // 맥주별, 공정별로 그룹화
+        // materialId 기준 중복 제거 후 그룹화
         return recipes.stream()
                 .collect(Collectors.groupingBy(
                         BeerRecipesDTO::getBeerName,
-                        Collectors.groupingBy(BeerRecipesDTO::getProcessStep)
+                        Collectors.groupingBy(
+                                BeerRecipesDTO::getProcessStep,
+                                Collectors.collectingAndThen(
+                                        Collectors.toMap(
+                                                BeerRecipesDTO::getMaterialId, // materialId 기준 중복 제거
+                                                Function.identity(),
+                                                (existing, replacement) -> existing,
+                                                LinkedHashMap::new
+                                        ),
+                                        map -> new ArrayList<>(map.values()) // Map → List 변환
+                                )
+                        )
                 ));
     }
+
 
     // 생산계획정보
     public List<PlanInfoDTO> workOrderPlanInfo() {
