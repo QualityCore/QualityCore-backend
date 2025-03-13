@@ -124,7 +124,7 @@ public class FermentationDetailsService {
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
             processTracking.setStatusCode("SC006");
             processTracking.setProcessStatus("작업 중");
-            processTracking.setProcessName("발효 상세");
+            processTracking.setProcessName("발효");
 
             // ✅ `processTracking`을 `mashingProcess`에 설정
             fermentationDetails.setProcessTracking(processTracking);

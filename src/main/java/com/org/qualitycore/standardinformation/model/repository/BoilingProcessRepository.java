@@ -14,4 +14,6 @@ public interface BoilingProcessRepository extends JpaRepository<BoilingProcess, 
     Integer findMaxBoilingId();
 
     List<BoilingProcess> findAllByLotNo(String lotNo);
+
+    Optional<BoilingProcess> findByLotNo(String lotNo);
 }

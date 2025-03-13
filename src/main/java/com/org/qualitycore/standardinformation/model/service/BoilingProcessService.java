@@ -182,18 +182,16 @@ public class BoilingProcessService {
     }
 
 
-    // 끓임 공정 업데이트  끓임 후 워트량 , 끓임손실량 , 실제 종료시간
     @Transactional
-    public Message updateBoilingProcess
-    (String boilingId, Double postBoilWortVolume, Double boilLossVolume) {
+    public Message updateBoilingProcessByLotNo(String lotNo, Double postBoilWortVolume, Double boilLossVolume) {
 
-        log.info("서비스 : 끓임 공정 업데이트 - ID {}, 끓임 후 워트량 {}, 끓임 손실량 {}",
-                boilingId, postBoilWortVolume, boilLossVolume);
+        log.info("서비스 : 끓임 공정 업데이트 - LOT_NO {}, 끓임 후 워트량 {}, 끓임 손실량 {}",
+                lotNo, postBoilWortVolume, boilLossVolume);
 
-
-        Optional<BoilingProcess> boilingProcessOptional = boilingProcessRepository.findById(boilingId);
+        // ✅ lotNo을 기반으로 끓임 공정 데이터 찾기
+        Optional<BoilingProcess> boilingProcessOptional = boilingProcessRepository.findByLotNo(lotNo);
         if (boilingProcessOptional.isEmpty()) {
-            log.warn("여과 공정을 찾을 수 없음 - ID {}", boilingId);
+            log.warn("끓임 공정을 찾을 수 없음 - LOT_NO {}", lotNo);
             return new Message(404, "끓임 공정을 찾을 수 없습니다.", null);
         }
 
@@ -206,19 +204,17 @@ public class BoilingProcessService {
             boilingProcess.setBoilLossVolume(boilLossVolume);
         }
 
-
         boilingProcess.setActualEndTime(LocalDateTime.now());
         BoilingProcess updatedBoilingProcess = boilingProcessRepository.save(boilingProcess);
-
 
         Map<String, Object> result = new HashMap<>();
         result.put("updatedBoilingProcess", modelMapper.map(updatedBoilingProcess, BoilingProcessDTO.class));
 
-
-        log.info("끓임 공정 업데이트 완료 - ID {}, 결과: {}", boilingId, result);
+        log.info("끓임 공정 업데이트 완료 - LOT_NO {}, 결과: {}", lotNo, result);
 
         return new Message(200, "끓임 공정이 성공적으로 업데이트되었습니다.", result);
     }
+
 
 
     // ✅ LOT_NO로 여러 개의 끓임 공정 조회 (리스트 반환)
