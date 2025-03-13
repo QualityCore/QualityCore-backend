@@ -35,6 +35,24 @@ public class WorkController {
     private final WorkService workService;
     private final SimpMessagingTemplate messagingTemplate;
 
+    // 맥주 랭킹차트
+    @GetMapping("/beer-podium")
+    public ResponseEntity<?> getBeerRanking() {
+        try {
+            List<BeerRankingDTO> ranking = workService.getTop3BeerRanking();
+
+            if (ranking.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                        .body(Map.of("message", "이번 달 맥주 생산 데이터가 없습니다."));
+            }
+
+            return ResponseEntity.ok(ranking);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "맥주 랭킹 조회 중 오류 발생", "details", e.getMessage()));
+        }
+    }
+
     // 작업지시서 전체 조회
     @GetMapping("/work")
     @Operation(summary = "작업지시서 전체 조회", description = "작업지시서를 전체 조회합니다.")
