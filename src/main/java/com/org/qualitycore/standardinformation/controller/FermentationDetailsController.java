@@ -57,7 +57,7 @@ public class FermentationDetailsController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "데이터 없음")
     })
-    @GetMapping("/{lotNo}")
+    @GetMapping("/ferment/{lotNo}")
     public ResponseEntity<Message> getMaterialsByLotNo(@PathVariable String lotNo) {
         log.info ("컨트롤러: 발효 상세 자재정보 LOT_NO={}에 대한 자재 정보 요청", lotNo);
         List<LineMaterialNDTO> materials = fermentationDetailsService.getMaterialsByLotNo(lotNo);

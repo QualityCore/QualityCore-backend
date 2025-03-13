@@ -54,7 +54,7 @@ public class CoolingProcessController {
             @ApiResponse(responseCode = "200", description = "조회 성공"),
             @ApiResponse(responseCode = "404", description = "데이터 없음")
     })
-    @GetMapping("/{lotNo}")
+    @GetMapping("/status/{lotNo}")
     public ResponseEntity<Message> getMaterialsByLotNo(@PathVariable String lotNo) {
         log.info ("컨트롤러: 냉각 자재정보 LOT_NO={}에 대한 자재 정보 요청", lotNo);
         List<LineMaterialNDTO> materials = coolingProcessService.getMaterialsByLotNo(lotNo);
