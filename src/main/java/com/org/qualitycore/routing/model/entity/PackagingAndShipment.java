@@ -47,4 +47,6 @@ public class PackagingAndShipment {
     @Column(name = "SHIPMENT_QUANTITY")
     private Integer shipmentQuantity;
 
+    @Column(name = "GOOD_QUANTITY")
+    private Integer goodQuantity;
 }
