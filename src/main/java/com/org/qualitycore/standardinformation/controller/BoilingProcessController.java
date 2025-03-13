@@ -95,19 +95,19 @@ public class BoilingProcessController {
     // 끓임 공정 끓임 후 워트량 , 끓임손실량 , 실제종료시간 수정 구문
 
     @Operation(
-            summary = "끓임 공정 업데이트",
-            description = "주어진 ID의 끓임 공정에서 끓음 후 워트량, 끓음 손실량 및 실제 종료 시간을 업데이트합니다."
+            summary = "끓임 공정 업데이트 (LOT_NO 기반)",
+            description = "주어진 LOT_NO의 끓임 공정에서 끓음 후 워트량, 끓음 손실량 및 실제 종료 시간을 업데이트합니다."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "성공적으로 업데이트됨",
                     content = @Content(schema = @Schema(implementation = Message.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터입니다")})
-    @PutMapping("/update/{boilingId}")
-    public ResponseEntity<Message> updateBoilingProcess(
-            @PathVariable @Parameter(description = "업데이트할 끓임 공정의 ID", required = true) String boilingId,
-            @RequestBody @Parameter(description = "수정할 끓임 공정 정보", required = true)
-            Map<String, Object> requestBody) {
-        log.info("컨트롤러 : 끓임 공정 업데이트 요청 - ID {}, 요청 데이터 {}", boilingId, requestBody);
+    @PutMapping("/update/lot/{lotNo}")  // ✅ boilingId → lotNo 사용
+    public ResponseEntity<Message> updateBoilingProcessByLotNo(
+            @PathVariable @Parameter(description = "업데이트할 끓임 공정의 LOT_NO", required = true) String lotNo,
+            @RequestBody @Parameter(description = "수정할 끓임 공정 정보", required = true) Map<String, Object> requestBody) {
+
+        log.info("컨트롤러 : 끓임 공정 업데이트 요청 - LOT_NO {}, 요청 데이터 {}", lotNo, requestBody);
 
         Object postBoilWortVolumeObj = requestBody.get("postBoilWortVolume");
         Double postBoilWortVolume = (postBoilWortVolumeObj instanceof Number number)
@@ -119,12 +119,12 @@ public class BoilingProcessController {
                 ? number.doubleValue()
                 : null;
 
+        log.info("📌 변환된 값 - postBoilWortVolume={}, boilLossVolume={}", postBoilWortVolume, boilLossVolume);
 
-
-        Message response = boilingProcessService.updateBoilingProcess(boilingId, postBoilWortVolume, boilLossVolume);
+        Message response = boilingProcessService.updateBoilingProcessByLotNo(lotNo, postBoilWortVolume, boilLossVolume);
         return ResponseEntity.status(response.getCode()).body(response);
-
     }
+
 
 
     // ✅ LOT_NO 기반으로 끓임 공정 데이터 조회 엔드포인트 추가
