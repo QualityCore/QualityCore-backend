@@ -44,12 +44,10 @@ public class PackagingAndShipmentRepositoryImpl implements PackagingAndShipmentC
                     .select(
                             pp.productName,
                             ps.shipmentQuantity.sum(),
+                            ps.goodQuantity.sum(), // 양품 수량 합계
                             Expressions.numberTemplate(Double.class,
-                                    "SUM(CASE WHEN {0} = '양호' AND {1} = '양호' AND {2} = '양호' THEN {3} ELSE 0 END)",
-                                    ps.fillingStatus, ps.sealingStatus, ps.packagingStatus, ps.shipmentQuantity),
-                            Expressions.numberTemplate(Double.class,
-                                    "ROUND(SUM(CASE WHEN {0} = '양호' AND {1} = '양호' AND {2} = '양호' THEN {3} ELSE 0 END) / NULLIF(SUM({3}), 0) * 100, 2)",
-                                    ps.fillingStatus, ps.sealingStatus, ps.packagingStatus, ps.shipmentQuantity)
+                                    "ROUND(SUM({0}) / NULLIF(SUM({1}), 0) * 100, 2)",
+                                    ps.goodQuantity, ps.shipmentQuantity) // 품질률 계산 수정
                     )
                     .from(ps)
                     .join(wo).on(ps.lotNo.eq(wo.lotNo))
@@ -63,13 +61,14 @@ public class PackagingAndShipmentRepositoryImpl implements PackagingAndShipmentC
 
             System.out.println("쿼리 실행 완료, 결과 수: " + results.size());
 
+            // 안전한 타입 변환을 위한 로직
             List<ProductionPerformanceDTO> dtoList = new ArrayList<>();
             for (Tuple tuple : results) {
                 ProductionPerformanceDTO dto = new ProductionPerformanceDTO();
                 dto.setYearMonth(yearMonth.toString());
                 dto.setProductName(tuple.get(0, String.class));
 
-                // 수정된 부분: Number로 받아서 안전하게 변환
+                // Number로 받아서 안전하게 변환
                 Number totalQuantity = tuple.get(1, Number.class);
                 Number goodQuantity = tuple.get(2, Number.class);
                 Number qualityRate = tuple.get(3, Number.class);
@@ -79,10 +78,10 @@ public class PackagingAndShipmentRepositoryImpl implements PackagingAndShipmentC
                 dto.setQualityRate(qualityRate != null ? qualityRate.doubleValue() : 0.0);
 
                 dtoList.add(dto);
-                System.out.println("결과 데이터: " + dto);
             }
 
             return dtoList;
+
         } catch (Exception e) {
             System.out.println("======= Repository 오류 발생 =======");
             System.out.println("오류 유형: " + e.getClass().getName());
@@ -139,22 +138,19 @@ public class PackagingAndShipmentRepositoryImpl implements PackagingAndShipmentC
         QPackagingAndShipment ps = QPackagingAndShipment.packagingAndShipment;
         QWorkOrder wo = QWorkOrder.workOrder;
         QPlanProduct pp = QPlanProduct.planProduct;
-        QPlanLine pl = QPlanLine.planLine;
 
         List<Tuple> results = queryFactory
                 .select(
                         pp.productName,
-                        ps.shipmentDate.max().as("maxShipmentDate"),       // 개별 날짜 집계 함수 사용
-                        pl.startDate.max().as("maxStartDate"),             // 개별 날짜 집계 함수 사용
-                        ps.shipmentQuantity.avg(),
+                        ps.shipmentQuantity.sum().as("totalQuantity"),
+                        ps.goodQuantity.sum().as("goodQuantity"),
                         Expressions.numberTemplate(Double.class,
-                                "ROUND(SUM(CASE WHEN {0} = '양호' AND {1} = '양호' AND {2} = '양호' THEN {3} ELSE 0 END) / NULLIF(SUM({3}), 0) * 100, 2)",
-                                ps.fillingStatus, ps.sealingStatus, ps.packagingStatus, ps.shipmentQuantity)
+                                "ROUND(SUM({0}) / NULLIF(SUM({1}), 0) * 100, 2)",
+                                ps.goodQuantity, ps.shipmentQuantity).as("qualityRate")
                 )
                 .from(ps)
                 .join(wo).on(ps.lotNo.eq(wo.lotNo))
                 .join(pp).on(wo.planProductId.eq(pp.planProductId))
-                .join(pl).on(wo.planLineId.eq(pl.planLineId))
                 .groupBy(pp.productName)
                 .fetch();
 
@@ -162,9 +158,13 @@ public class PackagingAndShipmentRepositoryImpl implements PackagingAndShipmentC
         for (Tuple tuple : results) {
             Map<String, Object> map = new HashMap<>();
             map.put("PRODUCT_NAME", tuple.get(0, String.class));
-            map.put("AVG_PRODUCTION_TIME_MINUTES", tuple.get(1, Double.class));
-            map.put("AVG_BATCH_SIZE", tuple.get(2, Double.class));
-            map.put("AVG_QUALITY_RATE", tuple.get(3, Double.class));
+            map.put("TOTAL_QUANTITY", tuple.get(1, Number.class));
+            map.put("GOOD_QUANTITY", tuple.get(2, Number.class));
+            map.put("QUALITY_RATE", tuple.get(3, Number.class));
+
+            // 디버깅용 로그 추가
+            System.out.println("효율성 데이터: " + map);
+
             resultList.add(map);
         }
 
