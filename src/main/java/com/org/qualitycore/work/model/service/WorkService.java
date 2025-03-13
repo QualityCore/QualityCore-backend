@@ -5,6 +5,7 @@ import com.org.qualitycore.work.model.entity.*;
 import com.org.qualitycore.work.model.repository.*;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.transaction.Transactional;
@@ -16,8 +17,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -300,13 +304,25 @@ public class WorkService {
                 .leftJoin(mw).on(br.material.materialId.eq(mw.materialId))
                 .fetch();
 
-        // 맥주별, 공정별로 그룹화
+        // materialId 기준 중복 제거 후 그룹화
         return recipes.stream()
                 .collect(Collectors.groupingBy(
                         BeerRecipesDTO::getBeerName,
-                        Collectors.groupingBy(BeerRecipesDTO::getProcessStep)
+                        Collectors.groupingBy(
+                                BeerRecipesDTO::getProcessStep,
+                                Collectors.collectingAndThen(
+                                        Collectors.toMap(
+                                                BeerRecipesDTO::getMaterialId, // materialId 기준 중복 제거
+                                                Function.identity(),
+                                                (existing, replacement) -> existing,
+                                                LinkedHashMap::new
+                                        ),
+                                        map -> new ArrayList<>(map.values()) // Map → List 변환
+                                )
+                        )
                 ));
     }
+
 
     // 생산계획정보
     public List<PlanInfoDTO> workOrderPlanInfo() {
@@ -333,4 +349,40 @@ public class WorkService {
                 .fetch();
     }
 
+    // 맥주랭킹 서비스
+    public List<BeerRankingDTO> getTop3BeerRanking() {
+            QWorkOrders wo = QWorkOrders.workOrders;
+            QPlanLine pl = QPlanLine.planLine;
+            QPlanProduct pp = QPlanProduct.planProduct;
+
+            // 이번 달의 첫날과 마지막 날 계산
+            LocalDate firstDayOfMonth = LocalDate.now().withDayOfMonth(1);
+            LocalDate lastDayOfMonth = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+
+            // LocalDate → java.util.Date 변환
+            Date firstDay = Date.from(firstDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date lastDay = Date.from(lastDayOfMonth.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            return queryFactory
+                    .select(Projections.constructor(BeerRankingDTO.class,
+                            pp.productName,
+                            pl.planQty.sum().longValue(),
+                            pl.lineNo,
+                            pl.startDate.min(),  // ✅ MIN 적용
+                            pl.endDate.max()     // ✅ MAX 적용
+                    ))
+                    .from(wo)
+                    .join(pl).on(wo.planLine.planLineId.eq(pl.planLineId))
+                    .join(pp).on(pl.planProductId.eq(pp.planProductId))
+                    .where(
+                            pl.startDate.isNotNull()
+                                    .and(pl.endDate.isNotNull())
+                                    .and(pl.startDate.goe(firstDay).or(pl.startDate.loe(lastDay)))
+                    )
+                    .groupBy(pp.productName, pl.lineNo) // ✅ startDate, endDate 제거 가능
+                    .orderBy(pl.planQty.sum().desc())
+                    .limit(3)
+                    .fetch();
+        }
 }
+
