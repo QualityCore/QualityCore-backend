@@ -165,7 +165,7 @@ public class MaterialGrindingService {
 
                 // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
                 processTracking.setStatusCode("SC001");
-                processTracking.setProcessStatus("작업 중");
+                processTracking.setProcessStatus("진행 중");
                 processTracking.setProcessName("분쇄");
 
 
