@@ -106,7 +106,7 @@ public class CarbonationProcessService {
 
             // ✅ ProcessTracking 에 lotNo를 직접 설정할 수 없으므로, WorkOrders 에서 가져와 사용
             processTracking.setStatusCode("SC009");
-            processTracking.setProcessStatus("작업 중");
+            processTracking.setProcessStatus("진행 중");
             processTracking.setProcessName("탄산 조정");
 
             // ✅ `processTracking`을 `mashingProcess`에 설정

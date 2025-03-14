@@ -265,7 +265,7 @@ public class FiltrationProcessService {
             // ✅ DTO 에서 ProcessTracking 정보를 가져와서 업데이트
 
                 processTracking.setStatusCode("SC003"); // ✅ 상태 코드 설정
-                processTracking.setProcessStatus("작업 중"); // ✅ 공정 상태 설정
+                processTracking.setProcessStatus("진행 중"); // ✅ 공정 상태 설정
                 processTracking.setProcessName("여과"); // ✅ 공정 이름 설정
 
                 log.info("DTO 에서 받은 값: StatusCode={}, ProcessStatus={}, ProcessName={}",
